@@ -1,0 +1,10 @@
+# In Pixels
+width = 1920
+height = 1080
+# fullscreen/windowed/windowfullscreen
+windowtype = windowfullscreen
+# Colours in RGB tuple
+background = 52,53,65
+primary = 168,213,186
+secondary = 255,154,162
+tertiary = 255,243,176
