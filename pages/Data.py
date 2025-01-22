@@ -65,6 +65,7 @@ def getMainMenuButtons(pygame, settings):
     ]
     return main_menu_buttons
 
+
 def getGamesMenuButtons(pygame, settings):
     # Screen is split into 3 sections horizontally for 3 games each section takes 30/94 of the screen with 1/94 as a gap between each game
     # The height of each section section is 8/15
@@ -124,12 +125,13 @@ def getGamesMenuButtons(pygame, settings):
 
     return games_buttons
 
+
 def getDefaultSettings():
     default_settings = {
         "Width": 1920,
         "Height": 1080,
         "Window Type": "Borderless",
-        "Background": (52, 53, 65),
+        "Background": (31, 31, 31),
         "Button Primary Colour": (99, 139, 102),
         "Button Secondary Colour": (120, 145, 255),
         "Button Tertiary Colour": (255, 120, 80),
@@ -147,5 +149,31 @@ def getDefaultSettings():
         "Game Primary Colour": (168, 213, 186),
         "Game Secondary Colour": (255, 154, 162),
         "Game Tertiary Colour": (255, 243, 176),
+        "Scroll Speed": 100,
     }
     return default_settings
+
+
+def getSettingsButtons(pygame, settings):
+    buttons = [
+        {
+            # Save
+        },
+        {
+            # Reset to Default
+        },
+        {
+            # Save and Quit
+        },
+        {
+            # Discard Changes
+        },
+        {
+            # Back to Main Menu
+        },
+    ]
+    return buttons
+
+
+def getSettingsOptions():
+    pass

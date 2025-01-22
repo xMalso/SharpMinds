@@ -4,7 +4,6 @@ def displayPage(settings, screen, font, pygame, buttons):
     title_text = title_font.render(
         "Games Menu", settings["Antialiasing Text"], settings["Font Primary Colour"]
     )
-    del title_font
     screen.blit(
         title_text,
         (
@@ -12,7 +11,6 @@ def displayPage(settings, screen, font, pygame, buttons):
             (settings["Height"] * 2) // 16 - title_text.get_height() // 2,
         ),
     )
-    del title_text
     for button in buttons[:-1]:
         scaled_image = pygame.transform.scale(button['Image'], (button['Pygame Button'].width, button['Pygame Button'].height))
         screen.blit(scaled_image, button["Pygame Button"].topleft)
@@ -30,7 +28,6 @@ def displayPage(settings, screen, font, pygame, buttons):
                 + button_text.get_height() // 2,
             ),
         )
-        del button_text
     pygame.draw.rect(screen, back["Colour"], back["Pygame Button"], border_radius=25)
     back_text = font.render(
         back["Name"], settings["Antialiasing Text"], button["Font Colour"]
@@ -46,4 +43,3 @@ def displayPage(settings, screen, font, pygame, buttons):
             - back_text.get_height() // 2,
         ),
     )
-    del back_text

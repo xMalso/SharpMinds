@@ -8,8 +8,22 @@ class Settings:
     default_settings = getDefaultSettings()
 
     def __init__(self):
+        global screen, font, pygame
         self.settings = self.setSettings()
         self.applySettings()
+        text_surface = font.render(
+            "Loading Game...",
+            self.settings["Antialiasing Text"],
+            self.settings["Background Font"],
+        )
+        screen.blit(
+            text_surface,
+            (
+                self.settings["Width"] // 2 - text_surface.get_width() // 2,
+                self.settings["Height"] // 2 - text_surface.get_height() // 2,
+            ),
+        )
+        pygame.display.flip()
 
     def getSettings(self):
         return self.settings
@@ -84,42 +98,45 @@ class Settings:
         )
 
 
-pygame.init()
-pygame.display.set_caption("Sharp Minds")
+def loadUpValues():
+    global content_height, max_scroll, scroll, main_menu_buttons, games_buttons, settings_buttons, page
+    content_height = (  # 1/30th of the screen per setting and 1/8th of the screen for back and save button and 200 pixel padding on bottom
+        len(settings) * settings["Height"] // 32 + settings["Height"] // 8
+    )
+    # Calculate max scrolling based on size of settings
+    max_scroll = max(0, content_height - settings["Height"])
+    scroll = 0
+    main_menu_buttons = getMainMenuButtons(pygame, settings)
+    games_buttons = getGamesMenuButtons(pygame, settings)
+    settings_buttons = getSettingsButtons(pygame, settings)
+    page = "Main Menu"
 
-screen = pygame.display.set_mode((1920, 1080), pygame.NOFRAME)
-screen.fill((52, 53, 65))
-default_font = pygame.font.SysFont("Arial", 30)
-default_text_surface = default_font.render("Loading Settings...", True, (217, 217, 217))
-del default_font
-screen.blit(
-    default_text_surface,
-    (
-        1920 // 2 - default_text_surface.get_width() // 2,
-        1080 // 2 - default_text_surface.get_height() // 2,
-    ),
-)
-del default_text_surface
-pygame.display.flip()
 
+def initialLoadUp():
+    global pygame
+    pygame.init()
+    pygame.display.set_caption("Sharp Minds")
+
+    screen = pygame.display.set_mode((1920, 1080), pygame.NOFRAME)
+    screen.fill((31, 31, 31))
+    default_font = pygame.font.SysFont("Arial", 30)
+    default_text_surface = default_font.render(
+        "Loading Settings...", True, (217, 217, 217)
+    )
+    screen.blit(
+        default_text_surface,
+        (
+            1920 // 2 - default_text_surface.get_width() // 2,
+            1080 // 2 - default_text_surface.get_height() // 2,
+        ),
+    )
+    pygame.display.flip()
+
+
+initialLoadUp()
 settingsClass = Settings()
 settings = settingsClass.getSettings()
-text_surface = font.render(
-    "Loading Game...", settings["Antialiasing Text"], settings["Background Font"]
-)
-screen.blit(
-    text_surface,
-    (
-        settings["Width"] // 2 - text_surface.get_width() // 2,
-        settings["Height"] // 2 - text_surface.get_height() // 2,
-    ),
-)
-del text_surface
-pygame.display.flip()
-
-main_menu_buttons = getMainMenuButtons(pygame, settings)
-games_buttons = getGamesMenuButtons(pygame, settings)
-page = "Main Menu"
+loadUpValues()
 
 while True:
     screen.fill(settings["Background"])
@@ -149,7 +166,28 @@ while True:
                     ):  # Check if location of mouse is within the boundaries of the button when mouse is pressed
                         page = game["Page"]  # Set page if button is pressed
                         print(f"Page set to: {page}")
-    if page == "Quit":
+    elif page == "Settings":
+        settingsDisplay(
+            settings, screen, font, pygame, scroll, content_height, settings_buttons
+        )
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEWHEEL:
+                scroll = max(
+                    0,
+                    min(
+                        content_height - settings["Height"],
+                        scroll - event.y * settings["Height"] // 32,
+                    ),
+                )
+            # if save.collidepoint(event.pos):
+            #     with open("settings.txt", "w") as file:
+            #         for key, value in settings.items():
+            #             file.write(f"{key}: {value}\n")
+            #     print("Settings saved.")
+    elif page == "Quit":
         pygame.quit()
         sys.exit()
     pygame.display.flip()
