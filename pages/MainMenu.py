@@ -12,8 +12,8 @@ def displayPage(settings, screen, font, pygame, buttons):
         ),
     )
     del title_text
-    for button in buttons.values():
-        pygame.draw.rect(screen, button["Colour"], button["Pygame Button"])
+    for button in buttons:
+        pygame.draw.rect(screen, button["Colour"], button["Pygame Button"], border_radius=25)
         button_text = font.render(
             button["Name"], settings["Antialiasing Text"], button["Font Colour"]
         )

@@ -130,7 +130,7 @@ while True:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                for button in main_menu_buttons.values():  # Check for each button
+                for button in main_menu_buttons:  # Check for each button
                     if button["Pygame Button"].collidepoint(
                         event.pos
                     ):  # Check if location of mouse is within the boundaries of the button when mouse is pressed
@@ -143,7 +143,7 @@ while True:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                for game in games_buttons.values():  # Check for each button
+                for game in games_buttons:  # Check for each button
                     if game["Pygame Button"].collidepoint(
                         event.pos
                     ):  # Check if location of mouse is within the boundaries of the button when mouse is pressed
