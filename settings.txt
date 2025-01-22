@@ -1,10 +1,32 @@
 # In Pixels
-width = 1920
-height = 1080
-# fullscreen/windowed/windowfullscreen
-windowtype = windowfullscreen
-# Colours in RGB tuple
-background = 52,53,65
-primary = 168,213,186
-secondary = 255,154,162
-tertiary = 255,243,176
+'Width': 1920,
+'Height': 1080,
+
+# Fullscreen/Windowed/Borderless
+'Window Type': "Borderless",
+
+# Main Colours
+'Background': (52, 53, 65),
+'Button Primary Colour': (99, 139, 102),
+'Button Secondary Colour': (120, 145, 255),
+'Button Tertiary Colour': (255, 120, 80),
+'Button Quaternary Colour': (140, 140, 140),
+'Button Quinary Colour': (255, 102, 68),
+
+# Font stuff
+'Background Font': (217, 217, 217),
+'Font Primary Colour': (217, 217, 217),
+'Font Secondary Colour': (217, 217, 217),
+'Font Tertiary Colour': (217, 217, 217),
+'Font Quaternary Colour': (217, 217, 217),
+'Font Quinary Colour': (217, 217, 217),
+'Font': "Arial",
+
+# Differing font sizes will be a multiplier of this value
+'Font Size': 30,
+'Antialiasing Text': True,
+
+# Game Stuff
+'Game Primary Colour': (168, 213, 186),
+'Game Secondary Colour': (255, 154, 162),
+'Game Tertiary Colour': (255, 243, 176),
