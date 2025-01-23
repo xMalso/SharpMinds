@@ -1,5 +1,4 @@
-import pygame
-import sys
+import pygame, sys
 from pages import *
 
 
@@ -46,7 +45,7 @@ class Settings:
 
                     key, value = line.split(": ", 1)
                     value = value.strip(",")
-                    key = key.strip("'")
+                    key = key.strip('"')
 
                     if (
                         key in self.settings
@@ -87,7 +86,12 @@ class Settings:
         flags = window_flags.get(
             self.settings["Window Type"], pygame.NOFRAME
         )  # Sets the window type based on the settings file or defaults to borderless
-        font = pygame.font.SysFont(self.settings["Font"], self.settings["Font Size"])
+        if self.settings["Font Type"] == "System":
+            font = pygame.font.SysFont(
+                self.settings["Font"], self.settings["Font Size"]
+            )
+        else:
+            font = pygame.font.Font(self.settings["Font"], self.settings["Font Size"])
         screen = pygame.display.set_mode(
             (self.settings["Width"], self.settings["Height"]), flags
         )
@@ -100,15 +104,16 @@ class Settings:
 
 def loadUpValues():
     global content_height, max_scroll, scroll, main_menu_buttons, games_buttons, settings_buttons, page
-    content_height = (  # 1/30th of the screen per setting and 1/8th of the screen for back and save button and 200 pixel padding on bottom
-        len(settings) * settings["Height"] // 32 + settings["Height"] // 8
-    )
+    content_height = (
+        len(settings)
+        + int(((settings["Height"] * 2 / 8)) / (settings["Font Size"] + 30))
+    ) * (settings["Font Size"] + 30)
     # Calculate max scrolling based on size of settings
     max_scroll = max(0, content_height - settings["Height"])
     scroll = 0
-    main_menu_buttons = getMainMenuButtons(pygame, settings)
+    main_menu_buttons = getMainMenuButtons(pygame, settings, font)
     games_buttons = getGamesMenuButtons(pygame, settings)
-    settings_buttons = getSettingsButtons(pygame, settings)
+    settings_buttons = getSettingsButtons(pygame, settings, font)
     page = "Main Menu"
 
 
@@ -119,7 +124,9 @@ def initialLoadUp():
 
     screen = pygame.display.set_mode((1920, 1080), pygame.NOFRAME)
     screen.fill((31, 31, 31))
-    default_font = pygame.font.SysFont("Arial", 30)
+    default_font = pygame.font.Font(
+        "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Regular.otf", 30
+    )
     default_text_surface = default_font.render(
         "Loading Settings...", True, (217, 217, 217)
     )
@@ -133,6 +140,12 @@ def initialLoadUp():
     pygame.display.flip()
 
 
+def checkExit(event):
+    if event.type == pygame.QUIT:
+        pygame.quit()
+        sys.exit()
+
+
 initialLoadUp()
 settingsClass = Settings()
 settings = settingsClass.getSettings()
@@ -143,10 +156,8 @@ while True:
     if page == "Main Menu":
         mainMenuDisplay(settings, screen, font, pygame, main_menu_buttons)
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            checkExit(event)
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for button in main_menu_buttons:  # Check for each button
                     if button["Pygame Button"].collidepoint(
                         event.pos
@@ -156,10 +167,8 @@ while True:
     elif page == "Game Menu":
         gameMenuDisplay(settings, screen, font, pygame, games_buttons)
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            checkExit(event)
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for game in games_buttons:  # Check for each button
                     if game["Pygame Button"].collidepoint(
                         event.pos
@@ -171,15 +180,15 @@ while True:
             settings, screen, font, pygame, scroll, content_height, settings_buttons
         )
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+            checkExit(event)
+            # print(event.type)
+            # print(event, event.type)
             if event.type == pygame.MOUSEWHEEL:
                 scroll = max(
                     0,
                     min(
                         content_height - settings["Height"],
-                        scroll - event.y * settings["Height"] // 32,
+                        scroll - event.y * (settings["Font Size"] + 30),
                     ),
                 )
             # if save.collidepoint(event.pos):

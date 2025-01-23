@@ -1,5 +1,10 @@
 def displayPage(settings, screen, font, pygame, buttons):
-    title_font = pygame.font.SysFont(settings["Font"], settings["Font Size"] * 3)
+    if settings["Font Type"] == "System":
+        title_font = pygame.font.SysFont(
+            settings["Font"], settings["Font Size"] * 3, bold=True
+        )
+    else:
+        title_font = pygame.font.Font(settings["Bold Font"], settings["Font Size"] * 3)
     title_text = title_font.render(
         "Main Menu", settings["Antialiasing Text"], settings["Font Primary Colour"]
     )
@@ -11,7 +16,9 @@ def displayPage(settings, screen, font, pygame, buttons):
         ),
     )
     for button in buttons:
-        pygame.draw.rect(screen, button["Colour"], button["Pygame Button"], border_radius=25)
+        pygame.draw.rect(
+            screen, button["Colour"], button["Pygame Button"], border_radius=25
+        )
         button_text = font.render(
             button["Name"], settings["Antialiasing Text"], button["Font Colour"]
         )

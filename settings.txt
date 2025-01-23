@@ -20,7 +20,10 @@
 "Font Tertiary Colour": (217, 217, 217),
 "Font Quaternary Colour": (217, 217, 217),
 "Font Quinary Colour": (217, 217, 217),
-"Font": "Arial",
+"Font": "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Regular.otf",
+"Bold Font": "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Bold.otf",
+# System/Custom
+"Font Type": "Custom"
 
 # Differing font sizes will be a multiplier of this value
 "Font Size": 30,
@@ -32,4 +35,5 @@
 "Game Tertiary Colour": (255, 243, 176),
 
 # Random Stuff
-"Scroll Speed": 100,
+# Recommended max scroll speed = 10
+"Scroll Speed": 1,

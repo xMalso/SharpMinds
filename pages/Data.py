@@ -1,15 +1,17 @@
-def getMainMenuButtons(pygame, settings):
+def getMainMenuButtons(pygame, settings, font):
+    text = font.size("Leaderboards and Personal Bests")
     # Screen is split into 5 sections vertically for 5 buttons each section takes 12% of the screen with 1% as a gap between each button and 32% to write the title of the Screen
     # The width is set to half the screen and is centered in the middle of the screen
     main_menu_buttons = [
         {
             "Name": "Games Menu",
             "Pygame Button": pygame.Rect(
-                (settings["Width"] * 3) // 8,
-                (settings["Height"] * 30) // 100,
-                settings["Width"] // 4,
-                (settings["Height"] * 10) // 100,
+                (settings["Width"] - (text[0] + 100)) // 2,
+                settings["Height"] // 3,
+                text[0] + 100,
+                text[1] + 40,
             ),
+            # "Font Size": settings["Font Size"],
             "Colour": settings["Button Primary Colour"],
             "Font Colour": settings["Font Primary Colour"],
             "Page": "Game Menu",
@@ -17,11 +19,12 @@ def getMainMenuButtons(pygame, settings):
         {
             "Name": "Leaderboards and Personal Bests",
             "Pygame Button": pygame.Rect(
-                (settings["Width"] * 3) // 8,
-                (settings["Height"] * 43) // 100,
-                settings["Width"] // 4,
-                (settings["Height"] * 10) // 100,
+                (settings["Width"] - (text[0] + 100)) // 2,
+                settings["Height"] // 3 + (text[1] + 60),
+                text[0] + 100,
+                text[1] + 40,
             ),
+            # "Font Size": settings["Font Size"],
             "Colour": settings["Button Secondary Colour"],
             "Font Colour": settings["Font Secondary Colour"],
             "Page": "Leaderboards",
@@ -29,11 +32,12 @@ def getMainMenuButtons(pygame, settings):
         {
             "Name": "Friends",
             "Pygame Button": pygame.Rect(
-                (settings["Width"] * 3) // 8,
-                (settings["Height"] * 56) // 100,
-                settings["Width"] // 4,
-                (settings["Height"] * 10) // 100,
+                (settings["Width"] - (text[0] + 100)) // 2,
+                settings["Height"] // 3 + (text[1] + 60) * 2,
+                text[0] + 100,
+                text[1] + 40,
             ),
+            # "Font Size": settings["Font Size"],
             "Colour": settings["Button Tertiary Colour"],
             "Font Colour": settings["Font Tertiary Colour"],
             "Page": "Friends",
@@ -41,11 +45,12 @@ def getMainMenuButtons(pygame, settings):
         {
             "Name": "Settings",
             "Pygame Button": pygame.Rect(
-                (settings["Width"] * 3) // 8,
-                (settings["Height"] * 69) // 100,
-                settings["Width"] // 4,
-                (settings["Height"] * 10) // 100,
+                (settings["Width"] - (text[0] + 100)) // 2,
+                settings["Height"] // 3 + (text[1] + 60) * 3,
+                text[0] + 100,
+                text[1] + 40,
             ),
+            # "Font Size": settings["Font Size"],
             "Colour": settings["Button Quaternary Colour"],
             "Font Colour": settings["Font Quaternary Colour"],
             "Page": "Settings",
@@ -53,11 +58,12 @@ def getMainMenuButtons(pygame, settings):
         {
             "Name": "Quit",
             "Pygame Button": pygame.Rect(
-                (settings["Width"] * 3) // 8,
-                (settings["Height"] * 82) // 100,
-                settings["Width"] // 4,
-                (settings["Height"] * 10) // 100,
+                (settings["Width"] - (text[0] + 100)) // 2,
+                settings["Height"] // 3 + (text[1] + 60) * 4,
+                text[0] + 100,
+                text[1] + 40,
             ),
+            # "Font Size": settings["Font Size"],
             "Colour": settings["Button Quinary Colour"],
             "Font Colour": settings["Font Quinary Colour"],
             "Page": "Quit",
@@ -67,11 +73,20 @@ def getMainMenuButtons(pygame, settings):
 
 
 def getGamesMenuButtons(pygame, settings):
+    if settings["Font Type"] == "System":
+        text = pygame.font.SysFont(settings["Font"], settings["Font Size"] // 2).size(
+            "Back to Main Menu"
+        )
+    else:
+        text = pygame.font.Font(settings["Font"], settings["Font Size"] // 2).size(
+            "Back to Main Menu"
+        )
     # Screen is split into 3 sections horizontally for 3 games each section takes 30/94 of the screen with 1/94 as a gap between each game
     # The height of each section section is 8/15
     #  of the screen with 1/15
     #  as a gap above and below with 5/15
     #  extra to write the title of the Screen
+
     games_buttons = [
         {
             "Name": "Game 1",
@@ -81,6 +96,7 @@ def getGamesMenuButtons(pygame, settings):
                 (settings["Width"] * 30) // 94,
                 (settings["Height"] * 10) // 16,
             ),
+            # "Font Size": settings["Font Size"],
             "Font Colour": settings["Font Primary Colour"],
             "Page": "Game 1",
             "Image": pygame.image.load("assets/images/blank.jpg"),
@@ -93,6 +109,7 @@ def getGamesMenuButtons(pygame, settings):
                 (settings["Width"] * 30) // 94,
                 (settings["Height"] * 10) // 16,
             ),
+            # "Font Size": settings["Font Size"],
             "Font Colour": settings["Font Primary Colour"],
             "Page": "Game 2",
             "Image": pygame.image.load("assets/images/blank.jpg"),
@@ -105,6 +122,7 @@ def getGamesMenuButtons(pygame, settings):
                 (settings["Width"] * 30) // 94,
                 (settings["Height"] * 10) // 16,
             ),
+            # "Font Size": settings["Font Size"],
             "Font Colour": settings["Font Primary Colour"],
             "Page": "Game 3",
             "Image": pygame.image.load("assets/images/blank.jpg"),
@@ -113,10 +131,11 @@ def getGamesMenuButtons(pygame, settings):
             "Name": "Back to Main Menu",
             "Pygame Button": pygame.Rect(
                 settings["Width"] // 94,
-                (settings["Height"] * 1.5) // 16,
-                (settings["Width"] * 20) // 94,
                 (settings["Height"] * 1) // 16,
+                text[0] + 30,
+                text[1] + 12,
             ),
+            # "Font Size": settings["Font Size"] // 2,
             "Colour": settings["Button Quinary Colour"],
             "Font Colour": settings["Font Quinary Colour"],
             "Page": "Main Menu",
@@ -143,7 +162,9 @@ def getDefaultSettings():
         "Font Tertiary Colour": (217, 217, 217),
         "Font Quaternary Colour": (217, 217, 217),
         "Font Quinary Colour": (217, 217, 217),
-        "Font": "Arial",
+        "Font": "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Regular.otf",
+        "Bold Font": "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Bold.otf",
+        "Font Type": "Custom",
         "Font Size": 30,
         "Antialiasing Text": True,
         "Game Primary Colour": (168, 213, 186),
@@ -154,7 +175,7 @@ def getDefaultSettings():
     return default_settings
 
 
-def getSettingsButtons(pygame, settings):
+def getSettingsButtons(pygame, settings, font):
     buttons = [
         {
             # Save
