@@ -18,4 +18,3 @@ def displayPage(settings, screen, font, pygame, scroll, content_height, buttons)
         y_offset += settings["Font Size"] + 30  # Increase offset based on font size and 10 px of padding
 
     screen.blit(settings_surface, (0, -scroll))
-    pygame.display.flip()

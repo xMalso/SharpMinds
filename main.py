@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, time
 from pages import *
 
 
@@ -150,7 +150,9 @@ initialLoadUp()
 settingsClass = Settings()
 settings = settingsClass.getSettings()
 loadUpValues()
-
+frame = time.perf_counter()
+i = 1
+text_surface = None
 while True:
     screen.fill(settings["Background"])
     if page == "Main Menu":
@@ -199,4 +201,18 @@ while True:
     elif page == "Quit":
         pygame.quit()
         sys.exit()
+    if settings["Show FPS"] and time.perf_counter() - frame > 0.1:
+        fps = 1 / (time.perf_counter() - frame) * i
+        text_surface = font.render(
+            f"FPS: {fps:.2f}",
+            settings["Antialiasing Text"],
+            settings["Background Font"],
+        )
+        screen.blit(text_surface, (0, 0))
+        frame = time.perf_counter()
+        i = 1
+    elif settings["Show FPS"]:
+        i += 1
+        if text_surface:
+            screen.blit(text_surface, (0, 0))
     pygame.display.flip()

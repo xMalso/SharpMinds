@@ -150,6 +150,7 @@ def getDefaultSettings():
         "Width": 1920,
         "Height": 1080,
         "Window Type": "Borderless",
+        "Show FPS": True,
         "Background": (31, 31, 31),
         "Button Primary Colour": (99, 139, 102),
         "Button Secondary Colour": (120, 145, 255),
