@@ -153,6 +153,7 @@ loadUpValues()
 frame = time.perf_counter()
 i = 1
 text_surface = None
+# fps = None
 while True:
     screen.fill(settings["Background"])
     if page == "Main Menu":
@@ -201,18 +202,25 @@ while True:
     elif page == "Quit":
         pygame.quit()
         sys.exit()
-    if settings["Show FPS"] and time.perf_counter() - frame > 0.1:
+    if time.perf_counter() - frame > 0.1:
         fps = 1 / (time.perf_counter() - frame) * i
-        text_surface = font.render(
-            f"FPS: {fps:.2f}",
-            settings["Antialiasing Text"],
-            settings["Background Font"],
-        )
-        screen.blit(text_surface, (0, 0))
+        if settings["Show FPS"]:
+            text_surface = font.render(
+                f"FPS: {fps:.2f}",
+                settings["Antialiasing Text"],
+                settings["Background Font"],
+            )
+            screen.blit(text_surface, (0, 0))
         frame = time.perf_counter()
         i = 1
-    elif settings["Show FPS"]:
+    else:
         i += 1
-        if text_surface:
+        if text_surface and settings["Show FPS"]:
             screen.blit(text_surface, (0, 0))
+    # if settings["FPS Limit"] > 0:
+    #     limiter = (1/settings["FPS Limit"]) - (time.perf_counter() - frame) / i
+    #     # print(f"FPS: {fps}, Limiter: {limiter}, time.perf_counter(): {time.perf_counter()}, frame: {frame}, i: {i}")
+    #     if limiter > 0:
+    #         time.sleep(limiter)
+    # print(time.perf_counter())
     pygame.display.flip()

@@ -5,6 +5,7 @@
 # Fullscreen/Windowed/Borderless
 "Window Type": "Borderless",
 "Show FPS": True,
+"FPS Limit": 0,
 
 # Main Colours
 "Background": (31, 31, 31),
