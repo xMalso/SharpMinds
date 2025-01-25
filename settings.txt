@@ -10,9 +10,9 @@
 # Main Colours
 "Background": (31, 31, 31),
 "Button Primary Colour": (99, 139, 102),
-"Button Secondary Colour": (120, 145, 255),
-"Button Tertiary Colour": (255, 120, 80),
-"Button Quaternary Colour": (140, 140, 140),
+"Button Secondary Colour": (90, 115, 225),
+"Button Tertiary Colour": (210, 100, 50),
+"Button Quaternary Colour": (90, 90, 90),
 "Button Quinary Colour": (255, 102, 68),
 
 # Font stuff
@@ -27,8 +27,8 @@
 # System/Custom
 "Font Type": "Custom"
 
-# Differing font sizes will be a multiplier of this value
-"Font Size": 30,
+# Differing font sizes will be based off this value
+"Font Size Divider": 64,
 "Antialiasing Text": True,
 
 # Game Stuff
