@@ -1,4 +1,4 @@
-import pygame, sys, time
+import pygame, sys, os
 from pages import *
 
 
@@ -13,7 +13,7 @@ class Settings:
         text_surface = font.render(
             "Loading Game...",
             self.settings["Antialiasing Text"],
-            self.settings["Background Font"],
+            self.settings["Background Font Colour"],
         )
         screen.blit(
             text_surface,
@@ -74,6 +74,7 @@ class Settings:
             )
 
         return self.settings
+
     def applySettings(self):
         global screen
         global font
@@ -100,24 +101,9 @@ class Settings:
         )
         pygame.display.flip()
 
-        print(
-            f"Screen set to: {self.settings['Width']}x{self.settings['Height']} in {self.settings['Window Type']} mode."
-        )
-
-
-def loadUpValues():
-    global content_height, scroll, main_menu_buttons, games_buttons, settings_buttons, meta, font_height
-    font_height = font.size("Save and Quit")[1]
-    content_height = (
-        len(settings)
-        + int((int((settings["Height"] * ((3 / 32) + 0.02))) + font_height * 3) / (font_height))
-    ) * (font_height) + (settings["Height"] % font_height)
-    # Calculate max scrolling based on size of settings
-    scroll = 0
-    main_menu_buttons = getMainMenuButtons(pygame, settings, font)
-    games_buttons = getGamesMenuButtons(pygame, settings)
-    settings_buttons = getSettingsButtons(pygame, settings, font)
-    meta = "Main Menu"
+        # print(
+        #     f"Screen set to: {self.settings['Width']}x{self.settings['Height']} in {self.settings['Window Type']} mode."
+        # )
 
 
 def initialLoadUp():
@@ -143,6 +129,34 @@ def initialLoadUp():
     pygame.display.flip()
 
 
+def loadUpValues():
+    global content_height, scroll, main_menu_buttons, games_buttons, settings_buttons, meta, font_height, options, choice, settingsClass, settings, text_surface, i, frame, selected, changed
+    settingsClass = Settings()
+    settings = settingsClass.getSettings()
+    frame = pygame.time.get_ticks()
+    i = 1
+    text_surface = None
+    selected = None
+    changed = False
+    font_height = font.size("Save and Leave")[1]
+    content_height = (
+        len(settings)
+        + int(
+            (int((settings["Height"] * ((3 / 32) + 0.02))) + font_height * 4)
+            / (font_height + settings["Height"] // 200)
+        )
+    ) * (font_height + settings["Height"] // 200) + (
+        settings["Height"] % (font_height + settings["Height"] // 200)
+    )
+    scroll = 0
+    main_menu_buttons = getMainMenuButtons(pygame, settings, font)
+    games_buttons = getGamesMenuButtons(pygame, settings)
+    settings_buttons = getSettingsButtons(pygame, settings, font)
+    meta = "Main Menu"
+    options = getSettingsOptions(pygame)
+    choice = settings.copy()
+
+
 def checkExit(event):
     if event.type == pygame.QUIT:
         pygame.quit()
@@ -150,13 +164,7 @@ def checkExit(event):
 
 
 initialLoadUp()
-settingsClass = Settings()
-settings = settingsClass.getSettings()
 loadUpValues()
-frame = time.perf_counter()
-i = 1
-text_surface = None
-# fps = None
 while True:
     screen.fill(settings["Background"])
     if meta == "Main Menu":
@@ -183,53 +191,81 @@ while True:
                         print(f"Page set to: {meta}")
     elif meta == "Settings":
         settingsDisplay(
-            settings, screen, font, pygame, scroll, content_height, settings_buttons
+            settings,
+            screen,
+            font,
+            pygame,
+            scroll,
+            content_height,
+            settings_buttons,
+            options,
+            choice,
+            changed,
         )
         for event in pygame.event.get():
             checkExit(event)
-            # print(event.type)
-            # print(event, event.type)
             if event.type == pygame.MOUSEWHEEL:
                 scroll = max(
                     0,
                     min(
                         content_height - settings["Height"],
-                        scroll - event.y * (font_height),
+                        scroll - event.y * (font_height + settings["Height"] // 200),
                     ),
                 )
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for button in settings_buttons:  # Check for each button
-                    if button["Pygame Button"].collidepoint(
-                        event.pos
-                    ):
-                        pass
-            # if save.collidepoint(event.pos):
-            #     with open("settings.txt", "w") as file:
-            #         for key, value in settings.items():
-            #             file.write(f"\"{key}\": {value}\n")
-            #     print("Settings saved.")
+                    if button["Pygame Button"].collidepoint(event.pos):
+                        if button["Meta"] == "Save":
+                            with open("settings.txt", "w") as file:
+                                for key, value in choice.items():
+                                    file.write(f'"{key}": {value}\n')
+                            print("Settings saved.")
+                        elif button["Meta"] == "Default":
+                            choice = settingsClass.resetSettings()
+                            print("Settings reset.")
+                        elif button["Meta"] == "Save and Leave":
+                            with open("settings.txt", "w") as file:
+                                for key, value in choice.items():
+                                    file.write(f'"{key}": {value}\n')
+                            print("Settings saved.")
+                            meta = "Main Menu"
+                        elif button["Meta"] == "Discard":
+                            choice = settingsClass.getSettings()
+                            print("Settings discarded.")
+                            # elif button["Meta"] == "Main Menu": # Confirmation needed
+                if selected != None:
+                    # check
+                    selected = None
+                else:
+                    for button in options_buttons.values():  # Check for each button
+                        if button["Pygame Button"].collidepoint(event.pos):
+                            selected = button
+                            if button["Type"] == "Dropdown":
+                                pass
+
     elif meta == "Quit":
         pygame.quit()
         sys.exit()
-    if time.perf_counter() - frame > 0.1:
-        fps = 1 / (time.perf_counter() - frame) * i
+    # FPS Counter
+    if (pygame.time.get_ticks() - frame) > 100:
+        fps = 1 / (pygame.time.get_ticks() - frame) * i * 1000
         if settings["Show FPS"]:
             text_surface = font.render(
                 f"FPS: {fps:.2f}",
                 settings["Antialiasing Text"],
-                settings["Background Font"],
+                settings["Background Font Colour"],
             )
             screen.blit(text_surface, (0, 0))
-        frame = time.perf_counter()
+        frame = pygame.time.get_ticks()
         i = 1
     else:
         i += 1
         if text_surface and settings["Show FPS"]:
             screen.blit(text_surface, (0, 0))
     # if settings["FPS Limit"] > 0:
-    #     limiter = (1/settings["FPS Limit"]) - (time.perf_counter() - frame) / i
-    #     # print(f"FPS: {fps}, Limiter: {limiter}, time.perf_counter(): {time.perf_counter()}, frame: {frame}, i: {i}")
-    #     if limiter > 0:
-    #         time.sleep(limiter)
-    # print(time.perf_counter())
+    # limiter = (1/settings["FPS Limit"]) - (pygame.time.get_ticks() - frame) / i
+    # print(f"FPS: {fps}, Limiter: {limiter}, pygame.time.get_ticks(): {pygame.time.get_ticks()}, frame: {frame}, i: {i}")
+    # if limiter > 0:
+    # pygame.time.Clock().tick(limiter)
+    # print(pygame.time.get_ticks())
     pygame.display.flip()
