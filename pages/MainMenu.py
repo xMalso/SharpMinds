@@ -1,10 +1,15 @@
 def displayPage(settings, screen, font, pygame, buttons):
     if settings["Font Type"] == "System":
         title_font = pygame.font.SysFont(
-            settings["Font"], settings["Width"] // settings["Font Size Divider"] * 3, bold=True
+            settings["Font"],
+            settings["Width"] // settings["Font Size Divider"] * 3,
+            bold=True,
         )
     else:
-        title_font = pygame.font.Font(settings["Bold Font"], settings["Width"] // settings["Font Size Divider"] * 3)
+        title_font = pygame.font.Font(
+            settings["Bold Font"],
+            settings["Width"] // settings["Font Size Divider"] * 3,
+        )
     title_text = title_font.render(
         "Main Menu", settings["Antialiasing Text"], settings["Font Primary Colour"]
     )

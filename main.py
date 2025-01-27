@@ -130,14 +130,15 @@ def initialLoadUp():
 
 
 def loadUpValues():
-    global content_height, scroll, main_menu_buttons, games_buttons, settings_buttons, meta, font_height, options, choice, settingsClass, settings, text_surface, i, frame, selected, changed
+    global content_height, scroll, main_menu_buttons, games_buttons, settings_buttons, meta, font_height, options
+    global choice, settingsClass, settings, text_surface, i, frame, selected, confirmation, confirmation_buttons
     settingsClass = Settings()
     settings = settingsClass.getSettings()
     frame = pygame.time.get_ticks()
     i = 1
     text_surface = None
     selected = None
-    changed = False
+    confirmation = None
     font_height = font.size("Save and Leave")[1]
     content_height = (
         len(settings)
@@ -148,11 +149,15 @@ def loadUpValues():
     ) * (font_height + settings["Height"] // 200) + (
         settings["Height"] % (font_height + settings["Height"] // 200)
     )
-    scroll = 0
     main_menu_buttons = getMainMenuButtons(pygame, settings, font)
     games_buttons = getGamesMenuButtons(pygame, settings)
     settings_buttons = getSettingsButtons(pygame, settings, font)
-    meta = "Main Menu"
+    confirmation_buttons = getConfirmationButtons(pygame, settings, font)
+    try:
+        meta = meta
+    except:
+        meta = "Main Menu"
+        scroll = 0
     options = getSettingsOptions(pygame)
     choice = settings.copy()
 
@@ -165,7 +170,8 @@ def checkExit(event):
 
 initialLoadUp()
 loadUpValues()
-while True:
+choice["Width"] = 1079
+while True:  # Main loop
     screen.fill(settings["Background"])
     if meta == "Main Menu":
         mainMenuDisplay(settings, screen, font, pygame, main_menu_buttons)
@@ -200,7 +206,8 @@ while True:
             settings_buttons,
             options,
             choice,
-            changed,
+            confirmation,
+            confirmation_buttons,
         )
         for event in pygame.event.get():
             checkExit(event)
@@ -213,26 +220,62 @@ while True:
                     ),
                 )
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if confirmation != None:
+                    print(confirmation)
+                    for button in confirmation_buttons:
+                        if button["Pygame Button"].collidepoint(event.pos):
+                            if button["Name"] == "Confirm":
+                                if confirmation == "Default":
+                                    print("Default confirmation")
+                                    settings = settingsClass.resetSettings()
+                                    choice = settings.copy()
+                                    with open("settings.txt", "w") as file:
+                                        for key, value in choice.items():
+                                            file.write(f'"{key}": {value},\n')
+                                    print("Settings reset.")
+                                    loadUpValues()
+                                elif confirmation == "Discard":
+                                    choice = settingsClass.getSettings()
+                                    print("Settings discarded.")
+                                elif confirmation == "Main Menu":
+                                    meta = "Main Menu"
+                                else:
+                                    print(
+                                        f"Error: Unknown request. {confirmation}, {button["Name"]}"
+                                    )
+                                confirmation = None
+                            elif button["Name"] == "Decline":
+                                confirmation = None
+                            else:
+                                print(f"Error: Unknown confirmation button. {button}")
                 for button in settings_buttons:  # Check for each button
                     if button["Pygame Button"].collidepoint(event.pos):
-                        if button["Meta"] == "Save":
-                            with open("settings.txt", "w") as file:
-                                for key, value in choice.items():
-                                    file.write(f'"{key}": {value}\n')
-                            print("Settings saved.")
-                        elif button["Meta"] == "Default":
-                            choice = settingsClass.resetSettings()
-                            print("Settings reset.")
-                        elif button["Meta"] == "Save and Leave":
-                            with open("settings.txt", "w") as file:
-                                for key, value in choice.items():
-                                    file.write(f'"{key}": {value}\n')
-                            print("Settings saved.")
-                            meta = "Main Menu"
-                        elif button["Meta"] == "Discard":
-                            choice = settingsClass.getSettings()
-                            print("Settings discarded.")
-                            # elif button["Meta"] == "Main Menu": # Confirmation needed
+                        if choice != settings:
+                            if button["Meta"] == "Save":
+                                with open("settings.txt", "w") as file:
+                                    for key, value in choice.items():
+                                        file.write(f'"{key}": {value},\n')
+                                print("Settings saved.")
+                                loadUpValues()
+                            elif button["Meta"] == "Save and Leave":
+                                with open("settings.txt", "w") as file:
+                                    for key, value in choice.items():
+                                        file.write(f'"{key}": {value},\n')
+                                meta = "Main Menu"
+                                print("Settings saved and page set to Main Menu")
+                                loadUpValues()
+                            elif button["Meta"] == "Discard":
+                                if confirmation == None:
+                                    confirmation = "Discard"
+                        if button["Meta"] == "Default":
+                            if confirmation == None:
+                                print("Done")
+                                confirmation = "Default"
+                        elif button["Meta"] == "Main Menu":
+                            if choice == settings:
+                                meta = "Main Menu"
+                            elif confirmation == None:
+                                confirmation = "Main Menu"
                 if selected != None:
                     # check
                     selected = None
@@ -242,7 +285,6 @@ while True:
                             selected = button
                             if button["Type"] == "Dropdown":
                                 pass
-
     elif meta == "Quit":
         pygame.quit()
         sys.exit()

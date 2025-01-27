@@ -1,13 +1,8 @@
-# In Pixels
 "Width": 1920,
 "Height": 1080,
-
-# Fullscreen/Windowed/Borderless
-"Window Type": "Borderless",
+"Window Type": Borderless,
 "Show FPS": True,
 "FPS Limit": 0,
-
-# Non Game Colours
 "Background": (31, 31, 31),
 "Background Font Colour": (217, 217, 217),
 "Dropdown Background": (63, 63, 63),
@@ -22,25 +17,13 @@
 "Font Quaternary Colour": (217, 217, 217),
 "Button Quinary Colour": (255, 102, 68),
 "Font Quinary Colour": (217, 217, 217),
-
-# Fonts
-"Font": "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Regular.otf",
-"Bold Font": "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Bold.otf",
-"Italic Font": "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Italic.otf",
-"BoldItalic Font": "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Bold-Italic.otf",
-
-# System/Custom
-"Font Type": "Custom"
-
-# Differing font sizes will be based off this value
+"Font": assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Regular.otf,
+"Bold Font": assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Bold.otf,
+"Italic Font": assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Italic.otf,
+"BoldItalic Font": assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Bold-Italic.otf,
+"Font Type": Custom,
 "Font Size Divider": 64,
 "Antialiasing Text": True,
-
-# Game Stuff
 "Game Primary Colour": (168, 213, 186),
 "Game Secondary Colour": (255, 154, 162),
 "Game Tertiary Colour": (255, 243, 176),
-
-# Random Stuff
-# Recommended max scroll speed = 10
-# "Scroll Speed": 1,

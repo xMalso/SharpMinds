@@ -7,16 +7,20 @@ global options_buttons
 #     print("fail")
 options_buttons = {}
 
+confirmation_text = {
+    "Main Menu": "go to main menu",
+    "Discard": "discard changes",
+    "Default": "return to default",
+}
+
 
 def update_button(new_button):
     button_name = new_button["Name"]
     options_buttons[button_name] = new_button
 
 
-def pasteButton(button, pygame, settings, screen, settings_surface, scroll):
-    pygame.draw.rect(
-        screen, button["Colour"], button["Pygame Button"], border_radius=25
-    )
+def pasteButton(button, pygame, settings, screen):
+    global small_font
     if settings["Font Type"] == "System":
         small_font = pygame.font.SysFont(
             settings["Font"],
@@ -28,11 +32,11 @@ def pasteButton(button, pygame, settings, screen, settings_surface, scroll):
             settings["Width"] // (settings["Font Size Divider"] * 2),
         )
     pygame.draw.rect(
-        settings_surface,
-        button["Colour"],
+        screen,
+        (button["Colour"]),
         (
             button["Pygame Button"].x,
-            button["Pygame Button"].y + scroll,
+            button["Pygame Button"].y,
             button["Pygame Button"].width,
             button["Pygame Button"].height,
         ),
@@ -41,7 +45,7 @@ def pasteButton(button, pygame, settings, screen, settings_surface, scroll):
     button_text = small_font.render(
         button["Name"], settings["Antialiasing Text"], button["Font Colour"]
     )
-    settings_surface.blit(
+    screen.blit(
         button_text,
         (
             button["Pygame Button"].x
@@ -49,8 +53,7 @@ def pasteButton(button, pygame, settings, screen, settings_surface, scroll):
             - button_text.get_width() // 2,
             button["Pygame Button"].y
             + button["Pygame Button"].height // 2
-            - button_text.get_height() // 2
-            + scroll,
+            - button_text.get_height() // 2,
         ),
     )
 
@@ -65,7 +68,8 @@ def displayPage(
     buttons,
     options,
     choice,
-    changed,
+    confirmation,
+    confirmation_buttons,
 ):
     settings_surface = pygame.Surface((settings["Width"], content_height))
     settings_surface.fill(settings["Background"])
@@ -90,24 +94,24 @@ def displayPage(
             (settings["Height"]) // 100 + scroll,
         ),
     )
-    text_height = font.size("Save and Leave")[1]
-    y_offset = text_height * 3 + (settings["Height"] // 50)
+    text_size = font.size("Save and Leave")
+    y_offset = text_size[1] * 3 + (settings["Height"] // 50)
 
     for key in settings.keys():
         # text_surface = font.render(
         #     f"{key}: {value}", settings["Antialiasing Text"], (255, 255, 255)
         # )
         # Check if the text is meant to be visible
-        text_width, text_height = font.size(str(choice[key]))  # {key}: ▼
+        text_width = font.size(str(choice[key]))[0]  # {key}: ▼
         buffer_width = font.size(f"{key}: ▼ ")[0]
         if not (
             y_offset
             > scroll
-            - text_height
+            - text_size[1]
             + (settings["Height"] * 29) // 32  # Check if below screen
             or y_offset
             < scroll
-            + text_height * 3
+            + text_size[1] * 3
             + settings["Height"] // 50  # Check if above scren
         ):
             if key in options:
@@ -116,7 +120,7 @@ def displayPage(
                     buffer_width + settings["Width"] // 50,
                     y_offset,
                     text_width + settings["Width"] // 25,
-                    text_height,
+                    text_size[1],
                 )
                 pygame.draw.rect(
                     settings_surface, settings["Dropdown Background"], dropdown_rect
@@ -145,7 +149,7 @@ def displayPage(
                     settings["Width"] // 20 + text_surface.get_width() - text_width,
                     y_offset,
                     text_width,
-                    text_height,
+                    text_size[1],
                 )
                 pygame.draw.rect(
                     settings_surface,
@@ -166,10 +170,45 @@ def displayPage(
         #         2,
         #     )
 
-        y_offset += text_height + settings["Height"] // 200
-    buttons, back = buttons[:-1], buttons[-1]
-    if changed:
-        for button in buttons:
-            pasteButton(button, pygame, settings, screen, settings_surface, scroll)
-    pasteButton(back, pygame, settings, screen, settings_surface, scroll)
+        y_offset += text_size[1] + settings["Height"] // 200
     screen.blit(settings_surface, (0, -scroll))
+    buttons, last2 = buttons[:-2], buttons[-2:]
+    if settings != choice:
+        for button in buttons:
+            pasteButton(button, pygame, settings, screen)
+    for button in last2:
+        pasteButton(button, pygame, settings, screen)
+    if confirmation != None:
+        confirmation_surface = pygame.Surface(
+            (settings["Width"] // 3, settings["Height"] // 8), pygame.SRCALPHA
+        )
+        confirmation_surface.fill((0, 0, 0, 0))
+        pygame.draw.rect(
+            confirmation_surface,
+            settings["Button Quaternary Colour"],
+            confirmation_surface.get_rect(),
+            border_radius=25,
+        )
+        text_surface = small_font.render(
+            f"Are you sure you want to {confirmation_text[confirmation]}?",
+            settings["Antialiasing Text"],
+            settings["Font Quaternary Colour"],
+        )
+        confirmation_surface.blit(
+            text_surface,
+            (
+                settings["Width"] // 6 - text_surface.get_width() // 2,
+                settings["Height"] // 64,
+            ),
+        )
+        screen.blit(
+            confirmation_surface,
+            (settings["Width"] * 2 // 6, settings["Height"] * 7 // 16),
+        )
+        for button in confirmation_buttons:
+            pasteButton(
+                button,
+                pygame,
+                settings,
+                screen,
+            )

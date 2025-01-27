@@ -157,10 +157,10 @@ def getDefaultSettings():
         "Font Quaternary Colour": (217, 217, 217),
         "Button Quinary Colour": (255, 102, 68),
         "Font Quinary Colour": (217, 217, 217),
-        "Font": "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Regular.otf",
-        "Bold Font": "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Bold.otf",
-        "Italic Font": "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Italic.otf",
-        "BoldItalic Font": "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Bold-Italic.otf",
+        "Font": r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Regular.otf",
+        "Bold Font": r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Bold.otf",
+        "Italic Font": r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Italic.otf",
+        "BoldItalic Font": r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Bold-Italic.otf",
         "Font Type": "Custom",
         "Font Size Divider": 64,
         "Antialiasing Text": True,
@@ -268,15 +268,16 @@ def getSettingsOptions(pygame):
         # "Button Quinary Colour": (rgb tuple),
         # "Font Quinary Colour": (rgb tuple),
         "Font": [
-            "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Regular.otf"],
+            r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Regular.otf"
+        ],
         "Bold Font": [
-            "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Bold.otf"
+            r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Bold.otf"
         ],
         "Italic Font": [
-            "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Italic.otf"
+            r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Italic.otf"
         ],
         "BoldItalic Font": [
-            "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Bold-Italic.otf"
+            r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Bold-Italic.otf"
         ],
         "Font Type": ["Custom", "System"],
         "Font Size Divider": [48, 56, 64, 72, 80],
@@ -288,3 +289,32 @@ def getSettingsOptions(pygame):
     }
     options["Font"] += pygame.font.get_fonts()
     return options
+
+
+def getConfirmationButtons(pygame, settings, font):
+    text_size = font.size("Confirm")
+    buttons = [
+        {
+            "Pygame Button": pygame.Rect(
+                settings["Width"] * 28 // 60 - text_size[0],
+                settings["Height"] // 2,
+                text_size[0] + settings["Width"] // 96,
+                text_size[1] // 2 + settings["Height"] // 54,
+            ),
+            "Name": "Confirm",
+            "Colour": settings["Button Quinary Colour"],
+            "Font Colour": settings["Font Quinary Colour"],
+        },
+        {
+            "Pygame Button": pygame.Rect(
+                settings["Width"] * 32 // 60,
+                settings["Height"] // 2,
+                text_size[0] + settings["Width"] // 96,
+                text_size[1] // 2 + settings["Height"] // 54,
+            ),
+            "Name": "Decline",
+            "Colour": settings["Button Primary Colour"],
+            "Font Colour": settings["Font Primary Colour"],
+        },
+    ]
+    return buttons
