@@ -8,9 +8,9 @@ global options_buttons
 options_buttons = {}
 
 confirmation_text = {
-    "Main Menu": "go to main menu",
+    "Main Menu": "discard and go to main menu",
     "Discard": "discard changes",
-    "Default": "return to default",
+    "Default": "return to default settings",
 }
 
 
@@ -102,8 +102,8 @@ def displayPage(
         #     f"{key}: {value}", settings["Antialiasing Text"], (255, 255, 255)
         # )
         # Check if the text is meant to be visible
-        text_width = font.size(str(choice[key]))[0]  # {key}: ▼
-        buffer_width = font.size(f"{key}: ▼ ")[0]
+        text_width = font.size(str(choice[key]))[0]
+        buffer_width = font.size(f"{key}:")[0] + font.size(" ")[0] * 0.4
         if not (
             y_offset
             > scroll
@@ -117,13 +117,16 @@ def displayPage(
             if key in options:
                 # Render a dropdown menu for selectable options
                 dropdown_rect = pygame.Rect(
-                    buffer_width + settings["Width"] // 50,
+                    buffer_width + settings["Width"] // 20,
                     y_offset,
                     text_width + settings["Width"] // 25,
                     text_size[1],
                 )
                 pygame.draw.rect(
-                    settings_surface, settings["Dropdown Background"], dropdown_rect
+                    settings_surface,
+                    settings["Dropdown Background"],
+                    dropdown_rect,
+                    border_radius=25,
                 )
                 dropdown_surface = font.render(
                     f"{key}: ▼ {choice[key]}",
@@ -152,9 +155,7 @@ def displayPage(
                     text_size[1],
                 )
                 pygame.draw.rect(
-                    settings_surface,
-                    choice[key],
-                    (colour_box_rect),
+                    settings_surface, choice[key], (colour_box_rect), border_radius=25
                 )
                 update_button(
                     {

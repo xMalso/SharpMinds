@@ -131,14 +131,17 @@ def initialLoadUp():
 
 def loadUpValues():
     global content_height, scroll, main_menu_buttons, games_buttons, settings_buttons, meta, font_height, options
-    global choice, settingsClass, settings, text_surface, i, frame, selected, confirmation, confirmation_buttons
+    global choice, settingsClass, settings, text_surface, i, frame, confirmation, confirmation_buttons, current_colour_picker, current_dropdown
     settingsClass = Settings()
     settings = settingsClass.getSettings()
     frame = pygame.time.get_ticks()
     i = 1
-    text_surface = None
-    selected = None
-    confirmation = None
+    confirmation, current_colour_picker, current_dropdown, text_surface = (
+        None,
+        None,
+        None,
+        None,
+    )
     font_height = font.size("Save and Leave")[1]
     content_height = (
         len(settings)
@@ -158,7 +161,7 @@ def loadUpValues():
     except:
         meta = "Main Menu"
         scroll = 0
-    options = getSettingsOptions(pygame)
+    options = getSettingsOptions(pygame, font)
     choice = settings.copy()
 
 
@@ -170,7 +173,7 @@ def checkExit(event):
 
 initialLoadUp()
 loadUpValues()
-choice["Width"] = 1079
+choice["Width"] = 1600
 while True:  # Main loop
     screen.fill(settings["Background"])
     if meta == "Main Menu":
@@ -182,8 +185,8 @@ while True:  # Main loop
                     if button["Pygame Button"].collidepoint(
                         event.pos
                     ):  # Check if location of mouse is within the boundaries of the button when mouse is pressed
+                        print(f"Page set from {button["Meta"]} to: {meta}")
                         meta = button["Meta"]  # Set page if button is pressed
-                        print(f"Page set to: {meta}")
     elif meta == "Game Menu":
         gameMenuDisplay(settings, screen, font, pygame, games_buttons)
         for event in pygame.event.get():
@@ -193,8 +196,8 @@ while True:  # Main loop
                     if game["Pygame Button"].collidepoint(
                         event.pos
                     ):  # Check if location of mouse is within the boundaries of the button when mouse is pressed
+                        print(f"Page set from {button["Meta"]} to: {meta}")
                         meta = game["Meta"]  # Set page if button is pressed
-                        print(f"Page set to: {meta}")
     elif meta == "Settings":
         settingsDisplay(
             settings,
@@ -209,6 +212,19 @@ while True:  # Main loop
             confirmation,
             confirmation_buttons,
         )
+        if current_dropdown != None:
+            dropdownDisplay(
+                pygame,
+                settings,
+                font,
+                screen,
+                current_dropdown["Pygame Button"],
+                options[current_dropdown["Name"]],
+                font_height + settings["Height"] // 200,
+                scroll
+            )
+        if current_colour_picker != None:
+            colourPickerDisplay()
         for event in pygame.event.get():
             checkExit(event)
             if event.type == pygame.MOUSEWHEEL:
@@ -220,8 +236,21 @@ while True:  # Main loop
                     ),
                 )
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if current_dropdown != None or current_colour_picker != None:
+                    current_dropdown = None
+                    current_colour_picker = None
+                    setOptionsButtons()
+                    print("unselected")
+                elif confirmation == None:
+                    for button in options_buttons.values():  # Check for each button
+                        if button["Pygame Button"].collidepoint((event.pos[0], event.pos[1] + scroll)):
+                            if button["Type"] == "Dropdown":
+                                current_dropdown = button
+                                print("Dropdown")
+                            elif button["Type"] == "Colour Picker":
+                                current_colour_picker = button
+                                print("Colour Picker")
                 if confirmation != None:
-                    print(confirmation)
                     for button in confirmation_buttons:
                         if button["Pygame Button"].collidepoint(event.pos):
                             if button["Name"] == "Confirm":
@@ -235,9 +264,10 @@ while True:  # Main loop
                                     print("Settings reset.")
                                     loadUpValues()
                                 elif confirmation == "Discard":
-                                    choice = settingsClass.getSettings()
+                                    choice = settings.copy()
                                     print("Settings discarded.")
                                 elif confirmation == "Main Menu":
+                                    choice = settings.copy()
                                     meta = "Main Menu"
                                 else:
                                     print(
@@ -269,22 +299,13 @@ while True:  # Main loop
                                     confirmation = "Discard"
                         if button["Meta"] == "Default":
                             if confirmation == None:
-                                print("Done")
+                                print("Settings returned to default.")
                                 confirmation = "Default"
                         elif button["Meta"] == "Main Menu":
                             if choice == settings:
                                 meta = "Main Menu"
                             elif confirmation == None:
                                 confirmation = "Main Menu"
-                if selected != None:
-                    # check
-                    selected = None
-                else:
-                    for button in options_buttons.values():  # Check for each button
-                        if button["Pygame Button"].collidepoint(event.pos):
-                            selected = button
-                            if button["Type"] == "Dropdown":
-                                pass
     elif meta == "Quit":
         pygame.quit()
         sys.exit()

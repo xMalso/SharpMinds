@@ -246,48 +246,60 @@ def getSettingsButtons(pygame, settings, font):
     return buttons
 
 
-def getSettingsOptions(pygame):
+def getSettingsOptions(pygame, font):
     options = {
-        "Width": [1920, 1600, 1366, 1280, 1024, 800, 640],
-        "Height": [1080, 900, 768, 720, 600, 480],
-        "Window Type": ["Borderless", "Fullscreen", "Windowed"],
-        "Show FPS": [True, False],
-        "FPS Limit": [0, 30, 60, 120, 144, 165, 240],
-        # "Background": (rgb tuple),
-        # "Background Font Colour": (rgb tuple),
-        # "Dropdown Background": (rgb tuple),
-        # "Dropdown Font Colour": (rgb tuple),
-        # "Button Primary Colour": (rgb tuple),
-        # "Font Primary Colour": (rgb tuple),
-        # "Button Secondary Colour": (rgb tuple),
-        # "Font Secondary Colour": (rgb tuple),
-        # "Button Tertiary Colour": (rgb tuple),
-        # "Font Tertiary Colour": (rgb tuple),
-        # "Button Quaternary Colour": (rgb tuple),
-        # "Font Quaternary Colour": (rgb tuple),
-        # "Button Quinary Colour": (rgb tuple),
-        # "Font Quinary Colour": (rgb tuple),
-        "Font": [
-            r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Regular.otf"
-        ],
-        "Bold Font": [
-            r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Bold.otf"
-        ],
-        "Italic Font": [
-            r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Italic.otf"
-        ],
-        "BoldItalic Font": [
-            r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Bold-Italic.otf"
-        ],
-        "Font Type": ["Custom", "System"],
-        "Font Size Divider": [48, 56, 64, 72, 80],
-        "Antialiasing Text": [True, False],
-        # "Game Primary Colour": "rgb tuple",
-        # "Game Secondary Colour": "rgb tuple",
-        # "Game Tertiary Colour": "rgb tuple",
-        # "Scroll Speed": [50, 75, 100, 125, 150],
+        "Width": {"Options": [1920, 1600, 1366, 1280, 1024, 800, 640]},
+        "Height": {"Options": [1080, 900, 768, 720, 600, 480]},
+        "Window Type": {"Options": ["Borderless", "Fullscreen", "Windowed"]},
+        "Show FPS": {"Options": [True, False]},
+        "FPS Limit": {"Options": [0, 30, 60, 120, 144, 165, 240]},
+        # "Background": {"Options": (rgb tuple)},
+        # "Background Font Colour": {"Options": (rgb tuple)},
+        # "Dropdown Background": {"Options": (rgb tuple)},
+        # "Dropdown Font Colour": {"Options": (rgb tuple)},
+        # "Button Primary Colour": {"Options": (rgb tuple)},
+        # "Font Primary Colour": {"Options": (rgb tuple)},
+        # "Button Secondary Colour": {"Options": (rgb tuple)},
+        # "Font Secondary Colour": {"Options": (rgb tuple)},
+        # "Button Tertiary Colour": {"Options": (rgb tuple)},
+        # "Font Tertiary Colour": {"Options": (rgb tuple)},
+        # "Button Quaternary Colour": {"Options": (rgb tuple)},
+        # "Font Quaternary Colour": {"Options": (rgb tuple)},
+        # "Button Quinary Colour": {"Options": (rgb tuple)},
+        # "Font Quinary Colour": {"Options": (rgb tuple)},
+        "Font": {
+            "Options": [
+                r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Regular.otf"
+            ]
+        },
+        "Bold Font": {
+            "Options": [
+                r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Bold.otf"
+            ]
+        },
+        "Italic Font": {
+            "Options": [
+                r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Italic.otf"
+            ]
+        },
+        "BoldItalic Font": {
+            "Options": [
+                r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Bold-Italic.otf"
+            ]
+        },
+        "Font Type": {"Options": ["Custom", "System"]},
+        "Font Size Divider": {"Options": [48, 56, 64, 72, 80]},
+        "Antialiasing Text": {"Options": [True, False]},
+        # "Game Primary Colour": {"Options": "rgb tuple"},
+        # "Game Secondary Colour": {"Options": "rgb tuple"},
+        # "Game Tertiary Colour": {"Options": "rgb tuple"},
+        # "Scroll Speed": {"Options": [50, 75, 100, 125, 150]},
     }
-    options["Font"] += pygame.font.get_fonts()
+    options["Font"]["Options"] += pygame.font.get_fonts()
+    temp = lambda x:font.size(str(x))[0]
+    for option in options.values():
+        largest = max(option["Options"], key=temp)
+        option["Largest"] = font.size(str(largest))[0]
     return options
 
 
