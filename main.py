@@ -57,15 +57,21 @@ class Settings:
                         elif value.isdigit():  # Check for numbers
                             self.settings[key] = int(value)
                         elif (
-                            value.lower() == "True" or value.lower() == "False"
+                            value.lower() == "true" or value.lower() == "false"
                         ):  # Check for boolean
-                            self.settings[key] = value.lower() == "True"
+                            self.settings[key] = value.lower() == "true"
                         else:  # Otherwise must be a string
                             self.settings[key] = value.strip('"')
                     else:
                         print(
                             f"Warning: Unknown setting '{key}' found in settings.txt. Ignoring."
                         )
+                if os.path.isfile(
+                    os.path.join(r"assets/fonts/fonts", self.settings["Font"])
+                ):
+                    self.settings["Font Type"] = "Custom"
+                else:
+                    self.settings["Font Type"] = "System"
         except FileNotFoundError:
             print("Error: settings.txt not found. Using default values.")
         except ValueError as e:
@@ -93,17 +99,13 @@ class Settings:
             )
         else:
             font = pygame.font.Font(
-                self.settings["Font"],
+                os.path.join(r"assets/fonts/fonts", self.settings["Font"]),
                 self.settings["Width"] // self.settings["Font Size Divider"],
             )
         screen = pygame.display.set_mode(
             (self.settings["Width"], self.settings["Height"]), flags
         )
         pygame.display.flip()
-
-        # print(
-        #     f"Screen set to: {self.settings['Width']}x{self.settings['Height']} in {self.settings['Window Type']} mode."
-        # )
 
 
 def initialLoadUp():
@@ -114,7 +116,7 @@ def initialLoadUp():
     screen = pygame.display.set_mode((1920, 1080), pygame.NOFRAME)
     screen.fill((31, 31, 31))
     default_font = pygame.font.Font(
-        "assets\\fonts\\opendyslexic-0.91.12\\compiled\\OpenDyslexic-Regular.otf", 30
+        "assets\\fonts\\fonts\\OpenDyslexic-Regular.otf", 30
     )
     default_text_surface = default_font.render(
         "Loading Settings...", True, (217, 217, 217)
@@ -163,6 +165,7 @@ def loadUpValues():
         scroll = 0
     options = getSettingsOptions(pygame, font)
     choice = settings.copy()
+    del choice["Font Type"]
 
 
 def checkExit(event):
@@ -171,9 +174,22 @@ def checkExit(event):
         sys.exit()
 
 
+def checkCollide(loc):
+    global current_dropdown, current_colour_picker
+    dropdown_buttons = getOptionsButtons()
+    for button in dropdown_buttons.values():
+        if button["Pygame Button"].collidepoint(loc):
+            print(choice[current_dropdown["Name"]], button["Name"])
+            choice[current_dropdown["Name"]] = button["Name"]
+    current_dropdown = None
+    current_colour_picker = None
+    setOptionsButtons()
+
+
 initialLoadUp()
 loadUpValues()
-choice["Width"] = 1600
+
+
 while True:  # Main loop
     screen.fill(settings["Background"])
     if meta == "Main Menu":
@@ -221,7 +237,7 @@ while True:  # Main loop
                 current_dropdown["Pygame Button"],
                 options[current_dropdown["Name"]],
                 font_height + settings["Height"] // 200,
-                scroll
+                scroll,
             )
         if current_colour_picker != None:
             colourPickerDisplay()
@@ -236,14 +252,13 @@ while True:  # Main loop
                     ),
                 )
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if current_dropdown != None or current_colour_picker != None:
-                    current_dropdown = None
-                    current_colour_picker = None
-                    setOptionsButtons()
-                    print("unselected")
+                if not (current_dropdown == None and current_colour_picker == None):
+                    checkCollide(event.pos)
                 elif confirmation == None:
                     for button in options_buttons.values():  # Check for each button
-                        if button["Pygame Button"].collidepoint((event.pos[0], event.pos[1] + scroll)):
+                        if button["Pygame Button"].collidepoint(
+                            (event.pos[0], event.pos[1] + scroll)
+                        ):
                             if button["Type"] == "Dropdown":
                                 current_dropdown = button
                                 print("Dropdown")
@@ -258,6 +273,7 @@ while True:  # Main loop
                                     print("Default confirmation")
                                     settings = settingsClass.resetSettings()
                                     choice = settings.copy()
+                                    del choice["Font Type"]
                                     with open("settings.txt", "w") as file:
                                         for key, value in choice.items():
                                             file.write(f'"{key}": {value},\n')
@@ -265,9 +281,11 @@ while True:  # Main loop
                                     loadUpValues()
                                 elif confirmation == "Discard":
                                     choice = settings.copy()
+                                    del choice["Font Type"]
                                     print("Settings discarded.")
                                 elif confirmation == "Main Menu":
                                     choice = settings.copy()
+                                    del choice["Font Type"]
                                     meta = "Main Menu"
                                 else:
                                     print(
@@ -312,7 +330,7 @@ while True:  # Main loop
     # FPS Counter
     if (pygame.time.get_ticks() - frame) > 100:
         fps = 1 / (pygame.time.get_ticks() - frame) * i * 1000
-        if settings["Show FPS"]:
+        if settings["Show FPS"] == True:
             text_surface = font.render(
                 f"FPS: {fps:.2f}",
                 settings["Antialiasing Text"],

@@ -1,3 +1,4 @@
+import os
 global options_buttons
 
 # try:
@@ -28,7 +29,7 @@ def pasteButton(button, pygame, settings, screen):
         )
     else:
         small_font = pygame.font.Font(
-            settings["Font"],
+            os.path.join(r"assets/fonts/fonts", settings["Font"]),
             settings["Width"] // (settings["Font Size Divider"] * 2),
         )
     pygame.draw.rect(
@@ -81,7 +82,7 @@ def displayPage(
         )
     else:
         title_font = pygame.font.Font(
-            settings["Bold Font"],
+            os.path.join(r"assets/fonts/fonts", settings["Bold Font"]),
             settings["Width"] // settings["Font Size Divider"] * 3,
         )
     title_text = title_font.render(
@@ -97,7 +98,7 @@ def displayPage(
     text_size = font.size("Save and Leave")
     y_offset = text_size[1] * 3 + (settings["Height"] // 50)
 
-    for key in settings.keys():
+    for key in choice.keys():
         # text_surface = font.render(
         #     f"{key}: {value}", settings["Antialiasing Text"], (255, 255, 255)
         # )

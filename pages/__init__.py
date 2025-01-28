@@ -9,5 +9,5 @@ from .Data import (
     getSettingsButtons,
     getConfirmationButtons,
 )
-from .Dropdown import displayPage as dropdownDisplay, xy_range, setOptionsButtons
+from .Dropdown import displayPage as dropdownDisplay, xy_range, setOptionsButtons, getOptionsButtons
 from .ColourPicker import displayPage as colourPickerDisplay

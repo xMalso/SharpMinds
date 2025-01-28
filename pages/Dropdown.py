@@ -8,7 +8,8 @@ def setOptionsButtons():
     options_buttons = {}
 
 
-setOptionsButtons()
+def getOptionsButtons():
+    return options_buttons
 
 
 def update_button(new_button):

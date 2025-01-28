@@ -1,3 +1,5 @@
+import os
+
 def getMainMenuButtons(pygame, settings, font):
     text = font.size("Leaderboards and Personal Bests")
     # Screen is split into 5 sections vertically for 5 buttons each section takes 12% of the screen with 1% as a gap between each button and 32% to write the title of the Screen
@@ -74,7 +76,7 @@ def getGamesMenuButtons(pygame, settings):
         ).size("Back to Main Menu")
     else:
         text = pygame.font.Font(
-            settings["Font"], settings["Width"] // settings["Font Size Divider"] // 2
+            os.path.join(r"assets/fonts/fonts", settings["Font"]), settings["Width"] // settings["Font Size Divider"] // 2
         ).size("Back to Main Menu")
     # Screen is split into 3 sections horizontally for 3 games each section takes 30/94 of the screen with 1/94 as a gap between each game
     # The height of each section section is 8/15
@@ -157,10 +159,10 @@ def getDefaultSettings():
         "Font Quaternary Colour": (217, 217, 217),
         "Button Quinary Colour": (255, 102, 68),
         "Font Quinary Colour": (217, 217, 217),
-        "Font": r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Regular.otf",
-        "Bold Font": r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Bold.otf",
-        "Italic Font": r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Italic.otf",
-        "BoldItalic Font": r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Bold-Italic.otf",
+        "Font": "OpenDyslexic-Regular.otf",
+        "Bold Font": "OpenDyslexic-Bold.otf",
+        "Italic Font": "OpenDyslexic-Italic.otf",
+        "BoldItalic Font": "OpenDyslexic-Bold-Italic.otf",
         "Font Type": "Custom",
         "Font Size Divider": 64,
         "Antialiasing Text": True,
@@ -268,24 +270,16 @@ def getSettingsOptions(pygame, font):
         # "Button Quinary Colour": {"Options": (rgb tuple)},
         # "Font Quinary Colour": {"Options": (rgb tuple)},
         "Font": {
-            "Options": [
-                r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Regular.otf"
-            ]
+            "Options": []
         },
         "Bold Font": {
-            "Options": [
-                r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Bold.otf"
-            ]
+            "Options": []
         },
         "Italic Font": {
-            "Options": [
-                r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Italic.otf"
-            ]
+            "Options": []
         },
         "BoldItalic Font": {
-            "Options": [
-                r"assets\fonts\opendyslexic-0.91.12\compiled\OpenDyslexic-Bold-Italic.otf"
-            ]
+            "Options": []
         },
         "Font Type": {"Options": ["Custom", "System"]},
         "Font Size Divider": {"Options": [48, 56, 64, 72, 80]},
@@ -295,6 +289,21 @@ def getSettingsOptions(pygame, font):
         # "Game Tertiary Colour": {"Options": "rgb tuple"},
         # "Scroll Speed": {"Options": [50, 75, 100, 125, 150]},
     }
+    dir = r"assets/fonts/fonts"
+    if os.path.exists(dir):
+        for file in os.listdir(dir):
+            if file.endswith((".ttf", ".otf")):
+                if "Bold" in file and "Italic" in file:
+                    options["BoldItalic Font"]["Options"].append(file)
+                elif "Italic" in file:
+                    options["Italic Font"]["Options"].append(file)
+                elif "Bold" in file:
+                    options["Bold Font"]["Options"].append(file)
+                else:
+                    options["Font"]["Options"].append(file)
+    else: print(f"Directory, {dir}, does not exist")
+    
+        
     options["Font"]["Options"] += pygame.font.get_fonts()
     temp = lambda x:font.size(str(x))[0]
     for option in options.values():
