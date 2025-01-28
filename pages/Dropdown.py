@@ -16,18 +16,19 @@ def update_button(new_button):
     button_name = new_button["Name"]
     options_buttons[button_name] = new_button
 
-
 def displayPage(pygame, settings, font, screen, button, options, height, scroll):
     buffer_width = font.size(" ")[0] * 0.6 + font.size("▼ ")[0] - font.size("▶ ")[0]
     y = button.y
     x = button.x
-    width = options["Largest"] + settings["Width"] // 25
+    space_width = font.size(" ")[0]
+    arrow_width = font.size("▼ ")[0]
+    width = options["Largest"] + space_width + arrow_width
     height = button.height
+    increment = height
     offset = -scroll
     inverted = False
-    if y > settings["Height"] // 2:
-        offset += height
-        height = -height
+    if y - scroll > settings["Height"] // 2:
+        increment = -increment
         inverted = True
     for index, option in enumerate(options["Options"]):
         dropdown_rect = pygame.Rect(
@@ -67,7 +68,7 @@ def displayPage(pygame, settings, font, screen, button, options, height, scroll)
                 settings["Dropdown Background"],
                 dropdown_rect,
             )
-        offset += height
+        offset += increment
     for button in options_buttons.values():
         text_surface = font.render(
             f"▶ {button["Name"]}",

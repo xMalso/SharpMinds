@@ -24,13 +24,11 @@ def pasteButton(button, pygame, settings, screen):
     global small_font
     if settings["Font Type"] == "System":
         small_font = pygame.font.SysFont(
-            settings["Font"],
-            settings["Width"] // (settings["Font Size Divider"] * 2),
+            settings["Font"], (settings["Font Size"] // 2),
         )
     else:
         small_font = pygame.font.Font(
-            os.path.join(r"assets/fonts/fonts", settings["Font"]),
-            settings["Width"] // (settings["Font Size Divider"] * 2),
+            os.path.join(r"assets/fonts/fonts", settings["Font"]), (settings["Font Size"] // 2),
         )
     pygame.draw.rect(
         screen,
@@ -77,13 +75,13 @@ def displayPage(
     if settings["Font Type"] == "System":
         title_font = pygame.font.SysFont(
             settings["Font"],
-            settings["Width"] // settings["Font Size Divider"] * 3,
+            settings["Font Size"] * 3,
             bold=True,
         )
     else:
         title_font = pygame.font.Font(
             os.path.join(r"assets/fonts/fonts", settings["Bold Font"]),
-            settings["Width"] // settings["Font Size Divider"] * 3,
+            settings["Font Size"] * 3,
         )
     title_text = title_font.render(
         "Settings", settings["Antialiasing Text"], settings["Font Primary Colour"]
@@ -97,14 +95,15 @@ def displayPage(
     )
     text_size = font.size("Save and Leave")
     y_offset = text_size[1] * 3 + (settings["Height"] // 50)
-
+    space_width = font.size(" ")[0]
+    arrow_width = font.size("▼ ")[0]
     for key in choice.keys():
         # text_surface = font.render(
         #     f"{key}: {value}", settings["Antialiasing Text"], (255, 255, 255)
         # )
         # Check if the text is meant to be visible
         text_width = font.size(str(choice[key]))[0]
-        buffer_width = font.size(f"{key}:")[0] + font.size(" ")[0] * 0.4
+        key_width = font.size(f"{key}:")[0]
         if not (
             y_offset
             > scroll
@@ -118,9 +117,9 @@ def displayPage(
             if key in options:
                 # Render a dropdown menu for selectable options
                 dropdown_rect = pygame.Rect(
-                    buffer_width + settings["Width"] // 20,
+                    space_width * 0.4 + key_width + settings["Width"] // 20,
                     y_offset,
-                    text_width + settings["Width"] // 25,
+                    text_width + space_width + arrow_width,
                     text_size[1],
                 )
                 pygame.draw.rect(
@@ -150,9 +149,9 @@ def displayPage(
 
                 settings_surface.blit(text_surface, (settings["Width"] // 20, y_offset))
                 colour_box_rect = pygame.Rect(
-                    settings["Width"] // 20 + text_surface.get_width() - text_width,
+                    settings["Width"] // 20 + text_surface.get_width() - text_width - 20,
                     y_offset,
-                    text_width,
+                    text_width + 50,
                     text_size[1],
                 )
                 pygame.draw.rect(
@@ -175,7 +174,7 @@ def displayPage(
         y_offset += text_size[1] + settings["Height"] // 200
     screen.blit(settings_surface, (0, -scroll))
     buttons, last2 = buttons[:-2], buttons[-2:]
-    if settings != choice:
+    if any(choice.get(k) != settings[k] for k in settings if k != "Font Type"):
         for button in buttons:
             pasteButton(button, pygame, settings, screen)
     for button in last2:

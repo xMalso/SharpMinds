@@ -1,5 +1,6 @@
 import os
 
+
 def getMainMenuButtons(pygame, settings, font):
     text = font.size("Leaderboards and Personal Bests")
     # Screen is split into 5 sections vertically for 5 buttons each section takes 12% of the screen with 1% as a gap between each button and 32% to write the title of the Screen
@@ -71,12 +72,13 @@ def getMainMenuButtons(pygame, settings, font):
 
 def getGamesMenuButtons(pygame, settings):
     if settings["Font Type"] == "System":
-        text = pygame.font.SysFont(
-            settings["Font"], settings["Width"] // settings["Font Size Divider"] // 2
-        ).size("Back to Main Menu")
+        text = pygame.font.SysFont(settings["Font"], settings["Font Size"] // 2).size(
+            "Back to Main Menu"
+        )
     else:
         text = pygame.font.Font(
-            os.path.join(r"assets/fonts/fonts", settings["Font"]), settings["Width"] // settings["Font Size Divider"] // 2
+            os.path.join(r"assets/fonts/fonts", settings["Font"]),
+            settings["Font Size"] // 2,
         ).size("Back to Main Menu")
     # Screen is split into 3 sections horizontally for 3 games each section takes 30/94 of the screen with 1/94 as a gap between each game
     # The height of each section section is 8/15
@@ -164,7 +166,7 @@ def getDefaultSettings():
         "Italic Font": "OpenDyslexic-Italic.otf",
         "BoldItalic Font": "OpenDyslexic-Bold-Italic.otf",
         "Font Type": "Custom",
-        "Font Size Divider": 64,
+        "Font Size": 30,
         "Antialiasing Text": True,
         "Game Primary Colour": (168, 213, 186),
         "Game Secondary Colour": (255, 154, 162),
@@ -248,7 +250,7 @@ def getSettingsButtons(pygame, settings, font):
     return buttons
 
 
-def getSettingsOptions(pygame, font):
+def getSettingsOptions(pygame, settings, font):
     options = {
         "Width": {"Options": [1920, 1600, 1366, 1280, 1024, 800, 640]},
         "Height": {"Options": [1080, 900, 768, 720, 600, 480]},
@@ -270,19 +272,24 @@ def getSettingsOptions(pygame, font):
         # "Button Quinary Colour": {"Options": (rgb tuple)},
         # "Font Quinary Colour": {"Options": (rgb tuple)},
         "Font": {
-            "Options": []
+            "Options": [
+                "arial",
+                "verdana",
+                "timesnewroman",
+                "couriernew",
+                "comicsansms",
+                "georgia",
+                "trebuchetms",
+                "lucidaconsole",
+                "tahoma",
+                "impact",
+            ]
         },
-        "Bold Font": {
-            "Options": []
-        },
-        "Italic Font": {
-            "Options": []
-        },
-        "BoldItalic Font": {
-            "Options": []
-        },
+        "Bold Font": {"Options": []},
+        "Italic Font": {"Options": []},
+        "BoldItalic Font": {"Options": []},
         "Font Type": {"Options": ["Custom", "System"]},
-        "Font Size Divider": {"Options": [48, 56, 64, 72, 80]},
+        "Font Size": {"Options": [48, 56, 64, 72, 80, 128, 160]},
         "Antialiasing Text": {"Options": [True, False]},
         # "Game Primary Colour": {"Options": "rgb tuple"},
         # "Game Secondary Colour": {"Options": "rgb tuple"},
@@ -301,13 +308,13 @@ def getSettingsOptions(pygame, font):
                     options["Bold Font"]["Options"].append(file)
                 else:
                     options["Font"]["Options"].append(file)
-    else: print(f"Directory, {dir}, does not exist")
-    
-        
-    options["Font"]["Options"] += pygame.font.get_fonts()
-    temp = lambda x:font.size(str(x))[0]
+    else:
+        print(f"Directory, {dir}, does not exist")
+
+    for index, choice in enumerate(options["Font Size"]["Options"]):
+        options["Font Size"]["Options"][index] = settings["Width"] // choice
     for option in options.values():
-        largest = max(option["Options"], key=temp)
+        largest = max(option["Options"], key=lambda x: font.size(str(x))[0])
         option["Largest"] = font.size(str(largest))[0]
     return options
 

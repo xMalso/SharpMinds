@@ -78,7 +78,6 @@ class Settings:
             print(
                 f"Error: Incorrect format in settings.txt ({e}). Using default values."
             )
-
         return self.settings
 
     def applySettings(self):
@@ -95,21 +94,34 @@ class Settings:
         if self.settings["Font Type"] == "System":
             font = pygame.font.SysFont(
                 self.settings["Font"],
-                self.settings["Width"] // self.settings["Font Size Divider"],
+                self.settings["Font Size"],
             )
         else:
             font = pygame.font.Font(
                 os.path.join(r"assets/fonts/fonts", self.settings["Font"]),
-                self.settings["Width"] // self.settings["Font Size Divider"],
+                self.settings["Font Size"],
             )
         screen = pygame.display.set_mode(
             (self.settings["Width"], self.settings["Height"]), flags
         )
         pygame.display.flip()
+    
+    def saveSettings(self):
+        with open("settings.txt", "w") as file:
+            for key, value in choice.items():
+                file.write(f'"{key}": {value},\n')
+        self.settings = choice.copy()
+        choice["Font Size"] = choice["Width"] // choice["Font Size"]
+        if os.path.isfile(
+            os.path.join(r"assets/fonts/fonts", self.settings["Font"])
+        ):
+            self.settings["Font Type"] = "Custom"
+        else:
+            self.settings["Font Type"] = "System"
+        print("Settings saved.")
 
-
-def initialLoadUp():
-    global pygame
+def LoadUp():
+    global pygame, settingsClass
     pygame.init()
     pygame.display.set_caption("Sharp Minds")
 
@@ -129,13 +141,15 @@ def initialLoadUp():
         ),
     )
     pygame.display.flip()
+    settingsClass = Settings()
+    loadUpValues()
 
 
 def loadUpValues():
     global content_height, scroll, main_menu_buttons, games_buttons, settings_buttons, meta, font_height, options
-    global choice, settingsClass, settings, text_surface, i, frame, confirmation, confirmation_buttons, current_colour_picker, current_dropdown
-    settingsClass = Settings()
+    global choice, settings, text_surface, i, frame, confirmation, confirmation_buttons, current_colour_picker, current_dropdown
     settings = settingsClass.getSettings()
+    settingsClass.applySettings()
     frame = pygame.time.get_ticks()
     i = 1
     confirmation, current_colour_picker, current_dropdown, text_surface = (
@@ -158,12 +172,9 @@ def loadUpValues():
     games_buttons = getGamesMenuButtons(pygame, settings)
     settings_buttons = getSettingsButtons(pygame, settings, font)
     confirmation_buttons = getConfirmationButtons(pygame, settings, font)
-    try:
-        meta = meta
-    except:
-        meta = "Main Menu"
-        scroll = 0
-    options = getSettingsOptions(pygame, font)
+    try: meta = meta; scroll = 0
+    except: meta = "Main Menu"; scroll = 0
+    options = getSettingsOptions(pygame, settings, font)
     choice = settings.copy()
     del choice["Font Type"]
 
@@ -186,8 +197,7 @@ def checkCollide(loc):
     setOptionsButtons()
 
 
-initialLoadUp()
-loadUpValues()
+LoadUp()
 
 
 while True:  # Main loop
@@ -201,7 +211,7 @@ while True:  # Main loop
                     if button["Pygame Button"].collidepoint(
                         event.pos
                     ):  # Check if location of mouse is within the boundaries of the button when mouse is pressed
-                        print(f"Page set from {button["Meta"]} to: {meta}")
+                        print(f"Page set from {button["Meta"]} to {meta}")
                         meta = button["Meta"]  # Set page if button is pressed
     elif meta == "Game Menu":
         gameMenuDisplay(settings, screen, font, pygame, games_buttons)
@@ -212,7 +222,7 @@ while True:  # Main loop
                     if game["Pygame Button"].collidepoint(
                         event.pos
                     ):  # Check if location of mouse is within the boundaries of the button when mouse is pressed
-                        print(f"Page set from {button["Meta"]} to: {meta}")
+                        print(f"Page set from {button["Meta"]} to {meta}")
                         meta = game["Meta"]  # Set page if button is pressed
     elif meta == "Settings":
         settingsDisplay(
@@ -298,17 +308,13 @@ while True:  # Main loop
                                 print(f"Error: Unknown confirmation button. {button}")
                 for button in settings_buttons:  # Check for each button
                     if button["Pygame Button"].collidepoint(event.pos):
-                        if choice != settings:
+                        if any(choice.get(k) != settings[k] for k in settings if k != "Font Type"):
                             if button["Meta"] == "Save":
-                                with open("settings.txt", "w") as file:
-                                    for key, value in choice.items():
-                                        file.write(f'"{key}": {value},\n')
+                                settingsClass.saveSettings()
                                 print("Settings saved.")
                                 loadUpValues()
                             elif button["Meta"] == "Save and Leave":
-                                with open("settings.txt", "w") as file:
-                                    for key, value in choice.items():
-                                        file.write(f'"{key}": {value},\n')
+                                settingsClass.saveSettings()
                                 meta = "Main Menu"
                                 print("Settings saved and page set to Main Menu")
                                 loadUpValues()
@@ -320,10 +326,10 @@ while True:  # Main loop
                                 print("Settings returned to default.")
                                 confirmation = "Default"
                         elif button["Meta"] == "Main Menu":
-                            if choice == settings:
-                                meta = "Main Menu"
-                            elif confirmation == None:
+                            if any(choice.get(k) != settings[k] for k in settings if k != "Font Type") and confirmation == None:
                                 confirmation = "Main Menu"
+                            elif confirmation == None:
+                                meta = "Main Menu"
     elif meta == "Quit":
         pygame.quit()
         sys.exit()
