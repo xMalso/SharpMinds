@@ -120,7 +120,7 @@ class Settings:
             self.settings["Font Type"] = "System"
         print("Settings saved.")
 
-def LoadUp():
+def loadUp():
     global pygame, settingsClass
     pygame.init()
     pygame.display.set_caption("Sharp Minds")
@@ -144,9 +144,8 @@ def LoadUp():
     settingsClass = Settings()
     loadUpValues()
 
-
 def loadUpValues():
-    global content_height, scroll, main_menu_buttons, games_buttons, settings_buttons, meta, font_height, options
+    global content_height, scroll, main_menu_buttons, games_buttons, settings_buttons, meta, font_height, options, colour_picker_buttons
     global choice, settings, text_surface, i, frame, confirmation, confirmation_buttons, current_colour_picker, current_dropdown
     settings = settingsClass.getSettings()
     settingsClass.applySettings()
@@ -172,6 +171,7 @@ def loadUpValues():
     games_buttons = getGamesMenuButtons(pygame, settings)
     settings_buttons = getSettingsButtons(pygame, settings, font)
     confirmation_buttons = getConfirmationButtons(pygame, settings, font)
+    colour_picker_buttons = getColourPickerButtons(pygame, settings, font)
     try: meta = meta; scroll = 0
     except: meta = "Main Menu"; scroll = 0
     options = getSettingsOptions(pygame, settings, font)
@@ -195,13 +195,14 @@ def checkCollide(loc):
     current_dropdown = None
     current_colour_picker = None
     setOptionsButtons()
+    print("unselected")
 
 
-LoadUp()
+loadUp()
 
 
 while True:  # Main loop
-    screen.fill(settings["Background"])
+    screen.fill(settings["Background Colour"])
     if meta == "Main Menu":
         mainMenuDisplay(settings, screen, font, pygame, main_menu_buttons)
         for event in pygame.event.get():
@@ -246,11 +247,10 @@ while True:  # Main loop
                 screen,
                 current_dropdown["Pygame Button"],
                 options[current_dropdown["Name"]],
-                font_height + settings["Height"] // 200,
                 scroll,
             )
         if current_colour_picker != None:
-            colourPickerDisplay()
+            colourPickerDisplay(pygame, settings, font, screen, current_colour_picker, colour_picker_buttons, scroll)
         for event in pygame.event.get():
             checkExit(event)
             if event.type == pygame.MOUSEWHEEL:

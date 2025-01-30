@@ -8,6 +8,7 @@ from .Data import (
     getSettingsOptions,
     getSettingsButtons,
     getConfirmationButtons,
+    getColourPickerButtons,
 )
 from .Dropdown import displayPage as dropdownDisplay, xy_range, setOptionsButtons, getOptionsButtons
-from .ColourPicker import displayPage as colourPickerDisplay
+from .ColourPicker import displayPage as colourPickerDisplay, inverted

@@ -147,10 +147,12 @@ def getDefaultSettings():
         "Window Type": "Borderless",
         "Show FPS": True,
         "FPS Limit": 0,
-        "Background": (31, 31, 31),
+        "Background Colour": (31, 31, 31),
         "Background Font Colour": (217, 217, 217),
-        "Dropdown Background": (63, 63, 63),
+        "Dropdown Background Colour": (63, 63, 63),
         "Dropdown Font Colour": (217, 217, 217),
+        "Input Background Colour": (85, 85, 85),
+        "Input Font Colour": (217, 217, 217),
         "Button Primary Colour": (99, 139, 102),
         "Font Primary Colour": (217, 217, 217),
         "Button Secondary Colour": (90, 115, 225),
@@ -252,15 +254,17 @@ def getSettingsButtons(pygame, settings, font):
 
 def getSettingsOptions(pygame, settings, font):
     options = {
-        "Width": {"Options": [1920, 1600, 1366, 1280, 1024, 800, 640]},
-        "Height": {"Options": [1080, 900, 768, 720, 600, 480]},
+        "Width": {"Options": [3840, 2560, 1920, 1440, 1366, 1280, 1024]},
+        "Height": {"Options": [2160, 1440, 1080, 768, 720]},
         "Window Type": {"Options": ["Borderless", "Fullscreen", "Windowed"]},
         "Show FPS": {"Options": [True, False]},
         "FPS Limit": {"Options": [0, 30, 60, 120, 144, 165, 240]},
-        # "Background": {"Options": (rgb tuple)},
+        # "Background Colour": {"Options": (rgb tuple)},
         # "Background Font Colour": {"Options": (rgb tuple)},
-        # "Dropdown Background": {"Options": (rgb tuple)},
+        # "Dropdown Background Colour": {"Options": (rgb tuple)},
         # "Dropdown Font Colour": {"Options": (rgb tuple)},
+        # "Input Background Colour": (rgb tuple),
+        # "Input Font Colour": (rgb tuple),
         # "Button Primary Colour": {"Options": (rgb tuple)},
         # "Font Primary Colour": {"Options": (rgb tuple)},
         # "Button Secondary Colour": {"Options": (rgb tuple)},
@@ -314,8 +318,8 @@ def getSettingsOptions(pygame, settings, font):
     for index, choice in enumerate(options["Font Size"]["Options"]):
         options["Font Size"]["Options"][index] = settings["Width"] // choice
     for option in options.values():
-        largest = max(option["Options"], key=lambda x: font.size(str(x))[0])
-        option["Largest"] = font.size(str(largest))[0]
+        largest = max(font.size(str(choice))[0] for choice in option["Options"])
+        option["Largest"] = largest
     return options
 
 
@@ -346,3 +350,21 @@ def getConfirmationButtons(pygame, settings, font):
         },
     ]
     return buttons
+
+
+def getColourPickerButtons(pygame, settings, font):
+    widest_char_width = max(font.size(str(char))[0] for char in "0123456789ABCDEF")
+    text_size = widest_char_width * 6 + font.size("#")[0]
+    buttons = [
+        {
+            "Pygame Button": pygame.Rect(
+                settings["Width"] // 2 - text_size // 2,
+                settings["Height"] // 2,
+                text_size + settings["Width"] // 96,
+                font.size("Confirm")[1] // 2 + settings["Height"] // 54,
+            ),
+            "Text": "Confirm",
+            "Colour": settings["Button Quinary Colour"],
+            "Font Colour": settings["Font Quinary Colour"],
+        },
+    ]

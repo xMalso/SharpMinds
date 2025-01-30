@@ -71,7 +71,7 @@ def displayPage(
     confirmation_buttons,
 ):
     settings_surface = pygame.Surface((settings["Width"], content_height))
-    settings_surface.fill(settings["Background"])
+    settings_surface.fill(settings["Background Colour"])
     if settings["Font Type"] == "System":
         title_font = pygame.font.SysFont(
             settings["Font"],
@@ -124,7 +124,7 @@ def displayPage(
                 )
                 pygame.draw.rect(
                     settings_surface,
-                    settings["Dropdown Background"],
+                    settings["Dropdown Background Colour"],
                     dropdown_rect,
                     border_radius=25,
                 )
@@ -139,9 +139,10 @@ def displayPage(
                 update_button(
                     {"Pygame Button": dropdown_rect, "Name": key, "Type": "Dropdown"},
                 )
+            # elif "Game" in key:
             else:
                 text_surface = font.render(
-                    f"{key}: {choice[key]}",
+                    f"{key}: ",
                     settings["Antialiasing Text"],
                     settings["Background Font Colour"],
                 )
@@ -149,7 +150,7 @@ def displayPage(
 
                 settings_surface.blit(text_surface, (settings["Width"] // 20, y_offset))
                 colour_box_rect = pygame.Rect(
-                    settings["Width"] // 20 + text_surface.get_width() - text_width - 20,
+                    settings["Width"] // 20 + text_surface.get_width() - 20,
                     y_offset,
                     text_width + 50,
                     text_size[1],
@@ -164,6 +165,33 @@ def displayPage(
                         "Type": "Colour Picker",
                     },
                 )
+            # elif "Font" in key:
+            #     text_surface = font.render(
+            #         f"{key}: ",
+            #         settings["Antialiasing Text"],
+            #         settings["Background Font Colour"],
+            #     )
+            #     #     # Render a colour picker for RGB tuples
+
+            #     settings_surface.blit(text_surface, (settings["Width"] // 20, y_offset))
+            #     colour_box_rect = pygame.Rect(
+            #         settings["Width"] // 20 + text_surface.get_width() - 20,
+            #         y_offset,
+            #         text_width + 50,
+            #         text_size[1],
+            #     )
+            #     pygame.draw.rect(
+            #         settings_surface, choice[background], (colour_box_rect), border_radius=25
+            #     )
+            #     update_button(
+            #         {
+            #             "Pygame Button": colour_box_rect,
+            #             "Name": key,
+            #             "Type": "Colour Picker",
+            #         },
+            #     )
+            # else:
+            #     background = key
         #     pygame.draw.rect(
         #         settings_surface,
         #         (255, 255, 255),
