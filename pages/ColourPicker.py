@@ -2,28 +2,30 @@ inverted = False
 
 
 def displayPage(pygame, settings, font, screen, button, options, scroll):
+    print(button["Pygame Button"])
     global inverted
-    y = button.y
-    x = button.x
-    width = button.width
-    height = button.height
+    y = button["Pygame Button"].y
+    x = button["Pygame Button"].x
+    width = button["Pygame Button"].width
+    height = button["Pygame Button"].height
     offset = -scroll
     if y - scroll > settings["Height"] // 2:
         inverted = True
     pygame.draw.rect(screen, settings["Input Background Colour"], button["Pygame Button"])
-    text_surface = font.render(
-        f"{button["Text"]}",
-        settings["Antialiasing Text"],
-        settings[""],
-    )
-    screen.blit(
-        text_surface,
-        (
-            button["Pygame Button"].x
-            + (button["Pygame Button"].width - text_surface.get_width()) // 2,
-            button["Pygame Button"].y + (button["Pygame Button"].height - text_surface.get_height()) // 2,
-        ),
-    )
+    for option in options:
+        text_surface = font.render(
+            f"{option["Text"]}",
+            settings["Antialiasing Text"],
+            settings[""],
+        )
+        screen.blit(
+            text_surface,
+            (
+                option["Pygame Button"].x
+                + (option["Pygame Button"].width - text_surface.get_width()) // 2,
+                option["Pygame Button"].y + (option["Pygame Button"].height - text_surface.get_height()) // 2,
+            ),
+        )
 
 
 
