@@ -1,34 +1,17 @@
-global options_buttons, xy_range
-options_buttons = {}
-xy_range = {"y": [0, 0], "x": [0, 0]}
-
-
-def setOptionsButtons():
-    global options_buttons
-    options_buttons = {}
-
-
-def getOptionsButtons():
-    return options_buttons
-
-
-def update_button(new_button):
-    button_name = new_button["Name"]
-    options_buttons[button_name] = new_button
+inverted = False
 
 def displayPage(pygame, settings, font, screen, button, options, height, scroll):
+    global inverted
     buffer_width = font.size(" ")[0] * 0.6 + font.size("▼ ")[0] - font.size("▶ ")[0]
     y = button.y
     x = button.x
-    space_width = font.size(" ")[0]
-    arrow_width = font.size("▼ ")[0]
-    width = options["Largest"] + space_width + arrow_width
+    # space_width = font.size(" ")[0]
+    # arrow_width = font.size("▼ ")[0]
+    # width = options["Largest"] + space_width + arrow_width
+    width = button.width
     height = button.height
-    increment = height
     offset = -scroll
-    inverted = False
     if y - scroll > settings["Height"] // 2:
-        increment = -increment
         inverted = True
     for index, option in enumerate(options["Options"]):
         dropdown_rect = pygame.Rect(
