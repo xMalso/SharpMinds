@@ -16,7 +16,7 @@ def update_button(new_button):
     button_name = new_button["Name"]
     options_buttons[button_name] = new_button
 
-def displayPage(pygame, settings, font, screen, button, options, height, scroll):
+def displayPage(pygame, settings, font, screen, button, options, scroll):
     buffer_width = font.size(" ")[0] * 0.6 + font.size("▼ ")[0] - font.size("▶ ")[0]
     y = button.y
     x = button.x
@@ -38,7 +38,7 @@ def displayPage(pygame, settings, font, screen, button, options, height, scroll)
         if len(options["Options"]) == 1:
             pygame.draw.rect(
                 screen,
-                settings["Dropdown Background"],
+                settings["Dropdown Background Colour"],
                 dropdown_rect,
                 border_radius=25,
             )
@@ -47,7 +47,7 @@ def displayPage(pygame, settings, font, screen, button, options, height, scroll)
         ):
             pygame.draw.rect(
                 screen,
-                settings["Dropdown Background"],
+                settings["Dropdown Background Colour"],
                 dropdown_rect,
                 border_top_left_radius=25,
                 border_top_right_radius=25,
@@ -57,7 +57,7 @@ def displayPage(pygame, settings, font, screen, button, options, height, scroll)
         ):
             pygame.draw.rect(
                 screen,
-                settings["Dropdown Background"],
+                settings["Dropdown Background Colour"],
                 dropdown_rect,
                 border_bottom_left_radius=25,
                 border_bottom_right_radius=25,
@@ -65,7 +65,7 @@ def displayPage(pygame, settings, font, screen, button, options, height, scroll)
         else:
             pygame.draw.rect(
                 screen,
-                settings["Dropdown Background"],
+                settings["Dropdown Background Colour"],
                 dropdown_rect,
             )
         offset += increment
