@@ -195,6 +195,7 @@ def checkCollide(loc):
     current_dropdown = None
     current_colour_picker = None
     setOptionsButtons()
+    print("unselected")
 
 
 LoadUp()
