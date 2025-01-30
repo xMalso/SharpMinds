@@ -4,4 +4,4 @@ Game of individuals with ADHD that has no paywall on gameplay features but has p
 (The game is not a prescribed treatment nor is it part of a treatment program)
 
 
-[Dyslexia Font](https://antijingoist.itch.io/opendyslexic?download)
+Find the used Dyslexia Font [here](https://antijingoist.itch.io/opendyslexic?download)
