@@ -254,8 +254,8 @@ def getSettingsButtons(pygame, settings, font):
 
 def getSettingsOptions(pygame, settings, font):
     options = {
-        "Width": {"Options": [1920, 1600, 1366, 1280, 1024, 800, 640]},
-        "Height": {"Options": [1080, 900, 768, 720, 600, 480]},
+        "Width": {"Options": [3840, 2560, 1920, 1440, 1366, 1280, 1024]},
+        "Height": {"Options": [2160, 1440, 1080, 768, 720]},
         "Window Type": {"Options": ["Borderless", "Fullscreen", "Windowed"]},
         "Show FPS": {"Options": [True, False]},
         "FPS Limit": {"Options": [0, 30, 60, 120, 144, 165, 240]},
