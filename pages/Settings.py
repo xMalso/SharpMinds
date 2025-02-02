@@ -114,7 +114,35 @@ def displayPage(
             + text_size[1] * 3
             + settings["Height"] // 50  # Check if above scren
         ):
-            if key in options:
+            if key == "Background Colour":
+                text_surface = font.render(
+                    f"{key}: ",
+                    settings["Antialiasing Text"],
+                    settings["Background Font Colour"],
+                )
+                #     # Render a colour picker for RGB tuples
+
+                settings_surface.blit(text_surface, (settings["Width"] // 20, y_offset))
+                colour_box_rect = pygame.Rect(
+                    settings["Width"] // 20 + text_surface.get_width() - 20,
+                    y_offset,
+                    text_width + 52,
+                    text_size[1] + 2,
+                )
+                pygame.draw.rect(
+                    settings_surface, choice["Background Font Colour"], (colour_box_rect), border_radius=25
+                )
+                pygame.draw.rect(
+                    settings_surface, choice[key], (colour_box_rect.x+1, colour_box_rect.y+1, colour_box_rect.width -2, colour_box_rect.height-2), border_radius=25
+                )
+                update_button(
+                    {
+                        "Pygame Button": colour_box_rect,
+                        "Name": key,
+                        "Type": "Colour Picker",
+                    },
+                )
+            elif key in options:
                 # Render a dropdown menu for selectable options
                 dropdown_rect = pygame.Rect(
                     space_width * 0.4 + key_width + settings["Width"] // 20,

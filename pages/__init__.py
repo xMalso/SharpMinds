@@ -10,5 +10,5 @@ from .Data import (
     getConfirmationButtons,
     getColourPickerButtons,
 )
-from .Dropdown import displayPage as dropdownDisplay, xy_range, setOptionsButtons, getOptionsButtons
-from .ColourPicker import displayPage as colourPickerDisplay, inverted
+from .Dropdown import displayPage as dropdownDisplay, resetDropdownButtons, getDropdownButtons
+from .ColourPicker import displayPage as colourPickerDisplay, resetColourButtons, getColourButtons

@@ -1,16 +1,12 @@
-global options_buttons, xy_range
+global options_buttons
 options_buttons = {}
-xy_range = {"y": [0, 0], "x": [0, 0]}
 
-
-def setOptionsButtons():
-    global options_buttons
-    options_buttons = {}
-
-
-def getOptionsButtons():
+def getDropdownButtons():
     return options_buttons
 
+def resetDropdownButtons():
+    global options_buttons
+    options_buttons = {}
 
 def update_button(new_button):
     button_name = new_button["Name"]
@@ -79,5 +75,3 @@ def displayPage(pygame, settings, font, screen, button, options, scroll):
             text_surface,
             (button["Pygame Button"].x + buffer_width, button["Pygame Button"].y),
         )
-    global xy_range
-    xy_range = {"y": [y, y + offset], "x": [x, x + width]}

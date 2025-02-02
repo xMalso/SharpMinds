@@ -1,5 +1,5 @@
-"Width": 2560,
-"Height": 1440,
+"Width": 1920,
+"Height": 1080,
 "Window Type": Borderless,
 "Show FPS": True,
 "FPS Limit": 0,

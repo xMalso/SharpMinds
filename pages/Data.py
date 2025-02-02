@@ -354,17 +354,39 @@ def getConfirmationButtons(pygame, settings, font):
 
 def getColourPickerButtons(pygame, settings, font):
     widest_char_width = max(font.size(str(char))[0] for char in "0123456789ABCDEF")
-    text_size = widest_char_width * 6 + font.size("#")[0]
+    text_size = (
+        widest_char_width * 6 + font.size("#")[0] + settings["Width"] // 32,
+        font.size("#")[1] + settings["Height"] // 32,
+    )
     buttons = [
         {
-            "Pygame Button": pygame.Rect(
-                settings["Width"] // 2 - text_size // 2,
-                settings["Height"] // 2,
-                text_size + settings["Width"] // 96,
-                font.size("Confirm")[1] // 2 + settings["Height"] // 54,
+            "Name": "Input",
+            "Size": text_size,
+            "Buffer Size": (
+                (settings["Width"] * 21) // 100,
+                (settings["Height"] * 3) // 128 + text_size[1] * 2,
             ),
-            "Text": "Confirm",
+            "Colour": settings["Input Background Colour"],
+            "Font Colour": settings["Input Font Colour"],
+        },
+        {
+            "Name": "Discard",
+            "Size": text_size,
+            "Buffer Size": ((settings["Width"] * 21) // 100, settings["Height"] // 128),
+            "Text": "Discard",
             "Colour": settings["Button Quinary Colour"],
             "Font Colour": settings["Font Quinary Colour"],
         },
+        {
+            "Name": "Confirm",
+            "Size": text_size,
+            "Buffer Size": (
+                (settings["Width"] * 21) // 100,
+                settings["Height"] // 64 + text_size[1],
+            ),
+            "Text": "Confirm",
+            "Colour": settings["Button Primary Colour"],
+            "Font Colour": settings["Font Primary Colour"],
+        },
     ]
+    return buttons
