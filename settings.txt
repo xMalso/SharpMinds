@@ -8,6 +8,7 @@
 "Dropdown Background Colour": (63, 63, 63),
 "Dropdown Font Colour": (217, 217, 217),
 "Input Background Colour": (85, 85, 85),
+"Selected Input Colour": (60, 60, 60),
 "Input Font Colour": (217, 217, 217),
 "Button Primary Colour": (99, 139, 102),
 "Font Primary Colour": (217, 217, 217),

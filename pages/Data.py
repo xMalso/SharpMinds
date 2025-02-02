@@ -152,6 +152,7 @@ def getDefaultSettings():
         "Dropdown Background Colour": (63, 63, 63),
         "Dropdown Font Colour": (217, 217, 217),
         "Input Background Colour": (85, 85, 85),
+        "Selected Input Colour": (60, 60, 60),
         "Input Font Colour": (217, 217, 217),
         "Button Primary Colour": (99, 139, 102),
         "Font Primary Colour": (217, 217, 217),
@@ -259,22 +260,6 @@ def getSettingsOptions(pygame, settings, font):
         "Window Type": {"Options": ["Borderless", "Fullscreen", "Windowed"]},
         "Show FPS": {"Options": [True, False]},
         "FPS Limit": {"Options": [0, 30, 60, 120, 144, 165, 240]},
-        # "Background Colour": {"Options": (rgb tuple)},
-        # "Background Font Colour": {"Options": (rgb tuple)},
-        # "Dropdown Background Colour": {"Options": (rgb tuple)},
-        # "Dropdown Font Colour": {"Options": (rgb tuple)},
-        # "Input Background Colour": (rgb tuple),
-        # "Input Font Colour": (rgb tuple),
-        # "Button Primary Colour": {"Options": (rgb tuple)},
-        # "Font Primary Colour": {"Options": (rgb tuple)},
-        # "Button Secondary Colour": {"Options": (rgb tuple)},
-        # "Font Secondary Colour": {"Options": (rgb tuple)},
-        # "Button Tertiary Colour": {"Options": (rgb tuple)},
-        # "Font Tertiary Colour": {"Options": (rgb tuple)},
-        # "Button Quaternary Colour": {"Options": (rgb tuple)},
-        # "Font Quaternary Colour": {"Options": (rgb tuple)},
-        # "Button Quinary Colour": {"Options": (rgb tuple)},
-        # "Font Quinary Colour": {"Options": (rgb tuple)},
         "Font": {
             "Options": [
                 "arial",
@@ -295,9 +280,6 @@ def getSettingsOptions(pygame, settings, font):
         "Font Type": {"Options": ["Custom", "System"]},
         "Font Size": {"Options": [48, 56, 64, 72, 80, 128, 160]},
         "Antialiasing Text": {"Options": [True, False]},
-        # "Game Primary Colour": {"Options": "rgb tuple"},
-        # "Game Secondary Colour": {"Options": "rgb tuple"},
-        # "Game Tertiary Colour": {"Options": "rgb tuple"},
         # "Scroll Speed": {"Options": [50, 75, 100, 125, 150]},
     }
     dir = r"assets/fonts/fonts"
@@ -356,37 +338,51 @@ def getColourPickerButtons(pygame, settings, font):
     widest_char_width = max(font.size(str(char))[0] for char in "0123456789ABCDEF")
     text_size = (
         widest_char_width * 6 + font.size("#")[0] + settings["Width"] // 32,
-        font.size("#")[1] + settings["Height"] // 32,
+        font.size("#")[1] + settings["Height"] // 100 - 1,
     )
     buttons = [
         {
             "Name": "Input",
             "Size": text_size,
             "Buffer Size": (
-                (settings["Width"] * 21) // 100,
+                settings["Width"] // 100,
+                # (settings["Width"] * 21) // 100,
                 (settings["Height"] * 3) // 128 + text_size[1] * 2,
             ),
             "Colour": settings["Input Background Colour"],
             "Font Colour": settings["Input Font Colour"],
         },
         {
-            "Name": "Discard",
+            "Name": "Selected Input",
             "Size": text_size,
-            "Buffer Size": ((settings["Width"] * 21) // 100, settings["Height"] // 128),
-            "Text": "Discard",
-            "Colour": settings["Button Quinary Colour"],
-            "Font Colour": settings["Font Quinary Colour"],
+            "Buffer Size": (
+                settings["Width"] // 100,
+                # (settings["Width"] * 21) // 100,
+                (settings["Height"] * 3) // 128 + text_size[1] * 2,
+            ),
+            "Colour": settings["Selected Input Colour"],
+            "Font Colour": settings["Input Font Colour"],
         },
         {
             "Name": "Confirm",
             "Size": text_size,
             "Buffer Size": (
-                (settings["Width"] * 21) // 100,
+                settings["Width"] // 100,
+                # (settings["Width"] * 21) // 100,
                 settings["Height"] // 64 + text_size[1],
             ),
             "Text": "Confirm",
             "Colour": settings["Button Primary Colour"],
             "Font Colour": settings["Font Primary Colour"],
+        },
+        {
+            "Name": "Discard",
+            "Size": text_size,
+            "Buffer Size": (settings["Width"] // 100, settings["Height"] // 128),
+            # "Buffer Size": ((settings["Width"] * 21) // 100, settings["Height"] // 128),
+            "Text": "Discard",
+            "Colour": settings["Button Quinary Colour"],
+            "Font Colour": settings["Font Quinary Colour"],
         },
     ]
     return buttons

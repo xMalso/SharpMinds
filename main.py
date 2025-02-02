@@ -145,7 +145,7 @@ def loadUp():
 
 
 def loadUpValues():
-    global content_height, scroll, main_menu_buttons, games_buttons, settings_buttons, meta, font_height, options, colour_picker_buttons
+    global content_height, scroll, main_menu_buttons, games_buttons, settings_buttons, meta, font_height, options, colour_picker_buttons, options_buttons
     global choice, settings, text_surface, i, frame, confirmation, confirmation_buttons, current_colour_picker, current_dropdown, input_text, input_selected
     settings = settingsClass.getSettings()
     settingsClass.applySettings()
@@ -157,7 +157,7 @@ def loadUpValues():
         None,
         None,
     )
-    input_text = '#'
+    input_text = "#"
     input_selected = False
     font_height = font.size("Save and Leave")[1]
     content_height = (
@@ -169,6 +169,7 @@ def loadUpValues():
     ) * (font_height + settings["Height"] // 200) + (
         settings["Height"] % (font_height + settings["Height"] // 200)
     )
+    options_buttons = getOptionsButtons()
     main_menu_buttons = getMainMenuButtons(pygame, settings, font)
     games_buttons = getGamesMenuButtons(pygame, settings)
     settings_buttons = getSettingsButtons(pygame, settings, font)
@@ -206,30 +207,33 @@ def checkCollide(loc):
         for button in colour_buttons.values():
             if button["Pygame Button"].collidepoint(loc):
                 if button["Name"] == "Confirm":
-                    input_text = input_text[1:].ljust(6, '0')
-                    hex = tuple(int(input_text[i:i+2], 16) for i in (0, 2, 4))
+                    input_text = input_text[1:].ljust(6, "0")
+                    hex = tuple(int(input_text[i : i + 2], 16) for i in (0, 2, 4))
                     choice[current_colour_picker["Name"]] = hex
-                    resetColourButtons()
                     current_colour_picker = None
-                    input_text = '#'
+                    input_text = "#"
                     input_selected = False
+                    selectInput(False)
+                    resetColourButtons()
                     return
                 elif button["Name"] == "Discard":
-                    resetColourButtons()
                     current_colour_picker = None
-                    input_text = '#'
+                    input_text = "#"
                     input_selected = False
+                    selectInput(False)
+                    resetColourButtons()
                     return
                 elif button["Name"] == "Input":
-                    input_selected = True
+                    input_selected = not input_selected
+                    selectInput(input_selected)
                     return
-                else: print("Unknown colour picker button.")
-        resetColourButtons()
+                else:
+                    print("Unknown colour picker button.")
         current_colour_picker = None
-        input_text = '#'
+        input_text = "#"
         input_selected = False
-                    
-
+        selectInput(False)
+        resetColourButtons()
 
 
 loadUp()
@@ -317,7 +321,9 @@ while True:  # Main loop
                                 print("Dropdown")
                             elif button["Type"] == "Colour Picker":
                                 current_colour_picker = button
-                                input_text = "#{:02X}{:02X}{:02X}".format(*choice[current_colour_picker["Name"]])
+                                input_text = "#{:02X}{:02X}{:02X}".format(
+                                    *choice[current_colour_picker["Name"]]
+                                )
                                 print("Colour Picker")
                 if confirmation != None:
                     for button in confirmation_buttons:

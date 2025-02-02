@@ -1,6 +1,6 @@
 from .MainMenu import displayPage as mainMenuDisplay
 from .GameMenu import displayPage as gameMenuDisplay
-from .Settings import displayPage as settingsDisplay, options_buttons
+from .Settings import displayPage as settingsDisplay, getOptionsButtons
 from .Data import (
     getMainMenuButtons,
     getGamesMenuButtons,
@@ -11,4 +11,4 @@ from .Data import (
     getColourPickerButtons,
 )
 from .Dropdown import displayPage as dropdownDisplay, resetDropdownButtons, getDropdownButtons
-from .ColourPicker import displayPage as colourPickerDisplay, resetColourButtons, getColourButtons
+from .ColourPicker import displayPage as colourPickerDisplay, resetColourButtons, getColourButtons, selectInput

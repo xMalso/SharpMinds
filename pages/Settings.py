@@ -8,6 +8,9 @@ global options_buttons
 #     print("fail")
 options_buttons = {}
 
+def getOptionsButtons():
+    return options_buttons
+
 confirmation_text = {
     "Main Menu": "discard and go to main menu",
     "Discard": "discard changes",
@@ -126,8 +129,8 @@ def displayPage(
                 colour_box_rect = pygame.Rect(
                     settings["Width"] // 20 + text_surface.get_width() - 20,
                     y_offset,
-                    text_width + 52,
-                    text_size[1] + 2,
+                    text_width + 50,
+                    text_size[1],
                 )
                 pygame.draw.rect(
                     settings_surface, choice["Background Font Colour"], (colour_box_rect), border_radius=25
