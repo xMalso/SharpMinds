@@ -78,6 +78,7 @@ class Settings:
             print(
                 f"Error: Incorrect format in settings.txt ({e}). Using default values."
             )
+        print(f"settings: {self.settings}")
         return self.settings
 
     def applySettings(self):
@@ -107,6 +108,7 @@ class Settings:
         pygame.display.flip()
 
     def saveSettings(self):
+        print(choice.get("Adaptive Difficulty"))
         with open("settings.txt", "w") as file:
             for key, value in choice.items():
                 file.write(f'"{key}": {value},\n')
@@ -147,8 +149,13 @@ def loadUp():
 def loadUpValues():
     global content_height, scroll, main_menu_buttons, games_buttons, settings_buttons, meta, font_height, options, colour_picker_buttons, options_buttons
     global choice, settings, text_surface, i, frame, confirmation, confirmation_buttons, current_colour_picker, current_dropdown, input_text, input_selected
+    try:
+        print(f"152 {settings.get("Adaptive Difficulty")}")
+    except: pass
     settings = settingsClass.getSettings()
+    print(f"155 {settings.get("Adaptive Difficulty")}")
     settingsClass.applySettings()
+    print(f"157 {settings.get("Adaptive Difficulty")}")
     frame = pygame.time.get_ticks()
     i = 1
     confirmation, current_colour_picker, current_dropdown, text_surface = (
@@ -158,6 +165,7 @@ def loadUpValues():
         None,
     )
     input_text = "#"
+    scroll = 0
     input_selected = False
     font_height = font.size("Save and Leave")[1]
     content_height = (
@@ -174,16 +182,22 @@ def loadUpValues():
     games_buttons = getGamesMenuButtons(pygame, settings)
     settings_buttons = getSettingsButtons(pygame, settings, font)
     confirmation_buttons = getConfirmationButtons(pygame, settings, font)
-    colour_picker_buttons = getColourPickerButtons(pygame, settings, font)
+    colour_picker_buttons = getColourPickerButtons(settings, font)
     try:
         meta = meta
-        scroll = 0
     except:
         meta = "Main Menu"
-        scroll = 0
-    options = getSettingsOptions(pygame, settings, font)
+    print(f"189 {settings.get("Adaptive Difficulty")}")
+    options = getSettingsOptions(settings, font)
+    print(f"191 {settings.get("Adaptive Difficulty")}")
+    try:
+        print(f"194 {choice.get("Adaptive Difficulty")}")
+    except: pass
     choice = settings.copy()
+    print(f"196 {settings.get("Adaptive Difficulty")}")
+    print(f" 197 {choice.get("Adaptive Difficulty")}")
     del choice["Font Type"]
+    choice["Adaptive Difficulty"]
 
 
 def checkExit(event):
@@ -250,7 +264,6 @@ while True:  # Main loop
                     if button["Pygame Button"].collidepoint(
                         event.pos
                     ):  # Check if location of mouse is within the boundaries of the button when mouse is pressed
-                        print(f"Page set from {button["Meta"]} to {meta}")
                         meta = button["Meta"]  # Set page if button is pressed
     elif meta == "Game Menu":
         gameMenuDisplay(settings, screen, font, pygame, games_buttons)
@@ -261,7 +274,6 @@ while True:  # Main loop
                     if game["Pygame Button"].collidepoint(
                         event.pos
                     ):  # Check if location of mouse is within the boundaries of the button when mouse is pressed
-                        print(f"Page set from {button["Meta"]} to {meta}")
                         meta = game["Meta"]  # Set page if button is pressed
     elif meta == "Settings":
         settingsDisplay(
@@ -342,10 +354,12 @@ while True:  # Main loop
                                 elif confirmation == "Discard":
                                     choice = settings.copy()
                                     del choice["Font Type"]
+                                    del choice["Adaptive Difficulty"]
                                     print("Settings discarded.")
                                 elif confirmation == "Main Menu":
                                     choice = settings.copy()
                                     del choice["Font Type"]
+                                    del choice["Adaptive Difficulty"]
                                     meta = "Main Menu"
                                 else:
                                     print(
@@ -361,16 +375,18 @@ while True:  # Main loop
                         if any(
                             choice.get(k) != settings[k]
                             for k in settings
-                            if k != "Font Type"
+                            if k != "Font Type" and k != "Adaptive Difficulty"
                         ):
                             if button["Meta"] == "Save":
+                                choice["Adaptive Difficulty"] = settings["Adaptive Difficulty"]
                                 settingsClass.saveSettings()
                                 print("Settings saved.")
                                 loadUpValues()
                             elif button["Meta"] == "Save and Leave":
+                                choice["Adaptive Difficulty"] = settings["Adaptive Difficulty"]
                                 settingsClass.saveSettings()
                                 meta = "Main Menu"
-                                print("Settings saved and page set to Main Menu")
+                                print("Settings saved.")
                                 loadUpValues()
                             elif button["Meta"] == "Discard":
                                 if confirmation == None:
@@ -384,7 +400,7 @@ while True:  # Main loop
                                 any(
                                     choice.get(k) != settings[k]
                                     for k in settings
-                                    if k != "Font Type"
+                                    if k != "Font Type" and k != "Adaptive Difficulty"
                                 )
                                 and confirmation == None
                             ):
@@ -401,7 +417,14 @@ while True:  # Main loop
     elif meta == "Quit":
         pygame.quit()
         sys.exit()
-    # FPS Counter
+    elif meta == "Expose the Impostor":
+        bufferHeight(font)
+        setRadius(settings)
+        Game1(pygame, settings, screen, font)
+    elif meta == "Pattern Rush":
+        Game2()
+    elif meta == "Memory Experiment":
+        Game3()
     if (pygame.time.get_ticks() - frame) > 100:
         fps = 1 / (pygame.time.get_ticks() - frame) * i * 1000
         if settings["Show FPS"] == True:

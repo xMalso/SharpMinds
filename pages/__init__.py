@@ -12,3 +12,6 @@ from .Data import (
 )
 from .Dropdown import displayPage as dropdownDisplay, resetDropdownButtons, getDropdownButtons
 from .ColourPicker import displayPage as colourPickerDisplay, resetColourButtons, getColourButtons, selectInput
+from .ExposetheImpostor import Game1, setRadius, bufferHeight, removeCircle
+from .MemoryExperiment import Game2
+from .PatternRush import Game3

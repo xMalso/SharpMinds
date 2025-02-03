@@ -29,3 +29,4 @@
 "Game Primary Colour": (168, 213, 186),
 "Game Secondary Colour": (255, 154, 162),
 "Game Tertiary Colour": (255, 243, 176),
+"Adaptive Difficulty": 1,

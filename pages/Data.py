@@ -80,15 +80,9 @@ def getGamesMenuButtons(pygame, settings):
             os.path.join(r"assets/fonts/fonts", settings["Font"]),
             settings["Font Size"] // 2,
         ).size("Back to Main Menu")
-    # Screen is split into 3 sections horizontally for 3 games each section takes 30/94 of the screen with 1/94 as a gap between each game
-    # The height of each section section is 8/15
-    #  of the screen with 1/15
-    #  as a gap above and below with 5/15
-    #  extra to write the title of the Screen
-
     games_buttons = [
         {
-            "Name": "Game 1",
+            "Name": "Expose the Impostor",
             "Pygame Button": pygame.Rect(
                 settings["Width"] // 94,
                 (settings["Height"] * 4) // 16,
@@ -96,11 +90,11 @@ def getGamesMenuButtons(pygame, settings):
                 (settings["Height"] * 10) // 16,
             ),
             "Font Colour": settings["Font Primary Colour"],
-            "Meta": "Game 1",
+            "Meta": "Expose the Impostor",
             "Image": pygame.image.load("assets/images/blank.jpg"),
         },
         {
-            "Name": "Game 2",
+            "Name": "Memory Experiment",
             "Pygame Button": pygame.Rect(
                 (settings["Width"] * 32) // 94,
                 (settings["Height"] * 4) // 16,
@@ -108,11 +102,11 @@ def getGamesMenuButtons(pygame, settings):
                 (settings["Height"] * 10) // 16,
             ),
             "Font Colour": settings["Font Primary Colour"],
-            "Meta": "Game 2",
+            "Meta": "Memory Experiment",
             "Image": pygame.image.load("assets/images/blank.jpg"),
         },
         {
-            "Name": "Game 3",
+            "Name": "Pattern Rush",
             "Pygame Button": pygame.Rect(
                 (settings["Width"] * 63) // 94,
                 (settings["Height"] * 4) // 16,
@@ -120,7 +114,7 @@ def getGamesMenuButtons(pygame, settings):
                 (settings["Height"] * 10) // 16,
             ),
             "Font Colour": settings["Font Primary Colour"],
-            "Meta": "Game 3",
+            "Meta": "Pattern Rush",
             "Image": pygame.image.load("assets/images/blank.jpg"),
         },
         {
@@ -174,7 +168,9 @@ def getDefaultSettings():
         "Game Primary Colour": (168, 213, 186),
         "Game Secondary Colour": (255, 154, 162),
         "Game Tertiary Colour": (255, 243, 176),
+        "Adaptive Difficulty": 1,
         # "Scroll Speed": 100,
+
     }
     return default_settings
 
@@ -253,7 +249,7 @@ def getSettingsButtons(pygame, settings, font):
     return buttons
 
 
-def getSettingsOptions(pygame, settings, font):
+def getSettingsOptions(settings, font):
     options = {
         "Width": {"Options": [3840, 2560, 1920, 1440, 1366, 1280, 1024]},
         "Height": {"Options": [2160, 1440, 1080, 768, 720]},
@@ -277,9 +273,9 @@ def getSettingsOptions(pygame, settings, font):
         "Bold Font": {"Options": []},
         "Italic Font": {"Options": []},
         "BoldItalic Font": {"Options": []},
-        "Font Type": {"Options": ["Custom", "System"]},
         "Font Size": {"Options": [48, 56, 64, 72, 80, 128, 160]},
         "Antialiasing Text": {"Options": [True, False]},
+        # "Adaptive Difficulty": {"Options": [1, 2, 3, 4, 5, 6, 7]},
         # "Scroll Speed": {"Options": [50, 75, 100, 125, 150]},
     }
     dir = r"assets/fonts/fonts"
@@ -334,7 +330,7 @@ def getConfirmationButtons(pygame, settings, font):
     return buttons
 
 
-def getColourPickerButtons(pygame, settings, font):
+def getColourPickerButtons(settings, font):
     widest_char_width = max(font.size(str(char))[0] for char in "0123456789ABCDEF")
     text_size = (
         widest_char_width * 6 + font.size("#")[0] + settings["Width"] // 32,

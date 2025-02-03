@@ -233,7 +233,7 @@ def displayPage(
         y_offset += text_size[1] + settings["Height"] // 200
     screen.blit(settings_surface, (0, -scroll))
     buttons, last2 = buttons[:-2], buttons[-2:]
-    if any(choice.get(k) != settings[k] for k in settings if k != "Font Type"):
+    if any(choice.get(k) != settings[k] for k in settings if k != "Font Type" and k != "Adaptive Difficulty"):
         for button in buttons:
             pasteButton(button, pygame, settings, screen)
     for button in last2:
