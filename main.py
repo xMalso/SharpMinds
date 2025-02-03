@@ -78,7 +78,6 @@ class Settings:
             print(
                 f"Error: Incorrect format in settings.txt ({e}). Using default values."
             )
-        print(f"settings: {self.settings}")
         return self.settings
 
     def applySettings(self):
@@ -108,7 +107,6 @@ class Settings:
         pygame.display.flip()
 
     def saveSettings(self):
-        print(choice.get("Adaptive Difficulty"))
         with open("settings.txt", "w") as file:
             for key, value in choice.items():
                 file.write(f'"{key}": {value},\n')
@@ -149,13 +147,8 @@ def loadUp():
 def loadUpValues():
     global content_height, scroll, main_menu_buttons, games_buttons, settings_buttons, meta, font_height, options, colour_picker_buttons, options_buttons
     global choice, settings, text_surface, i, frame, confirmation, confirmation_buttons, current_colour_picker, current_dropdown, input_text, input_selected
-    try:
-        print(f"152 {settings.get("Adaptive Difficulty")}")
-    except: pass
     settings = settingsClass.getSettings()
-    print(f"155 {settings.get("Adaptive Difficulty")}")
     settingsClass.applySettings()
-    print(f"157 {settings.get("Adaptive Difficulty")}")
     frame = pygame.time.get_ticks()
     i = 1
     confirmation, current_colour_picker, current_dropdown, text_surface = (
@@ -187,17 +180,10 @@ def loadUpValues():
         meta = meta
     except:
         meta = "Main Menu"
-    print(f"189 {settings.get("Adaptive Difficulty")}")
     options = getSettingsOptions(settings, font)
-    print(f"191 {settings.get("Adaptive Difficulty")}")
-    try:
-        print(f"194 {choice.get("Adaptive Difficulty")}")
-    except: pass
     choice = settings.copy()
-    print(f"196 {settings.get("Adaptive Difficulty")}")
-    print(f" 197 {choice.get("Adaptive Difficulty")}")
     del choice["Font Type"]
-    choice["Adaptive Difficulty"]
+    del choice["Adaptive Difficulty"]
 
 
 def checkExit(event):
@@ -213,7 +199,6 @@ def checkCollide(loc):
     if current_dropdown != None:
         for button in dropdown_buttons.values():
             if button["Pygame Button"].collidepoint(loc):
-                print(choice[current_dropdown["Name"]], button["Name"])
                 choice[current_dropdown["Name"]] = button["Name"]
         current_dropdown = None
         resetDropdownButtons()
@@ -330,19 +315,16 @@ while True:  # Main loop
                         ):
                             if button["Type"] == "Dropdown":
                                 current_dropdown = button
-                                print("Dropdown")
                             elif button["Type"] == "Colour Picker":
                                 current_colour_picker = button
                                 input_text = "#{:02X}{:02X}{:02X}".format(
                                     *choice[current_colour_picker["Name"]]
                                 )
-                                print("Colour Picker")
                 if confirmation != None:
                     for button in confirmation_buttons:
                         if button["Pygame Button"].collidepoint(event.pos):
                             if button["Name"] == "Confirm":
                                 if confirmation == "Default":
-                                    print("Default confirmation")
                                     settings = settingsClass.resetSettings()
                                     choice = settings.copy()
                                     del choice["Font Type"]
@@ -378,12 +360,16 @@ while True:  # Main loop
                             if k != "Font Type" and k != "Adaptive Difficulty"
                         ):
                             if button["Meta"] == "Save":
-                                choice["Adaptive Difficulty"] = settings["Adaptive Difficulty"]
+                                choice["Adaptive Difficulty"] = settings[
+                                    "Adaptive Difficulty"
+                                ]
                                 settingsClass.saveSettings()
                                 print("Settings saved.")
                                 loadUpValues()
                             elif button["Meta"] == "Save and Leave":
-                                choice["Adaptive Difficulty"] = settings["Adaptive Difficulty"]
+                                choice["Adaptive Difficulty"] = settings[
+                                    "Adaptive Difficulty"
+                                ]
                                 settingsClass.saveSettings()
                                 meta = "Main Menu"
                                 print("Settings saved.")
@@ -418,9 +404,10 @@ while True:  # Main loop
         pygame.quit()
         sys.exit()
     elif meta == "Expose the Impostor":
-        bufferHeight(font)
-        setRadius(settings)
-        Game1(pygame, settings, screen, font)
+        score, meta = Game1(pygame, settings, screen, font)
+    elif meta == "Game 1 Over":
+        print(meta)
+        meta = "Main Menu"
     elif meta == "Pattern Rush":
         Game2()
     elif meta == "Memory Experiment":

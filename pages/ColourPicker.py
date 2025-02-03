@@ -2,19 +2,25 @@ global colour_buttons, selected
 selected = False
 colour_buttons = {}
 
+
 def selectInput(selection):
     global selected
     selected = selection
+
+
 def getColourButtons():
     return colour_buttons
+
 
 def resetColourButtons():
     global colour_buttons
     colour_buttons = {}
 
+
 def update_button(new_button):
     button_name = new_button["Name"]
     colour_buttons[button_name] = new_button
+
 
 def displayPage(pygame, settings, font, screen, button, options, scroll, input_text):
     y = button["Pygame Button"].y

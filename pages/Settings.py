@@ -1,15 +1,12 @@
 import os
-global options_buttons
 
-# try:
-#     print(options_buttons)
-#     print("success")
-# except:
-#     print("fail")
+global options_buttons
 options_buttons = {}
+
 
 def getOptionsButtons():
     return options_buttons
+
 
 confirmation_text = {
     "Main Menu": "discard and go to main menu",
@@ -27,11 +24,13 @@ def pasteButton(button, pygame, settings, screen):
     global small_font
     if settings["Font Type"] == "System":
         small_font = pygame.font.SysFont(
-            settings["Font"], (settings["Font Size"] // 2),
+            settings["Font"],
+            (settings["Font Size"] // 2),
         )
     else:
         small_font = pygame.font.Font(
-            os.path.join(r"assets/fonts/fonts", settings["Font"]), (settings["Font Size"] // 2),
+            os.path.join(r"assets/fonts/fonts", settings["Font"]),
+            (settings["Font Size"] // 2),
         )
     pygame.draw.rect(
         screen,
@@ -133,10 +132,21 @@ def displayPage(
                     text_size[1],
                 )
                 pygame.draw.rect(
-                    settings_surface, choice["Background Font Colour"], (colour_box_rect), border_radius=25
+                    settings_surface,
+                    choice["Background Font Colour"],
+                    (colour_box_rect),
+                    border_radius=25,
                 )
                 pygame.draw.rect(
-                    settings_surface, choice[key], (colour_box_rect.x+1, colour_box_rect.y+1, colour_box_rect.width -2, colour_box_rect.height-2), border_radius=25
+                    settings_surface,
+                    choice[key],
+                    (
+                        colour_box_rect.x + 1,
+                        colour_box_rect.y + 1,
+                        colour_box_rect.width - 2,
+                        colour_box_rect.height - 2,
+                    ),
+                    border_radius=25,
                 )
                 update_button(
                     {
@@ -233,7 +243,11 @@ def displayPage(
         y_offset += text_size[1] + settings["Height"] // 200
     screen.blit(settings_surface, (0, -scroll))
     buttons, last2 = buttons[:-2], buttons[-2:]
-    if any(choice.get(k) != settings[k] for k in settings if k != "Font Type" and k != "Adaptive Difficulty"):
+    if any(
+        choice.get(k) != settings[k]
+        for k in settings
+        if k != "Font Type" and k != "Adaptive Difficulty"
+    ):
         for button in buttons:
             pasteButton(button, pygame, settings, screen)
     for button in last2:

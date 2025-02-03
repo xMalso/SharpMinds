@@ -1,16 +1,20 @@
 global options_buttons
 options_buttons = {}
 
+
 def getDropdownButtons():
     return options_buttons
+
 
 def resetDropdownButtons():
     global options_buttons
     options_buttons = {}
 
+
 def update_button(new_button):
     button_name = new_button["Name"]
     options_buttons[button_name] = new_button
+
 
 def displayPage(pygame, settings, font, screen, button, options, scroll):
     buffer_width = font.size(" ")[0] * 0.6 + font.size("▼ ")[0] - font.size("▶ ")[0]
