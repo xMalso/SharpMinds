@@ -165,10 +165,10 @@ def getDefaultSettings():
         "Font Type": "Custom",
         "Font Size": 30,
         "Antialiasing Text": True,
-        "Game Primary Colour": (0, 102, 51),
-        "Game Secondary Colour": (204, 0, 51),
-        "Game Tertiary Colour": (255, 204, 0),
-        "Adaptive Difficulty": 1,
+        "Game Primary Colour": (0, 255, 127),
+        "Game Secondary Colour": (255, 191, 191),
+        "Game Tertiary Colour": (0, 0, 255),
+        "Adaptive Difficulty": 2,
         # "Scroll Speed": 100,
     }
     return default_settings

@@ -8,21 +8,30 @@ def overlap(new_x, new_y):
     return False
 
 
-def removeCircle(pos):
+def removeCircle(pos, current):
     global circles
-    for i, (x, y, colour, _) in enumerate(circles):
+    for i, (x, y, colour, tick) in enumerate(circles):
         if math.dist(pos, (x, y)) < radius:
             circles.pop(i)
             if colour == "Green":
                 return -50
             else:
-                return 25
+                score = (
+                    30
+                    * min((0.012 * (despawn_time * 5 / (current - tick))) - 0.06, 1)
+                    ** 0.2
+                )
+                return score
     return 0
 
+
 def Game1(pygame, settings, screen, font):
-    global radius, circles
-    circle_colour = {"Green": settings["Game Primary Colour"], "Red": settings["Game Secondary Colour"]}
-    radius = settings["Width"] // 75
+    global radius, circles, despawn_time
+    circle_colour = {
+        "Green": settings["Game Primary Colour"],
+        "Red": settings["Game Secondary Colour"],
+    }
+    radius = int(settings["Width"] // (40 * settings["Adaptive Difficulty"] ** 0.15))
     height = max(font.size(str(char))[1] for char in "0123456789")
     score = 0
     circles = []
@@ -30,11 +39,13 @@ def Game1(pygame, settings, screen, font):
     frame = 0
     i = 1
     text_surface = None
-    start = pygame.time.get_ticks()
-    while start + 30000 > pygame.time.get_ticks():
+    start = current = pygame.time.get_ticks()
+    despawn_time = 9000 / (settings["Adaptive Difficulty"] ** 0.15)
+    spawn_gap = 800 / (settings["Adaptive Difficulty"] ** 0.7)
+    while start + 30000 > current:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                score = max(removeCircle(event.pos) + score, 0)
+                score = max(removeCircle(event.pos, current) + score, 0)
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return None, "Quit"
@@ -55,7 +66,7 @@ def Game1(pygame, settings, screen, font):
             ),
         )
         current_frame = pygame.time.get_ticks()
-        if current_frame - last_tick > 1200 // (settings["Adaptive Difficulty"] ** 0.7):
+        if current_frame - last_tick > spawn_gap:
             coords = random.randint(
                 settings["Width"] // 100 + radius * 2,
                 (settings["Width"] * 99) // 100 - radius * 2,
@@ -76,11 +87,11 @@ def Game1(pygame, settings, screen, font):
         while circle_number < len(circles):
             x, y, colour, tick = circles[circle_number]
             if expired:
-                if tick + (25000 // (settings["Adaptive Difficulty"] ** 1.3)) < current_frame:
+                if current_frame - tick > despawn_time:
                     circles.pop(0)
                     if colour == "Green":
                         score += 5
-                    else: 
+                    else:
                         score = max(0, score - 10)
                     continue
                 else:
@@ -103,5 +114,6 @@ def Game1(pygame, settings, screen, font):
             if text_surface and settings["Show FPS"]:
                 screen.blit(text_surface, (0, 0))
         pygame.display.flip()
+        current = pygame.time.get_ticks()
     print(score)
     return score, "Game 1 Over"
