@@ -91,7 +91,7 @@ def getGamesMenuButtons(pygame, settings):
             ),
             "Font Colour": settings["Font Primary Colour"],
             "Meta": "Expose the Impostor",
-            "Image": pygame.image.load("assets/images/blank.jpg"),
+            "Image": pygame.image.load("assets/images/game1.jpg"),
         },
         {
             "Name": "Memory Experiment",
@@ -103,7 +103,7 @@ def getGamesMenuButtons(pygame, settings):
             ),
             "Font Colour": settings["Font Primary Colour"],
             "Meta": "Memory Experiment",
-            "Image": pygame.image.load("assets/images/blank.jpg"),
+            "Image": pygame.image.load("assets/images/game2.jpg"),
         },
         {
             "Name": "Pattern Rush",
@@ -115,7 +115,7 @@ def getGamesMenuButtons(pygame, settings):
             ),
             "Font Colour": settings["Font Primary Colour"],
             "Meta": "Pattern Rush",
-            "Image": pygame.image.load("assets/images/blank.jpg"),
+            "Image": pygame.image.load("assets/images/game3.jpg"),
         },
         {
             "Name": "Back to Main Menu",
@@ -168,7 +168,7 @@ def getDefaultSettings():
         "Game Primary Colour": (0, 255, 127),
         "Game Secondary Colour": (255, 191, 191),
         "Game Tertiary Colour": (0, 0, 255),
-        "Adaptive Difficulty": (2, 2, 2)
+        "Adaptive Difficulty": (2, 2, 2),
         # "Scroll Speed": 100,
     }
     return default_settings

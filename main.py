@@ -58,7 +58,7 @@ class Settings:
                             except:
                                 self.settings[key] = tuple(
                                     map(float, value.strip("()").split(", "))
-                                ) # Convert to float tuple (for adaptive difficulty)
+                                )  # Convert to float tuple (for adaptive difficulty)
                         elif value.isdigit():  # Check for numbers
                             self.settings[key] = int(value)
                         elif (
@@ -84,9 +84,11 @@ class Settings:
                 f"Error: Incorrect format in settings.txt ({e}). Using default values."
             )
         global choice
+        self.settings["Font Size"] = self.settings["Width"] // self.settings["Font Size"]
         choice = self.settings.copy()
         del choice["Font Type"]
         self.saveSettings()
+        del choice["Adaptive Difficulty"]
         return self.settings
 
     def applySettings(self):
@@ -100,15 +102,16 @@ class Settings:
         flags = window_flags.get(
             self.settings["Window Type"], pygame.NOFRAME
         )  # Sets the window type based on the settings file or defaults to borderless
+        size = self.settings["Font Size"]
         if self.settings["Font Type"] == "System":
             font = pygame.font.SysFont(
                 self.settings["Font"],
-                self.settings["Font Size"],
+                size,
             )
         else:
             font = pygame.font.Font(
                 os.path.join(r"assets/fonts/fonts", self.settings["Font"]),
-                self.settings["Font Size"],
+                size,
             )
         screen = pygame.display.set_mode(
             (self.settings["Width"], self.settings["Height"]), flags
@@ -116,6 +119,8 @@ class Settings:
         pygame.display.flip()
 
     def saveSettings(self):
+        choice["Adaptive Difficulty"] = choice["Adaptive Difficulty"]
+        choice["Font Size"] = choice["Width"] // choice["Font Size"]
         with open("settings.txt", "w") as file:
             for key, value in choice.items():
                 file.write(f'"{key}": {value},\n')
@@ -125,7 +130,7 @@ class Settings:
             self.settings["Font Type"] = "Custom"
         else:
             self.settings["Font Type"] = "System"
-        print("Settings saved.")
+        self.settings["Font Size"] = self.settings["Width"] // self.settings["Font Size"]
 
 
 def loadUp():
@@ -190,9 +195,6 @@ def loadUpValues():
     except:
         meta = "Main Menu"
     options = getSettingsOptions(settings, font)
-    choice = settings.copy()
-    del choice["Font Type"]
-    del choice["Adaptive Difficulty"]
 
 
 def checkExit(event):
@@ -259,6 +261,11 @@ while True:  # Main loop
                         event.pos
                     ):  # Check if location of mouse is within the boundaries of the button when mouse is pressed
                         meta = button["Meta"]  # Set page if button is pressed
+                        if meta == "Settings":
+                            choice = settings.copy()
+                            # choice["Font Size"] = choice["Width"] // choice["Font Size"]
+                            del choice["Font Type"]
+                            del choice["Adaptive Difficulty"]
     elif meta == "Game Menu":
         gameMenuDisplay(settings, screen, font, pygame, games_buttons)
         for event in pygame.event.get():
@@ -269,6 +276,8 @@ while True:  # Main loop
                         event.pos
                     ):  # Check if location of mouse is within the boundaries of the button when mouse is pressed
                         meta = game["Meta"]  # Set page if button is pressed
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                meta = "Main Menu"
     elif meta == "Settings":
         settingsDisplay(
             settings,
@@ -306,6 +315,8 @@ while True:  # Main loop
             )
         for event in pygame.event.get():
             checkExit(event)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                meta = "Main Menu"
             if event.type == pygame.MOUSEWHEEL:
                 scroll = max(
                     0,
@@ -334,10 +345,13 @@ while True:  # Main loop
                         if button["Pygame Button"].collidepoint(event.pos):
                             if button["Name"] == "Confirm":
                                 if confirmation == "Default":
+                                    difficulty = settings["Adaptive Difficulty"]
                                     settings = settingsClass.resetSettings()
                                     choice = settings.copy()
+                                    choice["Adaptive Difficulty"] = difficulty
                                     del choice["Font Type"]
                                     settingsClass.saveSettings()
+                                    del choice["Adaptive Difficulty"]
                                     print("Settings reset.")
                                     loadUpValues()
                                 elif confirmation == "Discard":
@@ -346,10 +360,8 @@ while True:  # Main loop
                                     del choice["Adaptive Difficulty"]
                                     print("Settings discarded.")
                                 elif confirmation == "Main Menu":
-                                    choice = settings.copy()
-                                    del choice["Font Type"]
-                                    del choice["Adaptive Difficulty"]
                                     meta = "Main Menu"
+                                    scroll = 0
                                 else:
                                     print(
                                         f"Error: Unknown request. {confirmation}, {button["Name"]}"
@@ -371,6 +383,7 @@ while True:  # Main loop
                                     "Adaptive Difficulty"
                                 ]
                                 settingsClass.saveSettings()
+                                del choice["Adaptive Difficulty"]
                                 print("Settings saved.")
                                 loadUpValues()
                             elif button["Meta"] == "Save and Leave":
@@ -378,6 +391,7 @@ while True:  # Main loop
                                     "Adaptive Difficulty"
                                 ]
                                 settingsClass.saveSettings()
+                                del choice["Adaptive Difficulty"]
                                 meta = "Main Menu"
                                 print("Settings saved.")
                                 loadUpValues()
@@ -400,6 +414,7 @@ while True:  # Main loop
                                 confirmation = "Main Menu"
                             elif confirmation == None:
                                 meta = "Main Menu"
+                                scroll = 0
             if event.type == pygame.KEYDOWN and input_selected:
                 if event.key == pygame.K_BACKSPACE:
                     if len(input_text) > 1:
@@ -411,8 +426,9 @@ while True:  # Main loop
         pygame.quit()
         sys.exit()
     elif meta == "Expose the Impostor":
-        adjustment, meta = Game1(pygame, settings, screen, font)
-        if adjustment != None:
+        score, adjustment, meta = Game1(pygame, settings, screen, font)
+        if score != None:
+            score = score / (settings["Adaptive Difficulty"][0] ** 0.65)
             difficulty1, difficulty2, difficulty3 = settings["Adaptive Difficulty"]
             settings["Adaptive Difficulty"] = (
                 max(difficulty1 + adjustment, 0.2),
@@ -420,8 +436,11 @@ while True:  # Main loop
                 difficulty3,
             )
             choice = settings.copy()
+            choice["Font Size"] = choice["Width"] // choice["Font Size"]
             del choice["Font Type"]
             settingsClass.saveSettings()
+            del choice["Adaptive Difficulty"]
+            print("Adaptive Difficulty saved.")
     elif meta == "Game 1 Over":
         print(meta)
         meta = "Main Menu"
@@ -429,6 +448,9 @@ while True:  # Main loop
         Game2()
     elif meta == "Memory Experiment":
         Game3()
+    else:
+        print(f"Page '{meta}' is currently in development, sending back to main menu.")
+        meta = "Main Menu"
     if (pygame.time.get_ticks() - frame) > 100:
         fps = 1 / (pygame.time.get_ticks() - frame) * i * 1000
         if settings["Show FPS"] == True:

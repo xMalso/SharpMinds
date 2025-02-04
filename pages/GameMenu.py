@@ -1,7 +1,10 @@
 import os
 
+global pygame
+import pygame
 
-def displayPage(settings, screen, font, pygame, buttons):
+
+def displayPage(settings, screen, font, pygames, buttons):
     back = buttons[-1]
     if settings["Font Type"] == "System":
         title_font = pygame.font.SysFont(
@@ -23,9 +26,22 @@ def displayPage(settings, screen, font, pygame, buttons):
         ),
     )
     for button in buttons[:-1]:
+        button_height, button_width = (
+            button["Pygame Button"].height,
+            button["Pygame Button"].width,
+        )
+        height = 408
+        width = 370
+        scale = max(button_width / width, button_height / height)
+        cropped_surface = pygame.Rect(
+            0,
+            0,
+            button_width / scale,
+            button_height / scale,
+        )
+        cropped_image = button["Image"].subsurface(cropped_surface)
         scaled_image = pygame.transform.scale(
-            button["Image"],
-            (button["Pygame Button"].width, button["Pygame Button"].height),
+            cropped_image, (button_width, button_height)
         )
         screen.blit(scaled_image, button["Pygame Button"].topleft)
         button_text = font.render(

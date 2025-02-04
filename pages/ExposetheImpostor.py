@@ -25,7 +25,7 @@ def removeCircle(pos, current):
     return 0
 
 def split_text(font, max_width):
-    words = ["Press", "ESC", "to", "return", "to", "the", "main", "menu"]
+    words = ["Press", "ESC", "to", "return", "to", "games", "menu"]
     lines = []
     current_line = ''
 
@@ -84,10 +84,10 @@ def Game1(pygame, settings, screen, font):
                 score = max(removeCircle(event.pos, current_frame) + score, 0)
             if event.type == pygame.QUIT:
                 pygame.quit()
-                return None, "Quit"
+                return None, None, "Quit"
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    return None, "Main Menu"
+                    return None, None, "Games Menu"
         screen.fill(settings["Background Colour"])
         height = settings["Height"] // 200
         for line in return_text:
@@ -99,7 +99,7 @@ def Game1(pygame, settings, screen, font):
             screen.blit(
                 text,
                 (
-                    settings["Width"] - text.get_width() - settings["Width"] // 200,
+                    settings["Width"] * 7 // 8 - text.get_width() // 2 - settings["Width"] // 200,
                     height,
                 ),
             )
@@ -165,6 +165,6 @@ def Game1(pygame, settings, screen, font):
                 screen.blit(text_surface, (0, 0))
         pygame.display.flip()
         current_frame = pygame.time.get_ticks()
-    adjustment = ((score / (difficulty**0.65)) - 530) / 530
-    adjustment *= 10
-    return adjustment, "Game 1 Over"
+    adjustment = ((score / (difficulty**0.65)) - 560) / 560
+    # adjustment *= 10
+    return score, adjustment, "Game 1 Over"
