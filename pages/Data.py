@@ -168,7 +168,7 @@ def getDefaultSettings():
         "Game Primary Colour": (0, 255, 127),
         "Game Secondary Colour": (255, 191, 191),
         "Game Tertiary Colour": (0, 0, 255),
-        "Adaptive Difficulty": 2,
+        "Adaptive Difficulty": (2, 2, 2)
         # "Scroll Speed": 100,
     }
     return default_settings

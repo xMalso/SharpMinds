@@ -51,9 +51,14 @@ class Settings:
                         key in self.settings
                     ):  # Only update if it is a setting that has been defined
                         if "," in value:
-                            self.settings[key] = tuple(
-                                map(int, value.strip("()").split(", "))
-                            )  # Convert to tuple (mainly for RGB values)
+                            try:
+                                self.settings[key] = tuple(
+                                    map(int, value.strip("()").split(", "))
+                                )  # Convert to int tuple (for RGB values)
+                            except:
+                                self.settings[key] = tuple(
+                                    map(float, value.strip("()").split(", "))
+                                ) # Convert to float tuple (for adaptive difficulty)
                         elif value.isdigit():  # Check for numbers
                             self.settings[key] = int(value)
                         elif (
@@ -78,6 +83,10 @@ class Settings:
             print(
                 f"Error: Incorrect format in settings.txt ({e}). Using default values."
             )
+        global choice
+        choice = self.settings.copy()
+        del choice["Font Type"]
+        self.saveSettings()
         return self.settings
 
     def applySettings(self):
@@ -328,9 +337,7 @@ while True:  # Main loop
                                     settings = settingsClass.resetSettings()
                                     choice = settings.copy()
                                     del choice["Font Type"]
-                                    with open("settings.txt", "w") as file:
-                                        for key, value in choice.items():
-                                            file.write(f'"{key}": {value},\n')
+                                    settingsClass.saveSettings()
                                     print("Settings reset.")
                                     loadUpValues()
                                 elif confirmation == "Discard":
@@ -404,7 +411,17 @@ while True:  # Main loop
         pygame.quit()
         sys.exit()
     elif meta == "Expose the Impostor":
-        score, meta = Game1(pygame, settings, screen, font)
+        adjustment, meta = Game1(pygame, settings, screen, font)
+        if adjustment != None:
+            difficulty1, difficulty2, difficulty3 = settings["Adaptive Difficulty"]
+            settings["Adaptive Difficulty"] = (
+                max(difficulty1 + adjustment, 0.2),
+                difficulty2,
+                difficulty3,
+            )
+            choice = settings.copy()
+            del choice["Font Type"]
+            settingsClass.saveSettings()
     elif meta == "Game 1 Over":
         print(meta)
         meta = "Main Menu"
