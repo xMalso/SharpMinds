@@ -24,13 +24,14 @@ def removeCircle(pos, current):
                 return score
     return 0
 
+
 def split_text(font, max_width):
     words = ["Press", "ESC", "to", "return", "to", "games", "menu"]
     lines = []
-    current_line = ''
+    current_line = ""
 
     for word in words:
-        test_line = current_line + ' ' + word if current_line else word
+        test_line = current_line + " " + word if current_line else word
         text_width, _ = font.size(test_line)
 
         if text_width <= max_width:
@@ -43,6 +44,7 @@ def split_text(font, max_width):
         lines.append(current_line)
 
     return lines
+
 
 def Game1(pygame, settings, screen, font):
     global radius, circles, despawn_time
@@ -99,7 +101,9 @@ def Game1(pygame, settings, screen, font):
             screen.blit(
                 text,
                 (
-                    settings["Width"] * 7 // 8 - text.get_width() // 2 - settings["Width"] // 200,
+                    settings["Width"] * 7 // 8
+                    - text.get_width() // 2
+                    - settings["Width"] // 200,
                     height,
                 ),
             )

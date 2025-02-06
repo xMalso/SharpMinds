@@ -8,10 +8,8 @@ from .Data import (
     getSettingsOptions,
     getSettingsButtons,
     getConfirmationButtons,
-    getColourPickerButtons,
 )
-from .Dropdown import displayPage as dropdownDisplay, resetDropdownButtons, getDropdownButtons
-from .ColourPicker import displayPage as colourPickerDisplay, resetColourButtons, getColourButtons, selectInput
 from .ExposetheImpostor import Game1
 from .MemoryExperiment import Game2
 from .PatternRush import Game3
+from .GameOver import displayPage as gameOverDisplay

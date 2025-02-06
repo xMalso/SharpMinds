@@ -84,7 +84,9 @@ class Settings:
                 f"Error: Incorrect format in settings.txt ({e}). Using default values."
             )
         global choice
-        self.settings["Font Size"] = self.settings["Width"] // self.settings["Font Size"]
+        self.settings["Font Size"] = (
+            self.settings["Width"] // self.settings["Font Size"]
+        )
         choice = self.settings.copy()
         del choice["Font Type"]
         self.saveSettings()
@@ -130,7 +132,9 @@ class Settings:
             self.settings["Font Type"] = "Custom"
         else:
             self.settings["Font Type"] = "System"
-        self.settings["Font Size"] = self.settings["Width"] // self.settings["Font Size"]
+        self.settings["Font Size"] = (
+            self.settings["Width"] // self.settings["Font Size"]
+        )
 
 
 def loadUp():
@@ -159,37 +163,18 @@ def loadUp():
 
 
 def loadUpValues():
-    global content_height, scroll, main_menu_buttons, games_buttons, settings_buttons, meta, font_height, options, colour_picker_buttons, options_buttons
-    global choice, settings, text_surface, i, frame, confirmation, confirmation_buttons, current_colour_picker, current_dropdown, input_text, input_selected
+    global main_menu_buttons, games_buttons, settings_buttons, meta, options, options_buttons
+    global choice, settings, text_surface, i, frame, confirmation_buttons
     settings = settingsClass.getSettings()
     settingsClass.applySettings()
     frame = pygame.time.get_ticks()
     i = 1
-    confirmation, current_colour_picker, current_dropdown, text_surface = (
-        None,
-        None,
-        None,
-        None,
-    )
-    input_text = "#"
-    scroll = 0
-    input_selected = False
-    font_height = font.size("Save and Leave")[1]
-    content_height = (
-        len(settings)
-        + int(
-            (int((settings["Height"] * ((3 / 32) + 0.02))) + font_height * 4)
-            / (font_height + settings["Height"] // 200)
-        )
-    ) * (font_height + settings["Height"] // 200) + (
-        settings["Height"] % (font_height + settings["Height"] // 200)
-    )
+    text_surface = None
     options_buttons = getOptionsButtons()
     main_menu_buttons = getMainMenuButtons(pygame, settings, font)
     games_buttons = getGamesMenuButtons(pygame, settings)
     settings_buttons = getSettingsButtons(pygame, settings, font)
     confirmation_buttons = getConfirmationButtons(pygame, settings, font)
-    colour_picker_buttons = getColourPickerButtons(settings, font)
     try:
         meta = meta
     except:
@@ -197,260 +182,8 @@ def loadUpValues():
     options = getSettingsOptions(settings, font)
 
 
-def checkExit(event):
-    if event.type == pygame.QUIT:
-        pygame.quit()
-        sys.exit()
-
-
-def checkCollide(loc):
-    global current_dropdown, current_colour_picker, input_text, input_selected
-    colour_buttons = getColourButtons()
-    dropdown_buttons = getDropdownButtons()
-    if current_dropdown != None:
-        for button in dropdown_buttons.values():
-            if button["Pygame Button"].collidepoint(loc):
-                choice[current_dropdown["Name"]] = button["Name"]
-        current_dropdown = None
-        resetDropdownButtons()
-    else:
-        for button in colour_buttons.values():
-            if button["Pygame Button"].collidepoint(loc):
-                if button["Name"] == "Confirm":
-                    input_text = input_text[1:].ljust(6, "0")
-                    hex = tuple(int(input_text[i : i + 2], 16) for i in (0, 2, 4))
-                    choice[current_colour_picker["Name"]] = hex
-                    current_colour_picker = None
-                    input_text = "#"
-                    input_selected = False
-                    selectInput(False)
-                    resetColourButtons()
-                    return
-                elif button["Name"] == "Discard":
-                    current_colour_picker = None
-                    input_text = "#"
-                    input_selected = False
-                    selectInput(False)
-                    resetColourButtons()
-                    return
-                elif button["Name"] == "Input":
-                    input_selected = not input_selected
-                    selectInput(input_selected)
-                    return
-                else:
-                    print("Unknown colour picker button.")
-        current_colour_picker = None
-        input_text = "#"
-        input_selected = False
-        selectInput(False)
-        resetColourButtons()
-
-
-loadUp()
-
-
-while True:  # Main loop
-    screen.fill(settings["Background Colour"])
-    if meta == "Main Menu":
-        mainMenuDisplay(settings, screen, font, pygame, main_menu_buttons)
-        for event in pygame.event.get():
-            checkExit(event)
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                for button in main_menu_buttons:  # Check for each button
-                    if button["Pygame Button"].collidepoint(
-                        event.pos
-                    ):  # Check if location of mouse is within the boundaries of the button when mouse is pressed
-                        meta = button["Meta"]  # Set page if button is pressed
-                        if meta == "Settings":
-                            choice = settings.copy()
-                            # choice["Font Size"] = choice["Width"] // choice["Font Size"]
-                            del choice["Font Type"]
-                            del choice["Adaptive Difficulty"]
-    elif meta == "Game Menu":
-        gameMenuDisplay(settings, screen, font, pygame, games_buttons)
-        for event in pygame.event.get():
-            checkExit(event)
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                for game in games_buttons:  # Check for each button
-                    if game["Pygame Button"].collidepoint(
-                        event.pos
-                    ):  # Check if location of mouse is within the boundaries of the button when mouse is pressed
-                        meta = game["Meta"]  # Set page if button is pressed
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                meta = "Main Menu"
-    elif meta == "Settings":
-        settingsDisplay(
-            settings,
-            screen,
-            font,
-            pygame,
-            scroll,
-            content_height,
-            settings_buttons,
-            options,
-            choice,
-            confirmation,
-            confirmation_buttons,
-        )
-        if current_dropdown != None:
-            dropdownDisplay(
-                pygame,
-                settings,
-                font,
-                screen,
-                current_dropdown["Pygame Button"],
-                options[current_dropdown["Name"]],
-                scroll,
-            )
-        if current_colour_picker != None:
-            colourPickerDisplay(
-                pygame,
-                settings,
-                font,
-                screen,
-                current_colour_picker,
-                colour_picker_buttons,
-                scroll,
-                input_text,
-            )
-        for event in pygame.event.get():
-            checkExit(event)
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                meta = "Main Menu"
-            if event.type == pygame.MOUSEWHEEL:
-                scroll = max(
-                    0,
-                    min(
-                        content_height - settings["Height"],
-                        scroll - event.y * (font_height + settings["Height"] // 200),
-                    ),
-                )
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if not (current_dropdown == None and current_colour_picker == None):
-                    checkCollide(event.pos)
-                elif confirmation == None:
-                    for button in options_buttons.values():  # Check for each button
-                        if button["Pygame Button"].collidepoint(
-                            (event.pos[0], event.pos[1] + scroll)
-                        ):
-                            if button["Type"] == "Dropdown":
-                                current_dropdown = button
-                            elif button["Type"] == "Colour Picker":
-                                current_colour_picker = button
-                                input_text = "#{:02X}{:02X}{:02X}".format(
-                                    *choice[current_colour_picker["Name"]]
-                                )
-                if confirmation != None:
-                    for button in confirmation_buttons:
-                        if button["Pygame Button"].collidepoint(event.pos):
-                            if button["Name"] == "Confirm":
-                                if confirmation == "Default":
-                                    difficulty = settings["Adaptive Difficulty"]
-                                    settings = settingsClass.resetSettings()
-                                    choice = settings.copy()
-                                    choice["Adaptive Difficulty"] = difficulty
-                                    del choice["Font Type"]
-                                    settingsClass.saveSettings()
-                                    del choice["Adaptive Difficulty"]
-                                    print("Settings reset.")
-                                    loadUpValues()
-                                elif confirmation == "Discard":
-                                    choice = settings.copy()
-                                    del choice["Font Type"]
-                                    del choice["Adaptive Difficulty"]
-                                    print("Settings discarded.")
-                                elif confirmation == "Main Menu":
-                                    meta = "Main Menu"
-                                    scroll = 0
-                                else:
-                                    print(
-                                        f"Error: Unknown request. {confirmation}, {button["Name"]}"
-                                    )
-                                confirmation = None
-                            elif button["Name"] == "Decline":
-                                confirmation = None
-                            else:
-                                print(f"Error: Unknown confirmation button. {button}")
-                for button in settings_buttons:  # Check for each button
-                    if button["Pygame Button"].collidepoint(event.pos):
-                        if any(
-                            choice.get(k) != settings[k]
-                            for k in settings
-                            if k != "Font Type" and k != "Adaptive Difficulty"
-                        ):
-                            if button["Meta"] == "Save":
-                                choice["Adaptive Difficulty"] = settings[
-                                    "Adaptive Difficulty"
-                                ]
-                                settingsClass.saveSettings()
-                                del choice["Adaptive Difficulty"]
-                                print("Settings saved.")
-                                loadUpValues()
-                            elif button["Meta"] == "Save and Leave":
-                                choice["Adaptive Difficulty"] = settings[
-                                    "Adaptive Difficulty"
-                                ]
-                                settingsClass.saveSettings()
-                                del choice["Adaptive Difficulty"]
-                                meta = "Main Menu"
-                                print("Settings saved.")
-                                loadUpValues()
-                            elif button["Meta"] == "Discard":
-                                if confirmation == None:
-                                    confirmation = "Discard"
-                        if button["Meta"] == "Default":
-                            if confirmation == None:
-                                print("Settings returned to default.")
-                                confirmation = "Default"
-                        elif button["Meta"] == "Main Menu":
-                            if (
-                                any(
-                                    choice.get(k) != settings[k]
-                                    for k in settings
-                                    if k != "Font Type" and k != "Adaptive Difficulty"
-                                )
-                                and confirmation == None
-                            ):
-                                confirmation = "Main Menu"
-                            elif confirmation == None:
-                                meta = "Main Menu"
-                                scroll = 0
-            if event.type == pygame.KEYDOWN and input_selected:
-                if event.key == pygame.K_BACKSPACE:
-                    if len(input_text) > 1:
-                        input_text = input_text[:-1]
-                elif event.unicode.upper() in "0123456789ABCDEF":
-                    if len(input_text) != 7:
-                        input_text += event.unicode.upper()
-    elif meta == "Quit":
-        pygame.quit()
-        sys.exit()
-    elif meta == "Expose the Impostor":
-        score, adjustment, meta = Game1(pygame, settings, screen, font)
-        if score != None:
-            score = score / (settings["Adaptive Difficulty"][0] ** 0.65)
-            difficulty1, difficulty2, difficulty3 = settings["Adaptive Difficulty"]
-            settings["Adaptive Difficulty"] = (
-                max(difficulty1 + adjustment, 0.2),
-                difficulty2,
-                difficulty3,
-            )
-            choice = settings.copy()
-            choice["Font Size"] = choice["Width"] // choice["Font Size"]
-            del choice["Font Type"]
-            settingsClass.saveSettings()
-            del choice["Adaptive Difficulty"]
-            print("Adaptive Difficulty saved.")
-    elif meta == "Game 1 Over":
-        print(meta)
-        meta = "Main Menu"
-    elif meta == "Pattern Rush":
-        Game2()
-    elif meta == "Memory Experiment":
-        Game3()
-    else:
-        print(f"Page '{meta}' is currently in development, sending back to main menu.")
-        meta = "Main Menu"
+def getFps():
+    global frame, i, screen, text_surface, settings, font
     if (pygame.time.get_ticks() - frame) > 100:
         fps = 1 / (pygame.time.get_ticks() - frame) * i * 1000
         if settings["Show FPS"] == True:
@@ -466,6 +199,93 @@ while True:  # Main loop
         i += 1
         if text_surface and settings["Show FPS"]:
             screen.blit(text_surface, (0, 0))
+
+
+def checkExit(event):
+    if event.type == pygame.QUIT:
+        pygame.quit()
+        sys.exit()
+
+
+loadUp()
+
+
+while True:  # Main loop
+    if meta == "Main Menu":
+        meta, choice = mainMenuDisplay(
+            pygame, sys, os, settings, screen, font, main_menu_buttons, getFps
+        )
+    elif meta == "Game Menu":
+        meta = gameMenuDisplay(
+            pygame, sys, os, settings, screen, font, games_buttons, getFps
+        )
+    elif meta == "Settings":
+        choice, val = settingsDisplay(
+            pygame,
+            sys,
+            settings,
+            screen,
+            font,
+            settings_buttons,
+            options,
+            choice,
+            confirmation_buttons,
+            getFps,
+        )
+        if val == "Main Menu":
+            meta = "Main Menu"
+            scroll = 0
+        elif val == "Save and Leave":
+            choice["Adaptive Difficulty"] = settings["Adaptive Difficulty"]
+            settingsClass.saveSettings()
+            del choice["Adaptive Difficulty"]
+            meta = "Main Menu"
+            print("Settings saved.")
+            loadUpValues()
+        elif val == "Save":
+            choice["Adaptive Difficulty"] = settings["Adaptive Difficulty"]
+            settingsClass.saveSettings()
+            del choice["Adaptive Difficulty"]
+            print("Settings saved.")
+            loadUpValues()
+        elif val == "Default":
+            difficulty = settings["Adaptive Difficulty"]
+            settings = settingsClass.resetSettings()
+            choice = settings.copy()
+            choice["Adaptive Difficulty"] = difficulty
+            del choice["Font Type"]
+            settingsClass.saveSettings()
+            del choice["Adaptive Difficulty"]
+            print("Settings reset.")
+            loadUpValues()
+    elif meta == "Quit":
+        pygame.quit()
+        sys.exit()
+    elif meta == "Expose the Impostor":
+        score, adjustment, meta = Game1(pygame, settings, screen, font)
+        if score != None:
+            score = score / (settings["Adaptive Difficulty"][0] ** 0.65)
+            difficulty1, difficulty2, difficulty3 = settings["Adaptive Difficulty"]
+            settings["Adaptive Difficulty"] = (
+                max(difficulty1 + adjustment, 0.2),
+                difficulty2,
+                difficulty3,
+            )
+            choice = settings.copy()
+            del choice["Font Type"]
+            settingsClass.saveSettings()
+            del choice["Adaptive Difficulty"]
+            print("Adaptive Difficulty saved.")
+    elif meta == "Pattern Rush":
+        Game2()
+    elif meta == "Memory Experiment":
+        Game3()
+    elif meta == "Game 1 Over" or meta == "Game 2 Over" or meta == "Game 3 Over":
+        gameOverDisplay(pygame, settings, font, meta, score)
+        meta = "Main Menu"
+    else:
+        print(f"Page '{meta}' is currently in development, sending back to main menu.")
+        meta = "Main Menu"
     # if settings["FPS Limit"] > 0:
     # limiter = (1/settings["FPS Limit"]) - (pygame.time.get_ticks() - frame) / i
     # print(f"FPS: {fps}, Limiter: {limiter}, pygame.time.get_ticks(): {pygame.time.get_ticks()}, frame: {frame}, i: {i}")
