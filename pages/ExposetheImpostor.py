@@ -9,7 +9,7 @@ def overlap(new_x, new_y):
 
 
 def removeCircle(pos, current):
-    global circles
+    global circles, score_divider
     for i, (x, y, colour, tick) in enumerate(circles):
         if math.dist(pos, (x, y)) < radius:
             circles.pop(i)
@@ -19,7 +19,7 @@ def removeCircle(pos, current):
                 score = (
                     30
                     * min((0.012 * (despawn_time * 5 / (current - tick))) - 0.06, 1)
-                    ** 0.2
+                    ** 0.2 / score_divider
                 )
                 return score
     return 0
@@ -47,7 +47,7 @@ def split_text(font, max_width):
 
 
 def Game1(pygame, settings, screen, font):
-    global radius, circles, despawn_time
+    global radius, circles, despawn_time, score_divider
     difficulty = settings["Adaptive Difficulty"][0]
     return_text = split_text(font, settings["Width"] // 4)
     circle_colour = {
@@ -55,8 +55,10 @@ def Game1(pygame, settings, screen, font):
         "Red": settings["Game Secondary Colour"],
     }
     radius = int(settings["Width"] // (40 * difficulty**0.15))
+    score_divider = difficulty**0.65
     height = max(font.size(str(char))[1] for char in "0123456789")
     score = 0
+    red_count = 0
     circles = []
     last_tick = 0
     frame = 0
@@ -78,6 +80,7 @@ def Game1(pygame, settings, screen, font):
             colour = "Green"
         else:
             colour = "Red"
+            red_count += 1
         circles.append(coords + (colour, current_frame))
         last_tick = current_frame
     while start + 30000 > current_frame:
@@ -169,6 +172,6 @@ def Game1(pygame, settings, screen, font):
                 screen.blit(text_surface, (0, 0))
         pygame.display.flip()
         current_frame = pygame.time.get_ticks()
-    adjustment = ((score / (difficulty**0.65)) - 560) / 560
+    adjustment = score - 0.89*red_count
     # adjustment *= 10
     return score, adjustment, "Game 1 Over"
