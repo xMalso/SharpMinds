@@ -1,16 +1,109 @@
-def displayPage(pygame, sys, os, settings, screen, font, buttons, getFps):
+def makeButtons(pygame, settings, font):
+    text = font.size("Leaderboards and Personal Bests")
+    # Screen is split into 5 sections vertically for 5 buttons each section takes 12% of the screen with 1% as a gap between each button and 32% to write the title of the Screen
+    # The width is set to half the screen and is centered in the middle of the screen
+    main_menu_buttons = [
+        {
+            "Name":
+            "Games Menu",
+            "Pygame Button":
+            pygame.Rect(
+                (settings["Width"] - (text[0] + settings["Width"] // 19.2)) //
+                2,
+                settings["Height"] // 3,
+                text[0] + settings["Width"] // 19.2,
+                text[1] + settings["Height"] // 27,
+            ),
+            "Colour":
+            settings["Button Primary Colour"],
+            "Font Colour":
+            settings["Font Primary Colour"],
+            "Meta":
+            "Game Menu",
+        },
+        {
+            "Name":
+            "Leaderboards and Personal Bests",
+            "Pygame Button":
+            pygame.Rect(
+                (settings["Width"] - (text[0] + settings["Width"] // 19.2)) //
+                2,
+                settings["Height"] // 3 + (text[1] + settings["Height"] // 18),
+                text[0] + settings["Width"] // 19.2,
+                text[1] + settings["Height"] // 27,
+            ),
+            "Colour":
+            settings["Button Secondary Colour"],
+            "Font Colour":
+            settings["Font Secondary Colour"],
+            "Meta":
+            "Leaderboards",
+        },
+        {
+            "Name":
+            "Friends",
+            "Pygame Button":
+            pygame.Rect(
+                (settings["Width"] -
+                 (text[0] + settings["Width"] // 19.2)) // 2,
+                settings["Height"] // 3 +
+                (text[1] + settings["Height"] // 18) * 2,
+                text[0] + settings["Width"] // 19.2,
+                text[1] + settings["Height"] // 27,
+            ),
+            "Colour":
+            settings["Button Tertiary Colour"],
+            "Font Colour":
+            settings["Font Tertiary Colour"],
+            "Meta":
+            "Friends",
+        },
+        {
+            "Name":
+            "Settings",
+            "Pygame Button":
+            pygame.Rect(
+                (settings["Width"] -
+                 (text[0] + settings["Width"] // 19.2)) // 2,
+                settings["Height"] // 3 +
+                (text[1] + settings["Height"] // 18) * 3,
+                text[0] + settings["Width"] // 19.2,
+                text[1] + settings["Height"] // 27,
+            ),
+            "Colour":
+            settings["Button Quaternary Colour"],
+            "Font Colour":
+            settings["Font Quaternary Colour"],
+            "Meta":
+            "Settings",
+        },
+        {
+            "Name":
+            "Quit",
+            "Pygame Button":
+            pygame.Rect(
+                (settings["Width"] - (text[0] + settings["Width"] // 19.2)) //
+                2,
+                settings["Height"] // 3 +
+                (text[1] + settings["Height"] // 18) * 4,
+                text[0] + settings["Width"] // 19.2,
+                text[1] + settings["Height"] // 27,
+            ),
+            "Colour":
+            settings["Button Quinary Colour"],
+            "Font Colour":
+            settings["Font Quinary Colour"],
+            "Meta":
+            "Quit",
+        },
+    ]
+    return main_menu_buttons
+
+
+def displayPage(pygame, sys, settings, screen, font, title_font,
+                getFps):
     choice = None
-    if settings["Font Type"] == "System":
-        title_font = pygame.font.SysFont(
-            settings["Font"],
-            settings["Font Size"] * 3,
-            bold=True,
-        )
-    else:
-        title_font = pygame.font.Font(
-            os.path.join(r"assets/fonts/fonts", settings["Bold Font"]),
-            settings["Font Size"] * 3,
-        )
+    buttons = makeButtons(pygame, settings, font)
     title_text = title_font.render("Main Menu", settings["Antialiasing Text"],
                                    settings["Font Primary Colour"])
     while True:

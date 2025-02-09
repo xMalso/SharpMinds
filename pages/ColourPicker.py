@@ -17,23 +17,23 @@ def resetColourButtons():
     colour_buttons = {}
 
 
-def update_button(new_button):
+def updateButton(new_button):
     button_name = new_button["Name"]
     colour_buttons[button_name] = new_button
 
 
-def displayPage(pygame, settings, font, screen, button, options, scroll, input_text):
+def displayPage(pygame, settings, font, screen, button, colour_picker_buttons, scroll, input_text):
     y = button["Pygame Button"].y
     x = button["Pygame Button"].x
     width = button["Pygame Button"].width
-    for option in options[2:]:
+    for option in colour_picker_buttons[2:]:
         temp = pygame.Rect(
             x + width + option["Buffer Size"][0],
             y - option["Buffer Size"][1] - scroll,
             option["Size"][0],
             option["Size"][1],
         )
-        update_button({"Name": option["Name"], "Pygame Button": temp})
+        updateButton({"Name": option["Name"], "Pygame Button": temp})
         pygame.draw.rect(screen, option["Colour"], temp, border_radius=25)
         text_surface = font.render(
             f"{option["Text"]}",
@@ -49,16 +49,16 @@ def displayPage(pygame, settings, font, screen, button, options, scroll, input_t
         )
     global selected
     if selected:
-        button = options[1]
+        button = colour_picker_buttons[1]
     else:
-        button = options[0]
+        button = colour_picker_buttons[0]
     temp = pygame.Rect(
         x + width + button["Buffer Size"][0],
         y - button["Buffer Size"][1] - scroll,
         button["Size"][0],
         button["Size"][1],
     )
-    update_button({"Name": button["Name"], "Pygame Button": temp})
+    updateButton({"Name": button["Name"], "Pygame Button": temp})
     pygame.draw.rect(screen, button["Colour"], temp, border_radius=25)
     text_surface = font.render(
         input_text, settings["Antialiasing Text"], button["Font Colour"]

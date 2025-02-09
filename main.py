@@ -95,7 +95,7 @@ class Settings:
 
     def applySettings(self):
         global screen
-        global font
+        global font, title_font, small_font
         window_flags = {
             "Fullscreen": pygame.FULLSCREEN,
             "Borderless": pygame.NOFRAME,
@@ -109,10 +109,28 @@ class Settings:
                 self.settings["Font"],
                 size,
             )
+            title_font = pygame.font.SysFont(
+                self.settings["Font"],
+                size * 3,
+                bold=True,
+            )
+            small_font = pygame.font.SysFont(
+                self.settings["Font"],
+                size // 2,
+            )
         else:
             font = pygame.font.Font(
                 os.path.join(r"assets/fonts/fonts", self.settings["Font"]),
                 size,
+            )
+            title_font = pygame.font.Font(
+                os.path.join(r"assets/fonts/fonts",
+                             self.settings["Bold Font"]),
+                size * 3,
+            )
+            small_font = pygame.font.Font(
+                os.path.join(r"assets/fonts/fonts", self.settings["Font"]),
+                size // 2,
             )
         screen = pygame.display.set_mode(
             (self.settings["Width"], self.settings["Height"]), flags)
@@ -159,29 +177,23 @@ def loadUp():
 
 
 def loadUpValues():
-    global \
-        main_menu_buttons, \
-        games_buttons, \
-        settings_buttons, \
-        meta, \
-        options, \
-        options_buttons
-    global choice, settings, text_surface, i, frame, confirmation_buttons
+    global meta, choice, settings, text_surface, i, frame, confirmation_buttons
     settings = settingsClass.getSettings()
     settingsClass.applySettings()
     frame = pygame.time.get_ticks()
     i = 1
     text_surface = None
-    options_buttons = getOptionsButtons()
-    main_menu_buttons = getMainMenuButtons(pygame, settings, font)
-    games_buttons = getGamesMenuButtons(pygame, settings)
-    settings_buttons = getSettingsButtons(pygame, settings, font)
-    confirmation_buttons = getConfirmationButtons(pygame, settings, font)
+    makeMainMenuButtons(pygame, settings, font)
+    makeGameMenuButtons(pygame, settings, small_font)
+    makeGameOverButtons()
+    makeConfirmationButtons(pygame, settings, font)
+    makeOptions(settings, font)
+    makeColourPickerButtons(settings, font)
+    makeSettingsButtons(pygame, settings, small_font)
     try:
         meta = meta
     except:
         meta = "Main Menu"
-    options = getSettingsOptions(settings, font)
 
 
 def getFps():
@@ -202,68 +214,68 @@ def getFps():
         if text_surface and settings["Show FPS"]:
             screen.blit(text_surface, (0, 0))
 
-
-def checkExit(event):
-    if event.type == pygame.QUIT:
-        pygame.quit()
-        sys.exit()
+def executeSettingsResults(val):
+    if val == "Main Menu":
+        return "Main Menu"
+    elif val == "Save and Leave":
+        choice["Adaptive Difficulty"] = settings["Adaptive Difficulty"]
+        settingsClass.saveSettings()
+        del choice["Adaptive Difficulty"]
+        print("Settings saved.")
+        loadUpValues()
+        return "Main Menu"
+    elif val == "Save":
+        choice["Adaptive Difficulty"] = settings["Adaptive Difficulty"]
+        settingsClass.saveSettings()
+        del choice["Adaptive Difficulty"]
+        print("Settings saved.")
+        loadUpValues()
+    elif val == "Default":
+        difficulty = settings["Adaptive Difficulty"]
+        settings = settingsClass.resetSettings()
+        choice = settings.copy()
+        choice["Adaptive Difficulty"] = difficulty
+        del choice["Font Type"]
+        settingsClass.saveSettings()
+        del choice["Adaptive Difficulty"]
+        print("Settings reset.")
+        loadUpValues()
+    return "Settings"
 
 
 loadUp()
+meta = "Game Over"
+game = "Expose the Impostor"
+score = 530.7385
 
 while True:  # Main loop
     if meta == "Main Menu":
-        meta, choice = mainMenuDisplay(pygame, sys, os, settings, screen, font,
-                                       main_menu_buttons, getFps)
+        meta, choice = mainMenuDisplay(pygame, sys, settings, screen, font,
+                                       title_font, getFps)
     elif meta == "Game Menu":
-        meta = gameMenuDisplay(pygame, sys, os, settings, screen, font,
-                               games_buttons, getFps)
+        meta = gameMenuDisplay(pygame, sys, settings, screen, font, title_font,
+                               small_font, getFps)
     elif meta == "Settings":
+        scroll = 0
         choice, val = settingsDisplay(
             pygame,
             sys,
             settings,
             screen,
             font,
-            settings_buttons,
-            options,
+            title_font,
+            small_font,
             choice,
-            confirmation_buttons,
             getFps,
         )
-        if val == "Main Menu":
-            meta = "Main Menu"
-            scroll = 0
-        elif val == "Save and Leave":
-            choice["Adaptive Difficulty"] = settings["Adaptive Difficulty"]
-            settingsClass.saveSettings()
-            del choice["Adaptive Difficulty"]
-            meta = "Main Menu"
-            print("Settings saved.")
-            loadUpValues()
-        elif val == "Save":
-            choice["Adaptive Difficulty"] = settings["Adaptive Difficulty"]
-            settingsClass.saveSettings()
-            del choice["Adaptive Difficulty"]
-            print("Settings saved.")
-            loadUpValues()
-        elif val == "Default":
-            difficulty = settings["Adaptive Difficulty"]
-            settings = settingsClass.resetSettings()
-            choice = settings.copy()
-            choice["Adaptive Difficulty"] = difficulty
-            del choice["Font Type"]
-            settingsClass.saveSettings()
-            del choice["Adaptive Difficulty"]
-            print("Settings reset.")
-            loadUpValues()
+        meta = executeSettingsResults(val)
     elif meta == "Quit":
         pygame.quit()
         sys.exit()
     elif meta == "Expose the Impostor":
-        score, adjustment, meta = Game1(pygame, settings, screen, font)
+        score, adjustment, meta = Game1(pygame, sys, settings, screen, font,
+                                        getFps)
         if score != None:
-            score = score / (settings["Adaptive Difficulty"][0]**0.65)
             difficulty1, difficulty2, difficulty3 = settings[
                 "Adaptive Difficulty"]
             settings["Adaptive Difficulty"] = (
@@ -271,17 +283,23 @@ while True:  # Main loop
                 difficulty2,
                 difficulty3,
             )
+            del adjustment
+            del difficulty1, difficulty2, difficulty3
             choice = settings.copy()
             del choice["Font Type"]
             settingsClass.saveSettings()
             del choice["Adaptive Difficulty"]
             print("Adaptive Difficulty saved.")
+            game = "Expose the Impostor"
     elif meta == "Pattern Rush":
         Game2()
+        meta = "Main Menu"
     elif meta == "Memory Experiment":
         Game3()
-    elif meta == "Game 1 Over" or meta == "Game 2 Over" or meta == "Game 3 Over":
-        gameOverDisplay(pygame, settings, font, meta, score)
+        meta = "Main Menu"
+    elif meta == "Game Over":
+        gameOverDisplay(pygame, sys, screen, settings, font, title_font,
+                        small_font, game, score, getFps)
         meta = "Main Menu"
     else:
         print(

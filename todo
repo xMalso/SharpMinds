@@ -2,7 +2,6 @@ tutorial page
 game over page (global instead of just for 1 game)
 audio and visual cues
 
-adjust difficulty based on number of red circles spawned
-
 FPS limiter
 Functions and Classes files for main
+folders for each downloaded font instead of filtering each file

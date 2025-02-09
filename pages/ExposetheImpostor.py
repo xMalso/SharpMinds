@@ -44,7 +44,7 @@ def split_text(font, max_width):
     return lines
 
 
-def Game1(pygame, settings, screen, font):
+def Game1(pygame, sys, settings, screen, font, getFps):
     global radius, circles, despawn_time, max_score
     difficulty = settings["Adaptive Difficulty"][0]
     return_text = split_text(font, settings["Width"] // 4)
@@ -88,6 +88,7 @@ def Game1(pygame, settings, screen, font):
                 score = max(removeCircle(event.pos, current_frame) + score, 0)
             if event.type == pygame.QUIT:
                 pygame.quit()
+                sys.exit()
                 return None, None, "Quit"
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -109,16 +110,35 @@ def Game1(pygame, settings, screen, font):
                 ),
             )
             height += text.get_height()
-        text = font.render(
+        score_text = font.render(
             f"Score: {int(score)}",
             settings["Antialiasing Text"],
             settings["Background Font Colour"],
         )
+        remaining_time = 30 - (current_frame - start) / 1000
+        if remaining_time >= 10:
+            remaining_time = int(remaining_time)
+        elif remaining_time >= 0:
+            remaining_time = math.trunc(remaining_time * 10) / 10
+        # else:
+        #     remaining_time = math.trunc(remaining_time * 100) / 100
+        time_text = font.render(
+            f"Time: {remaining_time}s",
+            settings["Antialiasing Text"],
+            settings["Background Font Colour"],
+        )
         screen.blit(
-            text,
+            score_text,
             (
-                (settings["Width"] - text.get_width()) // 2,
+                (settings["Width"] - score_text.get_width()) // 2,
                 settings["Height"] // 200,
+            ),
+        )
+        screen.blit(
+            time_text,
+            (
+                (settings["Width"] - time_text.get_width()) // 2,
+                settings["Height"] // 200 + score_text.get_height(),
             ),
         )
         if current_frame - last_tick > spawn_gap:
@@ -155,25 +175,11 @@ def Game1(pygame, settings, screen, font):
                     expired = False
             circle_number += 1
             pygame.draw.circle(screen, circle_colour[colour], (x, y), radius)
-        if (pygame.time.get_ticks() - frame) > 100:
-            fps = 1 / (pygame.time.get_ticks() - frame) * i * 1000
-            if settings["Show FPS"] == True:
-                text_surface = font.render(
-                    f"FPS: {fps:.2f}",
-                    settings["Antialiasing Text"],
-                    settings["Background Font Colour"],
-                )
-                screen.blit(text_surface, (0, 0))
-            frame = pygame.time.get_ticks()
-            i = 1
-        else:
-            i += 1
-            if text_surface and settings["Show FPS"]:
-                screen.blit(text_surface, (0, 0))
+        getFps()
         pygame.display.flip()
         current_frame = pygame.time.get_ticks()
     green_count = max(1, green_count)
     red_count = max(1, red_count)
     adjustment = score - (0.8 * red_count + green_count / 6) * max_score
     adjustment /= 100
-    return score, adjustment, "Game 1 Over"
+    return score, adjustment, "Game Over"

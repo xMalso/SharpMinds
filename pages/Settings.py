@@ -9,15 +9,189 @@ from .ColourPicker import (
     getColourButtons,
     selectInput,
 )
-from .Data import getColourPickerButtons
-
-global os, current_colour_picker, current_dropdown
+global os, current_colour_picker, current_dropdown, options_buttons
+import os
 current_colour_picker = None
 current_dropdown = None
-import os
-
-global options_buttons
 options_buttons = {}
+
+
+def makeColourPickerButtons(settings, font):
+    global colour_picker_buttons
+    widest_char_width = max(
+        font.size(str(char))[0] for char in "0123456789ABCDEF")
+    text_size = (
+        widest_char_width * 6 + font.size("#")[0] + settings["Width"] // 32,
+        font.size("#")[1] + settings["Height"] // 100 - 1,
+    )
+    colour_picker_buttons = [
+        {
+            "Name":
+            "Input",
+            "Size":
+            text_size,
+            "Buffer Size": (
+                settings["Width"] // 100,
+                # (settings["Width"] * 21) // 100,
+                (settings["Height"] * 3) // 128 + text_size[1] * 2,
+            ),
+            "Colour":
+            settings["Input Background Colour"],
+            "Font Colour":
+            settings["Input Font Colour"],
+        },
+        {
+            "Name":
+            "Selected Input",
+            "Size":
+            text_size,
+            "Buffer Size": (
+                settings["Width"] // 100,
+                # (settings["Width"] * 21) // 100,
+                (settings["Height"] * 3) // 128 + text_size[1] * 2,
+            ),
+            "Colour":
+            settings["Selected Input Colour"],
+            "Font Colour":
+            settings["Input Font Colour"],
+        },
+        {
+            "Name":
+            "Confirm",
+            "Size":
+            text_size,
+            "Buffer Size": (
+                settings["Width"] // 100,
+                # (settings["Width"] * 21) // 100,
+                settings["Height"] // 64 + text_size[1],
+            ),
+            "Text":
+            "Confirm",
+            "Colour":
+            settings["Button Primary Colour"],
+            "Font Colour":
+            settings["Font Primary Colour"],
+        },
+        {
+            "Name": "Discard",
+            "Size": text_size,
+            "Buffer Size":
+            (settings["Width"] // 100, settings["Height"] // 128),
+            # "Buffer Size": ((settings["Width"] * 21) // 100, settings["Height"] // 128),
+            "Text": "Discard",
+            "Colour": settings["Button Quinary Colour"],
+            "Font Colour": settings["Font Quinary Colour"],
+        },
+    ]
+
+
+def makeOptions(settings, font):
+    global options
+    options = {
+        "Width": {
+            "Options": [3840, 2560, 1920, 1440, 1366, 1280, 1024]
+        },
+        "Height": {
+            "Options": [2160, 1440, 1080, 768, 720]
+        },
+        "Window Type": {
+            "Options": ["Borderless", "Fullscreen", "Windowed"]
+        },
+        "Show FPS": {
+            "Options": [True, False]
+        },
+        "FPS Limit": {
+            "Options": [0, 30, 60, 120, 144, 165, 240]
+        },
+        "Font": {
+            "Options": [
+                "arial",
+                "verdana",
+                "timesnewroman",
+                "couriernew",
+                "comicsansms",
+                "georgia",
+                "trebuchetms",
+                "lucidaconsole",
+                "tahoma",
+                "impact",
+            ]
+        },
+        "Bold Font": {
+            "Options": []
+        },
+        "Italic Font": {
+            "Options": []
+        },
+        "BoldItalic Font": {
+            "Options": []
+        },
+        "Font Size": {
+            "Options": [48, 56, 64, 72, 80, 128, 160]
+        },
+        "Antialiasing Text": {
+            "Options": [True, False]
+        },
+        # "Scroll Speed": {"Options": [50, 75, 100, 125, 150]},
+    }
+    dir = r"assets/fonts/fonts"
+    if os.path.exists(dir):
+        for file in os.listdir(dir):
+            if file.endswith((".ttf", ".otf")):
+                if "Bold" in file and "Italic" in file:
+                    options["BoldItalic Font"]["Options"].append(file)
+                elif "Italic" in file:
+                    options["Italic Font"]["Options"].append(file)
+                elif "Bold" in file:
+                    options["Bold Font"]["Options"].append(file)
+                else:
+                    options["Font"]["Options"].append(file)
+    else:
+        print(f"Directory, {dir}, does not exist")
+
+    for index, choice in enumerate(options["Font Size"]["Options"]):
+        options["Font Size"]["Options"][index] = settings["Width"] // choice
+    for option in options.values():
+        largest = max(
+            font.size(str(choice))[0] for choice in option["Options"])
+        option["Largest"] = largest
+
+
+def makeConfirmationButtons(pygame, settings, font):
+    global confirmation_buttons
+    text_size = font.size("Confirm")
+    confirmation_buttons = [
+        {
+            "Pygame Button":
+            pygame.Rect(
+                settings["Width"] * 28 // 60 - text_size[0],
+                settings["Height"] // 2,
+                text_size[0] + settings["Width"] // 96,
+                text_size[1] // 2 + settings["Height"] // 54,
+            ),
+            "Name":
+            "Confirm",
+            "Colour":
+            settings["Button Quinary Colour"],
+            "Font Colour":
+            settings["Font Quinary Colour"],
+        },
+        {
+            "Pygame Button":
+            pygame.Rect(
+                settings["Width"] * 32 // 60,
+                settings["Height"] // 2,
+                text_size[0] + settings["Width"] // 96,
+                text_size[1] // 2 + settings["Height"] // 54,
+            ),
+            "Name":
+            "Decline",
+            "Colour":
+            settings["Button Primary Colour"],
+            "Font Colour":
+            settings["Font Primary Colour"],
+        },
+    ]
 
 
 def checkCollide(loc):
@@ -63,10 +237,6 @@ def checkCollide(loc):
         resetColourButtons()
 
 
-def getOptionsButtons():
-    return options_buttons
-
-
 confirmation_text = {
     "Main Menu": "discard and go to main menu",
     "Discard": "discard changes",
@@ -74,7 +244,7 @@ confirmation_text = {
 }
 
 
-def update_button(new_button):
+def updateButton(new_button):
     button_name = new_button["Name"]
     options_buttons[button_name] = new_button
 
@@ -108,18 +278,118 @@ def pasteButton(button, pygame, settings, screen):
     )
 
 
+def makeButtons(pygame, settings, small_font):
+    global buttons, last
+    text_width, text_height = small_font.size("Save and Leave")
+    buttons = [
+        # Save and Leave
+        {
+            "Name":
+            "Save and Leave",
+            "Pygame Button":
+            pygame.Rect(
+                (settings["Width"] * 100) // 128 - (text_width * 5),
+                (settings["Height"] * 30) // 32 - text_height,
+                text_width + settings["Width"] // 32,
+                text_height + settings["Height"] // 32,
+            ),
+            "Colour":
+            settings["Button Primary Colour"],
+            "Font Colour":
+            settings["Font Primary Colour"],
+            "Meta":
+            "Save and Leave",
+        },
+        # Save
+        {
+            "Name":
+            "Save",
+            "Pygame Button":
+            pygame.Rect(
+                (settings["Width"] * 105) // 128 - (text_width * 4),
+                (settings["Height"] * 30) // 32 - text_height,
+                text_width + settings["Width"] // 32,
+                text_height + settings["Height"] // 32,
+            ),
+            "Colour":
+            settings["Button Secondary Colour"],
+            "Font Colour":
+            settings["Font Secondary Colour"],
+            "Meta":
+            "Save",
+        },
+        # Discard
+        {
+            "Name":
+            "Discard",
+            "Pygame Button":
+            pygame.Rect(
+                (settings["Width"] * 110) // 128 - (text_width * 3),
+                (settings["Height"] * 30) // 32 - text_height,
+                text_width + settings["Width"] // 32,
+                text_height + settings["Height"] // 32,
+            ),
+            "Colour":
+            settings["Button Quinary Colour"],
+            "Font Colour":
+            settings["Font Quinary Colour"],
+            "Meta":
+            "Discard",
+        },
+        ]
+    last = [
+        # Default
+        {
+            "Name":
+            "Default",
+            "Pygame Button":
+            pygame.Rect(
+                (settings["Width"] * 115) // 128 - (text_width * 2),
+                (settings["Height"] * 30) // 32 - text_height,
+                text_width + settings["Width"] // 32,
+                text_height + settings["Height"] // 32,
+            ),
+            "Colour":
+            settings["Button Quaternary Colour"],
+            "Font Colour":
+            settings["Font Quaternary Colour"],
+            "Meta":
+            "Default",
+        },
+        # Main Menu
+        {
+            "Name":
+            "Main Menu",
+            "Pygame Button":
+            pygame.Rect(
+                (settings["Width"] * 120) // 128 - text_width,
+                (settings["Height"] * 30) // 32 - text_height,
+                text_width + settings["Width"] // 32,
+                text_height + settings["Height"] // 32,
+            ),
+            "Colour":
+            settings["Button Tertiary Colour"],
+            "Font Colour":
+            settings["Font Tertiary Colour"],
+            "Meta":
+            "Main Menu",
+        },
+    ]
+
+
 def displayPage(
     pygame,
     sys,
     settings,
     screen,
     font,
-    buttons,
-    options,
+    title_font,
+    small_fonts,
     choices,
-    confirmation_buttons,
     getFps,
 ):
+    global current_dropdown, current_colour_picker, input_selected, choice, input_text, small_font
+    small_font = small_fonts
     font_height = font.size("Save and Leave")[1]
     content_height = (
         len(settings)
@@ -131,33 +401,9 @@ def displayPage(
         settings["Height"] % (font_height + settings["Height"] // 200)
     )
     confirmation = None
-    buttons, last2 = buttons[:-2], buttons[-2:]
     scroll = 0
-    colour_picker_buttons = getColourPickerButtons(settings, font)
-    global current_dropdown, current_colour_picker, input_selected, choice, small_font, input_text
-    if settings["Font Type"] == "System":
-        small_font = pygame.font.SysFont(
-            settings["Font"],
-            (settings["Font Size"] // 2),
-        )
-    else:
-        small_font = pygame.font.Font(
-            os.path.join(r"assets/fonts/fonts", settings["Font"]),
-            (settings["Font Size"] // 2),
-        )
     choice = choices.copy()
     input_selected = False
-    if settings["Font Type"] == "System":
-        title_font = pygame.font.SysFont(
-            settings["Font"],
-            settings["Font Size"] * 3,
-            bold=True,
-        )
-    else:
-        title_font = pygame.font.Font(
-            os.path.join(r"assets/fonts/fonts", settings["Bold Font"]),
-            settings["Font Size"] * 3,
-        )
     title_text = title_font.render(
         "Settings", settings["Antialiasing Text"], settings["Font Primary Colour"]
     )
@@ -216,7 +462,7 @@ def displayPage(
                         ),
                         border_radius=25,
                     )
-                    update_button(
+                    updateButton(
                         {
                             "Pygame Button": colour_box_rect,
                             "Name": key,
@@ -244,7 +490,7 @@ def displayPage(
                     settings_surface.blit(
                         dropdown_surface, (settings["Width"] // 20, y_offset)
                     )
-                    update_button(
+                    updateButton(
                         {
                             "Pygame Button": dropdown_rect,
                             "Name": key,
@@ -272,7 +518,7 @@ def displayPage(
                         (colour_box_rect),
                         border_radius=25,
                     )
-                    update_button(
+                    updateButton(
                         {
                             "Pygame Button": colour_box_rect,
                             "Name": key,
@@ -288,7 +534,7 @@ def displayPage(
         ):
             for button in buttons:
                 pasteButton(button, pygame, settings, screen)
-        for button in last2:
+        for button in last:
             pasteButton(button, pygame, settings, screen)
         if confirmation != None:
             confirmation_surface = pygame.Surface(
@@ -394,7 +640,7 @@ def displayPage(
                                 confirmation = None
                             else:
                                 print(f"Error: Unknown confirmation button. {button}")
-                for button in buttons + last2:  # Check for each button
+                for button in buttons + last:  # Check for each button
                     if button["Pygame Button"].collidepoint(event.pos):
                         if any(
                             choice.get(k) != settings[k]

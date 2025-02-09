@@ -1,6 +1,6 @@
-global options_buttons
+global options_buttons, os
+import os
 options_buttons = {}
-
 
 def getDropdownButtons():
     return options_buttons
@@ -11,7 +11,7 @@ def resetDropdownButtons():
     options_buttons = {}
 
 
-def update_button(new_button):
+def updateButton(new_button):
     button_name = new_button["Name"]
     options_buttons[button_name] = new_button
 
@@ -34,7 +34,7 @@ def displayPage(pygame, settings, font, screen, button, options, scroll):
         dropdown_rect = pygame.Rect(
             (x, y + offset, width, height),
         )
-        update_button({"Name": option, "Pygame Button": dropdown_rect})
+        updateButton({"Name": option, "Pygame Button": dropdown_rect})
         if len(options["Options"]) == 1:
             pygame.draw.rect(
                 screen,

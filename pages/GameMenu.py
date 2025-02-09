@@ -1,14 +1,83 @@
-def displayPage(pygame, sys, os, settings, screen, font, buttons, getFps):
+def makeButtons(pygame, settings, small_font):
+    text = small_font.size("Back to Main Menu")
+    games_buttons = [
+        {
+            "Name":
+            "Expose the Impostor",
+            "Pygame Button":
+            pygame.Rect(
+                settings["Width"] // 94,
+                (settings["Height"] * 4) // 16,
+                (settings["Width"] * 30) // 94,
+                (settings["Height"] * 10) // 16,
+            ),
+            "Font Colour":
+            settings["Font Primary Colour"],
+            "Meta":
+            "Expose the Impostor",
+            "Image":
+            pygame.image.load("assets/images/game1.jpg"),
+        },
+        {
+            "Name":
+            "Memory Experiment",
+            "Pygame Button":
+            pygame.Rect(
+                (settings["Width"] * 32) // 94,
+                (settings["Height"] * 4) // 16,
+                (settings["Width"] * 30) // 94,
+                (settings["Height"] * 10) // 16,
+            ),
+            "Font Colour":
+            settings["Font Primary Colour"],
+            "Meta":
+            "Memory Experiment",
+            "Image":
+            pygame.image.load("assets/images/game2.jpg"),
+        },
+        {
+            "Name":
+            "Pattern Rush",
+            "Pygame Button":
+            pygame.Rect(
+                (settings["Width"] * 63) // 94,
+                (settings["Height"] * 4) // 16,
+                (settings["Width"] * 30) // 94,
+                (settings["Height"] * 10) // 16,
+            ),
+            "Font Colour":
+            settings["Font Primary Colour"],
+            "Meta":
+            "Pattern Rush",
+            "Image":
+            pygame.image.load("assets/images/game3.jpg"),
+        },
+        {
+            "Name":
+            "Back to Main Menu",
+            "Pygame Button":
+            pygame.Rect(
+                settings["Width"] // 94,
+                settings["Height"] // 16,
+                text[0] + settings["Width"] // 64,
+                text[1] + settings["Height"] // 90,
+            ),
+            "Colour":
+            settings["Button Quinary Colour"],
+            "Font Colour":
+            settings["Font Quinary Colour"],
+            "Meta":
+            "Main Menu",
+        },
+    ]
+
+    return games_buttons
+
+
+def displayPage(pygame, sys, settings, screen, font, title_font, small_font,
+                getFps):
+    buttons = makeButtons(pygame, settings, small_font)
     back = buttons[-1]
-    if settings["Font Type"] == "System":
-        title_font = pygame.font.SysFont(settings["Font"],
-                                         settings["Font Size"] * 3,
-                                         bold=True)
-    else:
-        title_font = pygame.font.Font(
-            os.path.join(r"assets/fonts/fonts", settings["Bold Font"]),
-            settings["Font Size"] * 3,
-        )
     title_text = title_font.render("Games Menu", settings["Antialiasing Text"],
                                    settings["Font Primary Colour"])
     while True:
@@ -52,21 +121,13 @@ def displayPage(pygame, sys, os, settings, screen, font, buttons, getFps):
                     button_text.get_height() // 2,
                 ),
             )
-        if settings["Font Type"] == "System":
-            back_font = pygame.font.SysFont(settings["Font"],
-                                            settings["Font Size"] // 2)
-        else:
-            back_font = pygame.font.Font(
-                os.path.join(r"assets/fonts/fonts", settings["Font"]),
-                settings["Font Size"] // 2,
-            )
         pygame.draw.rect(screen,
                          back["Colour"],
                          back["Pygame Button"],
                          border_radius=25)
-        back_text = back_font.render(back["Name"],
-                                     settings["Antialiasing Text"],
-                                     button["Font Colour"])
+        back_text = small_font.render(back["Name"],
+                                      settings["Antialiasing Text"],
+                                      button["Font Colour"])
         screen.blit(
             back_text,
             (
