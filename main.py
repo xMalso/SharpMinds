@@ -2,7 +2,30 @@ import pygame
 import sys
 import os
 from pages import *
+# import firebase_admin
+# from dotenv import load_dotenv
+# from firebase_admin import credentials, firestore
+# import steam
 
+# steamworks = steam.SteamWorks()
+
+# if steamworks.is_running():
+#     user = steamworks.user
+#     steam_id = user.steam_id
+#     print(f"User Steam ID: {steam_id}")
+# else:
+#     print("Steam is not running.")
+
+# load_dotenv()
+# private_key_path = os.getenv("FIREBASE_PRIVATE_KEY_PATH")
+
+# print(private_key_path)
+# cred = credentials.Certificate(private_key_path)
+# firebase_admin.initialize_app(cred)
+
+# db = firestore.client()
+
+# leaderboard_ref = db.collection('leaderboard')
 
 class Settings:
     # Default incase it wants to be reset to default
@@ -183,13 +206,10 @@ def loadUpValues():
     frame = pygame.time.get_ticks()
     i = 1
     text_surface = None
-    makeMainMenuButtons(pygame, settings, font)
-    makeGameMenuButtons(pygame, settings, small_font)
-    makeGameOverButtons()
-    makeConfirmationButtons(pygame, settings, font)
-    makeOptions(settings, font)
-    makeColourPickerButtons(settings, font)
-    makeSettingsButtons(pygame, settings, small_font)
+    settingsInit(pygame, settings, font, small_font)
+    mainMenuInit(pygame, settings, font, title_font)
+    gameMenuInit(pygame, settings, small_font)
+    gameOverInit(pygame, settings, font, title_font)
     try:
         meta = meta
     except:
@@ -214,7 +234,9 @@ def getFps():
         if text_surface and settings["Show FPS"]:
             screen.blit(text_surface, (0, 0))
 
+
 def executeSettingsResults(val):
+    global choice, settings
     if val == "Main Menu":
         return "Main Menu"
     elif val == "Save and Leave":
@@ -298,8 +320,9 @@ while True:  # Main loop
         Game3()
         meta = "Main Menu"
     elif meta == "Game Over":
-        gameOverDisplay(pygame, sys, screen, settings, font, title_font,
-                        small_font, game, score, getFps)
+        meta = gameOverDisplay(pygame, sys, screen, settings, font,
+                score, getFps)
+    elif meta == "Leaderboards":
         meta = "Main Menu"
     else:
         print(

@@ -1,3 +1,12 @@
+def init(pygame, settings, font, title_font):
+    makeButtons(pygame, settings, font)
+    makeText(title_font, settings)
+
+def makeText(title_font, settings):
+    global title_text
+    title_text = title_font.render("Main Menu", settings["Antialiasing Text"],
+                                   settings["Font Primary Colour"])
+
 def makeButtons(pygame, settings, font):
     text = font.size("Leaderboards and Personal Bests")
     # Screen is split into 5 sections vertically for 5 buttons each section takes 12% of the screen with 1% as a gap between each button and 32% to write the title of the Screen
@@ -100,12 +109,9 @@ def makeButtons(pygame, settings, font):
     return main_menu_buttons
 
 
-def displayPage(pygame, sys, settings, screen, font, title_font,
-                getFps):
+def displayPage(pygame, sys, settings, screen, font, title_font, getFps):
     choice = None
     buttons = makeButtons(pygame, settings, font)
-    title_text = title_font.render("Main Menu", settings["Antialiasing Text"],
-                                   settings["Font Primary Colour"])
     while True:
         screen.fill(settings["Background Colour"])
         screen.blit(

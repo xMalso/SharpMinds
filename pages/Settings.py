@@ -14,7 +14,17 @@ import os
 current_colour_picker = None
 current_dropdown = None
 options_buttons = {}
+confirmation_text = {
+    "Main Menu": "discard and go to main menu",
+    "Discard": "discard changes",
+    "Default": "return to default settings",
+}
 
+def init(pygame, settings, font, small_font):
+    makeColourPickerButtons(settings, font)
+    makeOptions(settings, font)
+    makeConfirmationButtons(pygame, settings, font)
+    makeButtons(pygame, settings, small_font)
 
 def makeColourPickerButtons(settings, font):
     global colour_picker_buttons
@@ -194,90 +204,6 @@ def makeConfirmationButtons(pygame, settings, font):
     ]
 
 
-def checkCollide(loc):
-    global current_dropdown, current_colour_picker, input_text, input_selected, choice
-    colour_buttons = getColourButtons()
-    dropdown_buttons = getDropdownButtons()
-    if current_dropdown != None:
-        for button in dropdown_buttons.values():
-            if button["Pygame Button"].collidepoint(loc):
-                choice[current_dropdown["Name"]] = button["Name"]
-        current_dropdown = None
-        resetDropdownButtons()
-    else:
-        for button in colour_buttons.values():
-            if button["Pygame Button"].collidepoint(loc):
-                if button["Name"] == "Confirm":
-                    input_text = input_text[1:].ljust(6, "0")
-                    hex = tuple(int(input_text[i : i + 2], 16) for i in (0, 2, 4))
-                    choice[current_colour_picker["Name"]] = hex
-                    current_colour_picker = None
-                    input_text = "#"
-                    input_selected = False
-                    selectInput(False)
-                    resetColourButtons()
-                    return
-                elif button["Name"] == "Discard":
-                    current_colour_picker = None
-                    input_text = "#"
-                    input_selected = False
-                    selectInput(False)
-                    resetColourButtons()
-                    return
-                elif button["Name"] == "Input":
-                    input_selected = not input_selected
-                    selectInput(input_selected)
-                    return
-                else:
-                    print("Unknown colour picker button.")
-        current_colour_picker = None
-        input_text = "#"
-        input_selected = False
-        selectInput(False)
-        resetColourButtons()
-
-
-confirmation_text = {
-    "Main Menu": "discard and go to main menu",
-    "Discard": "discard changes",
-    "Default": "return to default settings",
-}
-
-
-def updateButton(new_button):
-    button_name = new_button["Name"]
-    options_buttons[button_name] = new_button
-
-
-def pasteButton(button, pygame, settings, screen):
-    global small_font
-    pygame.draw.rect(
-        screen,
-        (button["Colour"]),
-        (
-            button["Pygame Button"].x,
-            button["Pygame Button"].y,
-            button["Pygame Button"].width,
-            button["Pygame Button"].height,
-        ),
-        border_radius=25,
-    )
-    button_text = small_font.render(
-        button["Name"], settings["Antialiasing Text"], button["Font Colour"]
-    )
-    screen.blit(
-        button_text,
-        (
-            button["Pygame Button"].x
-            + button["Pygame Button"].width // 2
-            - button_text.get_width() // 2,
-            button["Pygame Button"].y
-            + button["Pygame Button"].height // 2
-            - button_text.get_height() // 2,
-        ),
-    )
-
-
 def makeButtons(pygame, settings, small_font):
     global buttons, last
     text_width, text_height = small_font.size("Save and Leave")
@@ -375,6 +301,80 @@ def makeButtons(pygame, settings, small_font):
             "Main Menu",
         },
     ]
+
+
+def checkCollide(loc):
+    global current_dropdown, current_colour_picker, input_text, input_selected, choice
+    colour_buttons = getColourButtons()
+    dropdown_buttons = getDropdownButtons()
+    if current_dropdown != None:
+        for button in dropdown_buttons.values():
+            if button["Pygame Button"].collidepoint(loc):
+                choice[current_dropdown["Name"]] = button["Name"]
+        current_dropdown = None
+        resetDropdownButtons()
+    else:
+        for button in colour_buttons.values():
+            if button["Pygame Button"].collidepoint(loc):
+                if button["Name"] == "Confirm":
+                    input_text = input_text[1:].ljust(6, "0")
+                    hex = tuple(int(input_text[i : i + 2], 16) for i in (0, 2, 4))
+                    choice[current_colour_picker["Name"]] = hex
+                    current_colour_picker = None
+                    input_text = "#"
+                    input_selected = False
+                    selectInput(False)
+                    resetColourButtons()
+                    return
+                elif button["Name"] == "Discard":
+                    current_colour_picker = None
+                    input_text = "#"
+                    input_selected = False
+                    selectInput(False)
+                    resetColourButtons()
+                    return
+                elif button["Name"] == "Input":
+                    input_selected = not input_selected
+                    selectInput(input_selected)
+                    return
+                else:
+                    print("Unknown colour picker button.")
+        current_colour_picker = None
+        input_text = "#"
+        input_selected = False
+        selectInput(False)
+        resetColourButtons()
+
+
+def updateButton(new_button):
+    global options_buttons
+    button_name = new_button["Name"]
+    options_buttons[button_name] = new_button
+
+
+def pasteButton(button, pygame, settings, screen):
+    global small_font
+    pygame.draw.rect(
+        screen,
+        (button["Colour"]),
+        button["Pygame Button"],
+        border_radius=25,
+    )
+    button_text = small_font.render(
+        button["Name"], settings["Antialiasing Text"], button["Font Colour"]
+    )
+    screen.blit(
+        button_text,
+        (
+            button["Pygame Button"].x
+            + button["Pygame Button"].width // 2
+            - button_text.get_width() // 2,
+            button["Pygame Button"].y
+            + button["Pygame Button"].height // 2
+            - button_text.get_height() // 2,
+        ),
+    )
+
 
 
 def displayPage(

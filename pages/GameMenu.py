@@ -1,3 +1,6 @@
+def init(pygame, settings, small_font):
+    makeButtons(pygame, settings, small_font)
+
 def makeButtons(pygame, settings, small_font):
     text = small_font.size("Back to Main Menu")
     games_buttons = [
