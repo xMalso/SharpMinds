@@ -7,3 +7,9 @@ make leaderboards private
 FPS limiter
 Functions and Classes files for main
 folders for each downloaded font instead of filtering each file
+
+
+
+90% correct = pass
+score = % * 600
+

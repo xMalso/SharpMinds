@@ -7,6 +7,8 @@ def getDefaultSettings():
         "FPS Limit": 0,
         "Background Colour": (31, 31, 31),
         "Background Font Colour": (217, 217, 217),
+        "Grid Background Colour": (63, 63, 63),
+        "Grid Line Colour": (0, 0, 0),
         "Dropdown Background Colour": (63, 63, 63),
         "Dropdown Font Colour": (217, 217, 217),
         "Input Background Colour": (85, 85, 85),

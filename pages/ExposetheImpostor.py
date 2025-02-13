@@ -16,9 +16,10 @@ def removeCircle(pos, current):
             if colour == "Green":
                 return -50
             else:
+                time = current-tick if current-tick != 0 else 1
                 score = (max_score * min(
                     (0.012 * (despawn_time * 5 /
-                              (current - tick))) - 0.06, 1)**0.2)
+                              (time))) - 0.06, 1)**0.2)
                 return score
     return 0
 
@@ -53,16 +54,13 @@ def Game1(pygame, sys, settings, screen, font, getFps):
         "Red": settings["Game Secondary Colour"],
     }
     radius = int(settings["Width"] // (40 * difficulty**0.15))
-    max_score = 30 / difficulty**0.65
+    max_score = 30 / difficulty**0.65 * (difficulty / 10 + 1)
     height = max(font.size(str(char))[1] for char in "0123456789")
     score = 0
     red_count = 0
     green_count = 0
     circles = []
     last_tick = 0
-    frame = 0
-    i = 1
-    text_surface = None
     start = current_frame = pygame.time.get_ticks()
     despawn_time = 9000 / (difficulty**0.15)
     spawn_gap = 800 / (difficulty**0.7)

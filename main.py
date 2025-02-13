@@ -6,7 +6,6 @@ from pages import *
 # from dotenv import load_dotenv
 # from firebase_admin import credentials, firestore
 # import steam
-
 # steamworks = steam.SteamWorks()
 
 # if steamworks.is_running():
@@ -266,9 +265,9 @@ def executeSettingsResults(val):
 
 
 loadUp()
-meta = "Game Over"
-game = "Expose the Impostor"
-score = 530.7385
+# meta = "Game Over"
+# game = "Expose the Impostor"
+# score = 530.7385
 
 while True:  # Main loop
     if meta == "Main Menu":
@@ -313,12 +312,13 @@ while True:  # Main loop
             del choice["Adaptive Difficulty"]
             print("Adaptive Difficulty saved.")
             game = "Expose the Impostor"
-    elif meta == "Pattern Rush":
-        Game2()
-        meta = "Main Menu"
     elif meta == "Memory Experiment":
-        Game3()
+        score, adjustment, meta = Game2(pygame, sys, settings, screen, font,
+                                        getFps)
         meta = "Main Menu"
+    elif meta == "Pattern Rush":
+        score, adjustment, meta = Game3(pygame, sys, settings, screen, font,
+                                        getFps)
     elif meta == "Game Over":
         meta = gameOverDisplay(pygame, sys, screen, settings, font,
                 score, getFps)
