@@ -54,7 +54,7 @@ def Game1(pygame, sys, settings, screen, font, getFps):
         "Red": settings["Game Secondary Colour"],
     }
     radius = int(settings["Width"] // (40 * difficulty**0.15))
-    max_score = 30 / difficulty**0.65 * (difficulty / 10 + 1)
+    max_score = 30 / difficulty**0.65 * ((difficulty - 1) / 10 + 1)
     height = max(font.size(str(char))[1] for char in "0123456789")
     score = 0
     red_count = 0
@@ -116,7 +116,8 @@ def Game1(pygame, sys, settings, screen, font, getFps):
         remaining_time = 30 - (current_frame - start) / 1000
         if remaining_time >= 10:
             remaining_time = int(remaining_time)
-        elif remaining_time >= 0:
+        # elif remaining_time >= 0:
+        else:
             remaining_time = math.trunc(remaining_time * 10) / 10
         # else:
         #     remaining_time = math.trunc(remaining_time * 100) / 100
