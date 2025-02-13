@@ -1,6 +1,4 @@
-import random, math
-global rounds
-rounds = 0
+import random
 
 
 def init(settings):
@@ -8,7 +6,7 @@ def init(settings):
 
 
 def findBestGrid():
-    target = 15 * difficulty**0.5
+    target = 10 * difficulty**0.5
     target = int(round(target))
 
     best_diff = target
@@ -43,26 +41,42 @@ def draw_grid(pygame, screen, settings):
             (col * (button_side + 1) + margin_width + 1, margin_height),
             (col * (button_side + 1) + margin_width + 1, 1 - margin_height),
         )
-    for button in patterns:
-        if button["Shape"] == "circle":
-            pygame.draw.circle(screen, button['Colour'], button['rect'].center,
-                               radius)
-        elif button["Shape"] == "square":
-            pygame.draw.rect(screen, settings["Grid Background Colour"],
-                             button['rect'])
-            pygame.draw.rect(screen, button['Colour'],
-                             (button['rect'].centerx - radius,
-                              button['rect'].centery - radius), radius * 2)
+    for loc in pattern:
+        r, c = loc
+        button = buttons[r][c]
+        if button["Shape"] == "Circle":
+            pygame.draw.circle(screen, button["Colour"], button["rect"].center, radius)
+        elif button["Shape"] == "Square":
+            pygame.draw.rect(screen, settings["Grid Background Colour"], button["rect"])
+            print(
+                button["Colour"], button["rect"].centerx, button["rect"].centery, radius
+            )
+            pygame.draw.rect(
+                screen,
+                button["Colour"],
+                (
+                    button["rect"].centerx - radius,
+                    button["rect"].centery - radius,
+                    radius * 2,
+                    radius * 2,
+                ),
+            )
         else:
             side_length = min(button["rect"].width, button["rect"].height)
             height = (side_length * (3**0.5)) / 2
-            points = [(button["rect"].centerx,
-                       button["rect"].centery - height / 2),
-                      (button["rect"].centerx - side_length / 2,
-                       button["rect"].centery + height / 2),
-                      (button["rect"].centerx + side_length / 2,
-                       button["rect"].centery + height / 2)]
-            pygame.draw.polygon(screen, button["colour"], points)
+            points = [
+                (button["rect"].centerx, button["rect"].centery - height / 2),
+                (
+                    button["rect"].centerx - side_length / 2,
+                    button["rect"].centery + height / 2,
+                ),
+                (
+                    button["rect"].centerx + side_length / 2,
+                    button["rect"].centery + height / 2,
+                ),
+            ]
+            pygame.draw.polygon(screen, button["Colour"], points)
+
 
 def split_text(font, max_width):
     words = ["Press", "ESC", "to", "return", "to", "games", "menu"]
@@ -84,18 +98,20 @@ def split_text(font, max_width):
 
     return lines
 
+
 def Game2(pygame, sys, settings, screen, font, getFps):
     global difficulty, buttons, rows, cols, button_side, radius, margin_width, margin_height, score, return_text
     score = 0
     return_text = split_text(font, settings["Width"] // 4)
     difficulty = settings["Adaptive Difficulty"][1]
     cols, rows = findBestGrid()
-    button_width = (settings["Width"] * .8 + 1) // cols - 1
-    button_height = (settings["Height"] * .8 + 1) // rows - 1
+    button_width = (settings["Width"] * 0.8 + 1) // cols - 1
+    button_height = (settings["Height"] * 0.8 + 1) // rows - 1
     button_side = min(button_width, button_height)
-    radius = min(button_side, button_side) * .45
+    radius = int(min(button_side, button_side) * 0.45)
     margin_width, margin_height = (1 - (button_side * cols)) // 2, (
-        1 - (settings["Height"] * cols)) // 2
+        1 - (settings["Height"] * cols)
+    ) // 2
     button_margin = settings["Width"] // 100, settings["Height"] // 100
     shape_size = button_side - button_margin[0], button_side - button_margin[1]
     buttons = []
@@ -105,28 +121,38 @@ def Game2(pygame, sys, settings, screen, font, getFps):
             x = margin_width + col * (button_side)
             y = margin_height + row * (button_side)
             button = {
-                'rect': pygame.Rect(x, y, shape_size),
+                "rect": pygame.Rect(x, y, *shape_size),
             }
             button_row.append(button)
             buttons.append(button_row)
-    for round in range(rounds):
-        round(settings, getFps, screen, sys, pygame, font)
+    for i in range(5):
+        cycle(settings, getFps, screen, sys, pygame, font)
 
 
-def round(settings, getFps, screen, sys, pygame, font):
-    global patterns
-    for row in buttons:
-        for button in row:
-            button["Shape"] = random.choice(["circle", "square", "triangle"])
-            button['Colour'] = random.choice([
-                settings["Game Primary Colour"],
-                settings["Game Secondary Colour"],
-                settings["Game Tertiary Colour"]
-            ])
+def cycle(settings, getFps, screen, sys, pygame, font):
+    global pattern
     all_positions = [(r, c) for r in range(rows) for c in range(cols)]
     num_shapes = int(difficulty**0.5 * 7.5) + random.randint(-2, 2)
     random.shuffle(all_positions)
     pattern = all_positions[:num_shapes]
+    for r, c in pattern:
+        button = buttons[r][c]
+        button["Shape"] = random.choice(["Circle", "Square", "Triangle"])
+        button["Colour"] = random.choice(
+            [
+                settings["Game Primary Colour"],
+                settings["Game Secondary Colour"],
+                settings["Game Tertiary Colour"],
+            ]
+        )
+    # not_pattern = all_positions[num_shapes:]
+    # for (r, c) in not_pattern:
+    #     buttons[r][c]['Colour'] = settings["Grid Background Colour"]
+
+    # --- Game States ---
+    # 'memorize' : pattern is visible for 10 seconds
+    # 'replicate': pattern is hidden and the player clicks buttons to reproduce it
+    # 'result'   : display the outcome
     ready = False
     while not ready:
 
@@ -138,10 +164,34 @@ def round(settings, getFps, screen, sys, pygame, font):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return None, None, "Game Menu"
+            # Only allow clicking during the replication phase.
+            if state == "replicate":
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    pos = pygame.mouse.get_pos()
+                    # Check which button (if any) was clicked.
+                    for r in range(rows):
+                        for c in range(cols):
+                            btn = buttons[r][c]
+                            if (
+                                btn["rect"].collidepoint(pos)
+                                and (r, c) not in player_selection
+                            ):
+                                # Mark the player's selection by changing its colour to Game Secondary Colour.
+                                btn["Colour"] = settings["Game Secondary Colour"]
+                                player_selection.append((r, c))
 
+                                # When the player has selected enough buttons, check if they match the pattern.
+                                if len(player_selection) == len(pattern):
+                                    # For this example, the order does not matter.
+                                    if sorted(player_selection) == sorted(pattern):
+                                        result_message = "Success!"
+                                    else:
+                                        result_message = "Failure!"
+                                    state = "result"
 
         screen.fill(settings["Background Colour"])
         draw_grid(pygame, screen, settings)
+        height = settings["Height"] // 200
         for line in return_text:
             text = font.render(
                 line,
@@ -151,8 +201,9 @@ def round(settings, getFps, screen, sys, pygame, font):
             screen.blit(
                 text,
                 (
-                    settings["Width"] * 7 // 8 - text.get_width() // 2 -
-                    settings["Width"] // 200,
+                    settings["Width"] * 7 // 8
+                    - text.get_width() // 2
+                    - settings["Width"] // 200,
                     height,
                 ),
             )
@@ -170,12 +221,91 @@ def round(settings, getFps, screen, sys, pygame, font):
                 settings["Height"] // 200,
             ),
         )
-        
+
+        # state = 'memorize'
+        # memorize_duration = 10 * 1000  # 10 seconds (in milliseconds)
+        # memorize_start_time = pygame.time.get_ticks()
+
+        # Player's clicks will be stored here (as (row, col) tuples)
+        # player_selection = []
+        # result_message = ""
+
+        # running = True
+        # while running:
+        # dt = clock.tick(60)  # Limit to 60 FPS
+
+        # --- State Transitions ---
+        if state == "memorize":
+            # After 10 seconds, hide the pattern by resetting all buttons to Button Primary Colour.
+            current_time = pygame.time.get_ticks()
+            if current_time - memorize_start_time >= memorize_duration:
+                for r in range(rows):
+                    for c in range(cols):
+                        buttons[r][c]["Colour"] = settings["Button Primary Colour"]
+                state = "replicate"
+
+        # --- Drawing ---
+        screen.fill(settings["Background Colour"])
+
+        # Draw all buttons on the grid.
+        for row in buttons:
+            for btn in row:
+                draw_button(screen, btn, font)
+
+        # Display text based on the current state.
+        if state == "memorize":
+            remaining_time = max(
+                0,
+                (memorize_duration - (pygame.time.get_ticks() - memorize_start_time))
+                // 1000,
+            )
+            timer_text = font.render(
+                f"Memorize: {remaining_time}",
+                settings["Antialiasing Text"],
+                settings["Background Font Colour"],
+            )
+            screen.blit(
+                timer_text,
+                (
+                    settings["Width"] // 2 - timer_text.get_width() // 2,
+                    settings["Height"] - timer_text.get_height() - 20,
+                ),
+            )
+        elif state == "replicate":
+            instruct_text = font.render(
+                "Replicate the pattern by clicking the buttons",
+                settings["Antialiasing Text"],
+                settings["Background Font Colour"],
+            )
+            screen.blit(
+                instruct_text,
+                (
+                    settings["Width"] // 2 - instruct_text.get_width() // 2,
+                    settings["Height"] - instruct_text.get_height() - 20,
+                ),
+            )
+        elif state == "result":
+            result_text = font.render(
+                result_message,
+                settings["Antialiasing Text"],
+                settings["Background Font Colour"],
+            )
+            screen.blit(
+                result_text,
+                (
+                    settings["Width"] // 2 - result_text.get_width() // 2,
+                    settings["Height"] - result_text.get_height() - 20,
+                ),
+            )
 
         getFps()
         pygame.display.flip()
 
 
+# Example usage:
+# Assuming you have already called pygame.init() and set up your display:
+# screen = pygame.display.set_mode((settings["Width"], settings["Height"]))
+# game_loop(screen)
 
 # remaining_time = 30 - (current_frame - start) / 1000
 # if remaining_time >= 10:

@@ -11,5 +11,8 @@ folders for each downloaded font instead of filtering each file
 
 
 90% correct = pass
-score = % * 600
+score = % * 600 * (1 + difficulty/10)
 
+memorize (button to say ready)
+wait 10 seconds
+replicate (drag and drop? pick shape and colour and drop?)
