@@ -2,6 +2,7 @@ import pygame
 import sys
 import os
 from pages import *
+
 # import firebase_admin
 # from dotenv import load_dotenv
 # from firebase_admin import credentials, firestore
@@ -26,17 +27,19 @@ from pages import *
 
 # leaderboard_ref = db.collection('leaderboard')
 
+
 class Settings:
     # Default incase it wants to be reset to default
-    default_settings = getDefaultSettings()
 
     def __init__(self):
         global screen, font, pygame
         self.settings = self.setSettings()
         self.applySettings()
-        text_surface = font.render("Loading Game...",
-                                   self.settings["Antialiasing Text"],
-                                   self.settings["Background Font Colour"])
+        text_surface = font.render(
+            "Loading Game...",
+            self.settings["Antialiasing Text"],
+            self.settings["Background Font Colour"],
+        )
         screen.blit(
             text_surface,
             (
@@ -50,12 +53,12 @@ class Settings:
         return self.settings
 
     def resetSettings(self):
-        self.settings = self.default_settings.copy()
+        self.settings = default_settings.copy()
         return self.settings
 
     def setSettings(self):
         # To ensure values are all filled and anything not found is replaced with default values
-        self.settings = self.default_settings.copy()
+        self.settings = default_settings.copy()
         try:
             with open("./settings.txt", "r") as file:
                 for line in file:
@@ -69,24 +72,23 @@ class Settings:
                     key = key.strip('"')
 
                     if (
-                            key in self.settings
+                        key in self.settings
                     ):  # Only update if it is a setting that has been defined
                         if "," in value:
                             try:
                                 self.settings[key] = tuple(
-                                    map(int,
-                                        value.strip("()").split(", "))
+                                    map(int, value.strip("()").split(", "))
                                 )  # Convert to int tuple (for RGB values)
                             except:
                                 self.settings[key] = tuple(
-                                    map(float,
-                                        value.strip("()").split(", "))
+                                    map(float, value.strip("()").split(", "))
                                     # Convert to float tuple (for adaptive difficulty)
                                 )
                         elif value.isdigit():  # Check for numbers
                             self.settings[key] = int(value)
-                        elif (value.lower() == "true" or value.lower()
-                              == "false"):  # Check for boolean
+                        elif (
+                            value.lower() == "true" or value.lower() == "false"
+                        ):  # Check for boolean
                             self.settings[key] = value.lower() == "true"
                         else:  # Otherwise must be a string
                             self.settings[key] = value.strip('"')
@@ -95,8 +97,8 @@ class Settings:
                             f"Warning: Unknown setting '{key}' found in settings.txt. Ignoring."
                         )
                 if os.path.isfile(
-                        os.path.join(r"assets/fonts/fonts",
-                                     self.settings["Font"])):
+                    os.path.join(r"assets/fonts/fonts", self.settings["Font"])
+                ):
                     self.settings["Font Type"] = "Custom"
                 else:
                     self.settings["Font Type"] = "System"
@@ -107,8 +109,9 @@ class Settings:
                 f"Error: Incorrect format in settings.txt ({e}). Using default values."
             )
         global choice
-        self.settings["Font Size"] = (self.settings["Width"] //
-                                      self.settings["Font Size"])
+        self.settings["Font Size"] = (
+            self.settings["Width"] // self.settings["Font Size"]
+        )
         choice = self.settings.copy()
         del choice["Font Type"]
         self.saveSettings()
@@ -146,8 +149,7 @@ class Settings:
                 size,
             )
             title_font = pygame.font.Font(
-                os.path.join(r"assets/fonts/fonts",
-                             self.settings["Bold Font"]),
+                os.path.join(r"assets/fonts/fonts", self.settings["Bold Font"]),
                 size * 3,
             )
             small_font = pygame.font.Font(
@@ -155,37 +157,39 @@ class Settings:
                 size // 2,
             )
         screen = pygame.display.set_mode(
-            (self.settings["Width"], self.settings["Height"]), flags)
+            (self.settings["Width"], self.settings["Height"]), flags
+        )
         pygame.display.flip()
 
     def saveSettings(self):
-        choice["Adaptive Difficulty"] = choice["Adaptive Difficulty"]
         choice["Font Size"] = choice["Width"] // choice["Font Size"]
         with open("settings.txt", "w") as file:
             for key, value in choice.items():
                 file.write(f'"{key}": {value},\n')
         self.settings = choice.copy()
         choice["Font Size"] = choice["Width"] // choice["Font Size"]
-        if os.path.isfile(
-                os.path.join(r"assets/fonts/fonts", self.settings["Font"])):
+        if os.path.isfile(os.path.join(r"assets/fonts/fonts", self.settings["Font"])):
             self.settings["Font Type"] = "Custom"
         else:
             self.settings["Font Type"] = "System"
-        self.settings["Font Size"] = (self.settings["Width"] //
-                                      self.settings["Font Size"])
+        self.settings["Font Size"] = (
+            self.settings["Width"] // self.settings["Font Size"]
+        )
 
 
 def loadUp():
-    global pygame, settingsClass
+    global pygame
     pygame.init()
     pygame.display.set_caption("Sharp Minds")
 
     screen = pygame.display.set_mode((1920, 1080), pygame.NOFRAME)
     screen.fill((31, 31, 31))
     default_font = pygame.font.Font(
-        "assets\\fonts\\fonts\\OpenDyslexic-Regular.otf", 30)
-    default_text_surface = default_font.render("Loading Settings...", True,
-                                               (217, 217, 217))
+        "assets\\fonts\\fonts\\OpenDyslexic-Regular.otf", 30
+    )
+    default_text_surface = default_font.render(
+        "Loading Settings...", True, (217, 217, 217)
+    )
     screen.blit(
         default_text_surface,
         (
@@ -194,6 +198,45 @@ def loadUp():
         ),
     )
     pygame.display.flip()
+    global settingsClass, default_settings
+    default_settings = {
+        "Width": 1920,
+        "Height": 1080,
+        "Window Type": "Borderless",
+        "Show FPS": True,
+        "FPS Limit": 0,
+        "Background Colour": (31, 31, 31),
+        "Background Font Colour": (217, 217, 217),
+        "Grid Background Colour": (63, 63, 63),
+        "Grid Line Colour": (0, 0, 0),
+        "Dropdown Background Colour": (63, 63, 63),
+        "Dropdown Font Colour": (217, 217, 217),
+        "Input Background Colour": (85, 85, 85),
+        "Selected Input Colour": (60, 60, 60),
+        "Input Font Colour": (217, 217, 217),
+        "Button Primary Colour": (99, 139, 102),
+        "Font Primary Colour": (217, 217, 217),
+        "Button Secondary Colour": (90, 115, 225),
+        "Font Secondary Colour": (217, 217, 217),
+        "Button Tertiary Colour": (210, 100, 50),
+        "Font Tertiary Colour": (217, 217, 217),
+        "Button Quaternary Colour": (90, 90, 90),
+        "Font Quaternary Colour": (217, 217, 217),
+        "Button Quinary Colour": (255, 102, 68),
+        "Font Quinary Colour": (217, 217, 217),
+        "Font": "OpenDyslexic-Regular.otf",
+        "Bold Font": "OpenDyslexic-Bold.otf",
+        "Italic Font": "OpenDyslexic-Italic.otf",
+        "BoldItalic Font": "OpenDyslexic-Bold-Italic.otf",
+        "Font Type": "Custom",
+        "Font Size": 30,
+        "Antialiasing Text": True,
+        "Game Primary Colour": (0, 255, 127),
+        "Game Secondary Colour": (255, 191, 191),
+        "Game Tertiary Colour": (0, 0, 255),
+        "Adaptive Difficulty": (2, 2, 2),
+        # "Scroll Speed": 100,
+    }
     settingsClass = Settings()
     loadUpValues()
 
@@ -205,10 +248,10 @@ def loadUpValues():
     frame = pygame.time.get_ticks()
     i = 1
     text_surface = None
-    settingsInit(pygame, settings, font, small_font)
-    mainMenuInit(pygame, settings, font, title_font)
-    gameMenuInit(pygame, settings, small_font)
-    gameOverInit(pygame, settings, font, title_font)
+    settingsInit(settings, font, small_font)
+    mainMenuInit(settings, font, title_font)
+    gameMenuInit(settings, small_font)
+    gameOverInit(settings, font, title_font)
     try:
         meta = meta
     except:
@@ -232,6 +275,11 @@ def getFps():
         i += 1
         if text_surface and settings["Show FPS"]:
             screen.blit(text_surface, (0, 0))
+
+
+def exit():
+    pygame.quit()
+    sys.exit()
 
 
 def executeSettingsResults(val):
@@ -264,70 +312,84 @@ def executeSettingsResults(val):
     return "Settings"
 
 
+def adjustDifficulty(adjustment):
+    global settings, meta, choice
+    difficulty1, difficulty2, difficulty3 = settings["Adaptive Difficulty"]
+    if game == "Expose the Criminal":
+        settings["Adaptive Difficulty"] = (
+            max(difficulty1 + adjustment, 0.2),
+            difficulty2,
+            difficulty3,
+        )
+        
+    elif game == "Memory Experiment":
+        settings["Adaptive Difficulty"] = (
+            difficulty1,
+            max(difficulty2 + adjustment, 0.2),
+            difficulty3,
+        )
+    elif game == "Pattern Rush":
+        settings["Adaptive Difficulty"] = (
+            difficulty1,
+            difficulty2,
+            max(difficulty3 + adjustment, 0.2),
+        )
+    else:
+        print("Error: Game not found, difficulty not adjusted and sending to main menu")
+        meta = "Main Menu"
+    del adjustment
+    del difficulty1, difficulty2, difficulty3
+    choice = settings.copy()
+    del choice["Font Type"]
+    settingsClass.saveSettings()
+    del choice["Adaptive Difficulty"]
+    print("Adaptive Difficulty saved.")
+
+
 loadUp()
 # meta = "Game Over"
-# game = "Expose the Impostor"
+# game = "Expose the Criminal"
 # score = 530.7385
 
 while True:  # Main loop
     if meta == "Main Menu":
-        meta, choice = mainMenuDisplay(pygame, sys, settings, screen, font,
-                                       title_font, getFps)
+        meta, choice = mainMenuDisplay(settings, screen, font, getFps, exit)
     elif meta == "Game Menu":
-        meta = gameMenuDisplay(pygame, sys, settings, screen, font, title_font,
-                               small_font, getFps)
+        meta = gameMenuDisplay(
+            settings, screen, font, title_font, small_font, getFps, exit
+        )
     elif meta == "Settings":
         scroll = 0
         choice, val = settingsDisplay(
-            pygame,
-            sys,
-            settings,
-            screen,
-            font,
-            title_font,
-            small_font,
-            choice,
-            getFps,
+            settings, screen, font, title_font, small_font, choice, getFps, exit
         )
         meta = executeSettingsResults(val)
     elif meta == "Quit":
         pygame.quit()
         sys.exit()
-    elif meta == "Expose the Impostor":
-        score, adjustment, meta = Game1(pygame, sys, settings, screen, font,
-                                        getFps)
+    elif meta == "Expose the Criminal":
+        score, adjustment, meta = Game1(settings, screen, font, getFps, exit)
         if score != None:
-            difficulty1, difficulty2, difficulty3 = settings[
-                "Adaptive Difficulty"]
-            settings["Adaptive Difficulty"] = (
-                max(difficulty1 + adjustment, 0.2),
-                difficulty2,
-                difficulty3,
-            )
-            del adjustment
-            del difficulty1, difficulty2, difficulty3
-            choice = settings.copy()
-            del choice["Font Type"]
-            settingsClass.saveSettings()
-            del choice["Adaptive Difficulty"]
-            print("Adaptive Difficulty saved.")
-            game = "Expose the Impostor"
+            game = "Expose the Criminal"
+            adjustDifficulty(adjustment)
     elif meta == "Memory Experiment":
-        score, adjustment, meta = Game2(pygame, sys, settings, screen, font,
-                                        getFps)
-        meta = "Main Menu"
+        print(f"Page '{meta}' is currently in development, sending back to main menu.")
+        score, adjustment, meta = Game2(settings, screen, font, getFps, exit)
+        if score != None:
+            game = "Memory Experiment"
+            adjustDifficulty(adjustment)
     elif meta == "Pattern Rush":
-        score, adjustment, meta = Game3(pygame, sys, settings, screen, font,
-                                        getFps)
+        print(f"Page '{meta}' is currently in development, sending back to main menu.")
+        score, adjustment, meta = Game3(settings, screen, font, getFps, exit)
+        if score != None:
+            game = "Pattern Rush"
+            adjustDifficulty(adjustment)
     elif meta == "Game Over":
-        meta = gameOverDisplay(pygame, sys, screen, settings, font,
-                score, getFps)
+        meta = gameOverDisplay(screen, settings, font, game, score, getFps, exit)
     elif meta == "Leaderboards":
         meta = "Main Menu"
     else:
-        print(
-            f"Page '{meta}' is currently in development, sending back to main menu."
-        )
+        print(f"Page '{meta}' is currently in development, sending back to main menu.")
         meta = "Main Menu"
     # if settings["FPS Limit"] > 0:
     # limiter = (1/settings["FPS Limit"]) - (pygame.time.get_ticks() - frame) / i

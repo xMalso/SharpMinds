@@ -1,6 +1,8 @@
-global options_buttons, os
-import os
+global options_buttons, os, pygame
+import os, pygame
+
 options_buttons = {}
+
 
 def getDropdownButtons():
     return options_buttons
@@ -16,7 +18,7 @@ def updateButton(new_button):
     options_buttons[button_name] = new_button
 
 
-def displayPage(pygame, settings, font, screen, button, options, scroll):
+def displayPage(settings, font, screen, button, options, scroll):
     buffer_width = font.size(" ")[0] * 0.6 + font.size("▼ ")[0] - font.size("▶ ")[0]
     y = button.y
     x = button.x

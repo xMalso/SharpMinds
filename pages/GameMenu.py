@@ -1,12 +1,15 @@
-def init(pygame, settings, small_font):
-    makeButtons(pygame, settings, small_font)
+global pygame
+import pygame
+def init(settings, small_font):
+    makeButtons(settings, small_font)
 
-def makeButtons(pygame, settings, small_font):
+def makeButtons(settings, small_font):
+    global buttons
     text = small_font.size("Back to Main Menu")
-    games_buttons = [
+    buttons = [
         {
             "Name":
-            "Expose the Impostor",
+            "Expose the Criminal",
             "Pygame Button":
             pygame.Rect(
                 settings["Width"] // 94,
@@ -17,7 +20,7 @@ def makeButtons(pygame, settings, small_font):
             "Font Colour":
             settings["Font Primary Colour"],
             "Meta":
-            "Expose the Impostor",
+            "Expose the Criminal",
             "Image":
             pygame.image.load("assets/images/game1.jpg"),
         },
@@ -74,12 +77,9 @@ def makeButtons(pygame, settings, small_font):
         },
     ]
 
-    return games_buttons
 
-
-def displayPage(pygame, sys, settings, screen, font, title_font, small_font,
-                getFps):
-    buttons = makeButtons(pygame, settings, small_font)
+def displayPage(settings, screen, font, title_font, small_font,
+                getFps, exit):
     back = buttons[-1]
     title_text = title_font.render("Games Menu", settings["Antialiasing Text"],
                                    settings["Font Primary Colour"])
@@ -142,8 +142,7 @@ def displayPage(pygame, sys, settings, screen, font, title_font, small_font,
         )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                exit()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for game in buttons:  # Check for each button
                     if game["Pygame Button"].collidepoint(

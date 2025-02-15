@@ -1,5 +1,7 @@
-def init(pygame, settings, font, title_font):
-    makeButtons(pygame, settings, font)
+global pygame
+import pygame
+def init(settings, font, title_font):
+    makeButtons(settings, font)
     makeText(title_font, settings)
 
 def makeText(title_font, settings):
@@ -7,11 +9,12 @@ def makeText(title_font, settings):
     title_text = title_font.render("Main Menu", settings["Antialiasing Text"],
                                    settings["Font Primary Colour"])
 
-def makeButtons(pygame, settings, font):
+def makeButtons(settings, font):
     text = font.size("Leaderboards and Personal Bests")
     # Screen is split into 5 sections vertically for 5 buttons each section takes 12% of the screen with 1% as a gap between each button and 32% to write the title of the Screen
     # The width is set to half the screen and is centered in the middle of the screen
-    main_menu_buttons = [
+    global buttons
+    buttons = [
         {
             "Name":
             "Games Menu",
@@ -106,12 +109,9 @@ def makeButtons(pygame, settings, font):
             "Quit",
         },
     ]
-    return main_menu_buttons
 
-
-def displayPage(pygame, sys, settings, screen, font, title_font, getFps):
+def displayPage(settings, screen, font, getFps, exit):
     choice = None
-    buttons = makeButtons(pygame, settings, font)
     while True:
         screen.fill(settings["Background Colour"])
         screen.blit(
@@ -143,8 +143,7 @@ def displayPage(pygame, sys, settings, screen, font, title_font, getFps):
             )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                exit()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for button in buttons:  # Check for each button
                     if button["Pygame Button"].collidepoint(

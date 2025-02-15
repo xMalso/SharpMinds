@@ -1,4 +1,5 @@
-import math, random
+global pygame, math, random
+import pygame, math, random
 
 
 def overlap(new_x, new_y):
@@ -45,7 +46,7 @@ def split_text(font, max_width):
     return lines
 
 
-def Game1(pygame, sys, settings, screen, font, getFps):
+def Game1(settings, screen, font, getFps, exit):
     global radius, circles, despawn_time, max_score
     difficulty = settings["Adaptive Difficulty"][0]
     return_text = split_text(font, settings["Width"] // 4)
@@ -80,13 +81,13 @@ def Game1(pygame, sys, settings, screen, font, getFps):
             red_count += 1
         circles.append(coords + (colour, current_frame))
         last_tick = current_frame
-    while start + 30000 > current_frame:
+    duration = 30000
+    while start + duration > current_frame:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 score = max(removeCircle(event.pos, current_frame) + score, 0)
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                exit()
                 return None, None, "Quit"
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -113,7 +114,7 @@ def Game1(pygame, sys, settings, screen, font, getFps):
             settings["Antialiasing Text"],
             settings["Background Font Colour"],
         )
-        remaining_time = 30 - (current_frame - start) / 1000
+        remaining_time = (duration - (current_frame - start)) / 1000
         if remaining_time >= 10:
             remaining_time = int(remaining_time)
         # elif remaining_time >= 0:

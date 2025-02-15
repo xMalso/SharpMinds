@@ -1,8 +1,9 @@
-def init(pygame, settings, font, title_font, ):
-    makeButtons(pygame, settings, font)
+import pygame
+def init(settings, font, title_font):
+    makeButtons(settings, font)
     makeText(settings, title_font)
 
-def makeButtons(pygame, settings, font):
+def makeButtons(settings, font):
     global buttons
     text_width, text_height = font.size("Leaderboards")
     buttons = [
@@ -52,8 +53,8 @@ def makeText(settings, title_font):
     game_over_text_rect.midtop = (settings["Width"] // 2,
                                   settings["Height"] // 30)
 
-def displayPage(pygame, sys, screen, settings, font,
-                score, getFps):
+def displayPage(screen, settings, font, game,
+                score, getFps, exit):
     score_text = font.render(f"Score: {int(score)}", True,
                              settings["Background Font Colour"])
     score_text_rect = score_text.get_rect()
@@ -89,8 +90,7 @@ def displayPage(pygame, sys, screen, settings, font,
         getFps()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                exit()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for button in buttons:
                     if button["Pygame Button"].collidepoint(event.pos):

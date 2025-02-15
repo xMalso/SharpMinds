@@ -1,4 +1,5 @@
-global colour_buttons, selected
+global colour_buttons, selected, pygame
+import pygame
 selected = False
 colour_buttons = {}
 
@@ -21,7 +22,7 @@ def selectInput(selection):
     selected = selection
 
 
-def displayPage(pygame, settings, font, screen, button, colour_picker_buttons, scroll, input_text):
+def displayPage(settings, font, screen, button, colour_picker_buttons, scroll, input_text):
     y = button["Pygame Button"].y
     x = button["Pygame Button"].x
     width = button["Pygame Button"].width
