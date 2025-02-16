@@ -117,11 +117,8 @@ def Game1(settings, screen, font, getFps, exit):
         remaining_time = (duration - (current_frame - start)) / 1000
         if remaining_time >= 10:
             remaining_time = int(remaining_time)
-        # elif remaining_time >= 0:
         else:
-            remaining_time = math.trunc(remaining_time * 10) / 10
-        # else:
-        #     remaining_time = math.trunc(remaining_time * 100) / 100
+            remaining_time = int(remaining_time * 10) / 10
         time_text = font.render(
             f"Time: {remaining_time}s",
             settings["Antialiasing Text"],

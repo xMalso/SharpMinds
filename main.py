@@ -200,7 +200,7 @@ def loadUp():
         "Background Colour": (31, 31, 31),
         "Background Font Colour": (217, 217, 217),
         "Grid Background Colour": (63, 63, 63),
-        "Grid Line Colour": (0, 0, 0),
+        "Grid Line Colour": (217, 217, 217),
         "Dropdown Background Colour": (63, 63, 63),
         "Dropdown Font Colour": (217, 217, 217),
         "Input Background Colour": (85, 85, 85),
@@ -244,6 +244,8 @@ def loadUpValues():
     mainMenuInit(settings, font, title_font)
     gameMenuInit(settings, small_font)
     gameOverInit(settings, font, title_font)
+    game2Init(settings, small_font, font)
+
 
 def getFps():
     global frame, i, screen, text_surface, settings, font
@@ -361,7 +363,6 @@ while True:  # Main loop
             game = "Expose the Criminal"
             adjustDifficulty(adjustment)
     elif meta == "Memory Experiment":
-        print(f"Page '{meta}' is currently in development, sending back to main menu.")
         score, adjustment, meta = Game2(settings, screen, font, getFps, exit)
         if score != None:
             game = "Memory Experiment"

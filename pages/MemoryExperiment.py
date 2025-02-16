@@ -7,41 +7,43 @@ def init(settings, small_font, font):
 
 
 def makeButtons(settings, small_font, font):
-    global buttons
-    text = small_font.size("Back to Main Menu")
+    # global buttons
+    # text = small_font.size("Back to Main Menu")
+    global ready_button
     ready_text = font.size("Ready")
-    buttons = [
-        {
-            "Text": "Back to Main Menu",
-            "Pygame Button": pygame.Rect(
-                settings["Width"] // 94,
-                settings["Height"] // 16,
-                text[0] + settings["Width"] // 64,
-                text[1] + settings["Height"] // 90,
-            ),
-            "Colour": settings["Button Quinary Colour"],
-            "Font Colour": settings["Font Quinary Colour"],
-            "Meta": "Main Menu",
-        },
-        {
-            "Text": "Ready",
-            "Pygame Button": pygame.Rect(
-                settings["Width"] // 2 - (ready_text[0] + settings["Width"] // 64) // 2,
-                int(settings["Height"] * 0.9)
-                - (ready_text[1] + settings["Height"] // 90) // 2,
-                ready_text[0] + settings["Width"] // 64,
-                ready_text[1] + settings["Height"] // 90,
-            ),
-            "Colour": settings["Button Primary Colour"],
-            "Font Colour": settings["Font Primary Colour"],
-            "Meta": "Ready",
-        },
-    ]
+    # buttons = [
+    # {
+    #     "Text": "Back to Main Menu",
+    #     "Pygame Button": pygame.Rect(
+    #         settings["Width"] // 94,
+    #         settings["Height"] // 16,
+    #         text[0] + settings["Width"] // 64,
+    #         text[1] + settings["Height"] // 90,
+    #     ),
+    #     "Colour": settings["Button Quinary Colour"],
+    #     "Font Colour": settings["Font Quinary Colour"],
+    #     "Meta": "Main Menu",
+    # },
+
+    # {
+    ready_button = {
+        "Text": "Ready",
+        "Pygame Button": pygame.Rect(
+            settings["Width"] // 2 - (ready_text[0] + settings["Width"] // 64) // 2,
+            int(settings["Height"] * 0.9)
+            - (ready_text[1] + settings["Height"] // 90) // 2,
+            ready_text[0] + settings["Width"] // 64,
+            ready_text[1] + settings["Height"] // 90,
+        ),
+        "Colour": settings["Button Primary Colour"],
+        "Font Colour": settings["Font Primary Colour"],
+        "Meta": "Ready",
+    }
 
 
 def findBestGrid():
-    target = 10 * difficulty**0.5
-    target = int(round(target))
+    target = avg
+    target = round(target)
 
     best_diff = target
     best_pair = (None, None)
@@ -135,11 +137,15 @@ def split_text(font, max_width):
 
 
 def Game2(settings, screen, font, getFps, exit):
-    global difficulty, buttons, rows, cols, button_side, radius, margin_width, margin_height, score, return_text
+    global difficulty, buttons, rows, cols, button_side, radius, margin_width, margin_height, score, return_text, multiplier, pause_duration, avg
+    difficulty = settings["Adaptive Difficulty"][1]
+    pause_duration = 10000
+    multiplier = (difficulty - 1) / 10 + 1
     score = 0
     return_text = split_text(font, settings["Width"] // 4)
-    difficulty = settings["Adaptive Difficulty"][1]
+    avg = difficulty**0.5 * 10
     cols, rows = findBestGrid()
+    avg = int(avg // 2)
     button_width = (settings["Width"] * 0.8 + 1) // cols - 1
     button_height = (settings["Height"] * 0.8 + 1) // rows - 1
     button_side = min(button_width, button_height)
@@ -160,17 +166,26 @@ def Game2(settings, screen, font, getFps, exit):
             }
             button_row.append(button)
             buttons.append(button_row)
-    # for i in range(5):
-    val = cycle(settings, getFps, screen, font, exit)
-    return val
+    rounds = 3
+    for i in range(rounds):
+        score, adjustment, meta = cycle(i, settings, getFps, screen, font, exit)
+        if score is None:
+            return (score, adjustment, meta)
+    adjustment = ((score / rounds) - (540 * multiplier)) / 100
+    return (score, adjustment, meta)
 
 
-def cycle(settings, getFps, screen, font, exit):
+def cycle(round_number, settings, getFps, screen, font, exit):
     global pattern
+    round_text = font.render(
+        f"Round {round_number + 1}",
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+    )
     all_positions = [(r, c) for r in range(rows) for c in range(cols)]
-    num_shapes = int(difficulty**0.5 * 7.5) + random.randint(-2, 2)
+    num_shapes = avg + random.randint(-2, 2)
     random.shuffle(all_positions)
-    pattern = all_positions[:num_shapes]
+    pattern = set(all_positions[:num_shapes])
     for r, c in pattern:
         button = buttons[r][c]
         button["Shape"] = random.choice(["Circle", "Square", "Triangle"])
@@ -192,11 +207,12 @@ def cycle(settings, getFps, screen, font, exit):
     ready = False
     while not ready:
         screen.fill(settings["Background Colour"])
-        for button in buttons:
-            pygame.draw.rect(screen,
-                button["Colour"],
-                button["Pygame Button"]
-                )
+        # for button in buttons:
+        #     pygame.draw.rect(screen,
+        #         button["Colour"],
+        #         button["Pygame Button"]
+        #         )
+        pygame.draw.rect(screen, ready_button["Colour"], ready_button["Pygame Button"])
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()
@@ -206,14 +222,17 @@ def cycle(settings, getFps, screen, font, exit):
                     return None, None, "Game Menu"
             # Only allow clicking during the replication phase.
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                for button in buttons:
-                    if button["Pygame Button"].collidepoint(event.pos):
-                        meta = button["Meta"]
-                        if meta == "Main Menu":
-                            return None, None, "Main Menu"
-                        elif meta == "Ready":
-                            ready = True
-        
+                # for button in buttons:
+                #     if button["Pygame Button"].collidepoint(event.pos):
+                #         meta = button["Meta"]
+                #         if meta == "Ready":
+                #             ready = True
+                if ready_button["Pygame Button"].collidepoint(event.pos):
+                    if ready_button["Meta"] == "Ready":
+                        ready = True
+                        # elif meta == "Main Menu":
+                        #     return None, None, "Main Menu"
+
             # if state == "replicate":
             #     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             #         pos = pygame.mouse.get_pos()
@@ -238,8 +257,110 @@ def cycle(settings, getFps, screen, font, exit):
             #                             result_message = "Failure!"
             #                         state = "result"
 
-
         draw_grid(screen, settings)
+        height = settings["Height"] // 200
+        for line in return_text:
+            text = font.render(
+                line,
+                settings["Antialiasing Text"],
+                settings["Background Font Colour"],
+            )
+            screen.blit(
+                text,
+                (
+                    settings["Width"] * 7 // 8
+                    - text.get_width() // 2
+                    - settings["Width"] // 200,
+                    height,
+                ),
+            )
+            height += text.get_height()
+        screen.blit(
+            round_text,
+            (
+                (settings["Width"] - round_text.get_width()) // 2,
+                settings["Height"] // 200,
+            ),
+        )
+        score_text = font.render(
+            f"Score: {int(score)}",
+            settings["Antialiasing Text"],
+            settings["Background Font Colour"],
+        )
+        screen.blit(
+            score_text,
+            (
+                (settings["Width"] - score_text.get_width()) // 2,
+                settings["Height"] // 200 + round_text.get_height(),
+            ),
+        )
+        getFps()
+        pygame.display.flip()
+    current = start = pygame.time.get_ticks()
+    remaining_time = int((pause_duration - (current - start)) / 100) / 10
+    while remaining_time > 0:
+        screen.fill(settings["Background Colour"])
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+                return None, None, "Quit"
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return None, None, "Game Menu"
+        current = pygame.time.get_ticks()
+        remaining_time = int((pause_duration - (current - start)) / 100) / 10
+        time_text = font.render(
+            f"Time: {remaining_time}s",
+            settings["Antialiasing Text"],
+            settings["Background Font Colour"],
+        )
+        screen.blit(
+            time_text,
+            (
+                (settings["Width"] - time_text.get_width()) // 2,
+                (settings["Height"] - time_text.get_height()) // 2,
+            ),
+        )
+        height = settings["Height"] // 200
+        for line in return_text:
+            text = font.render(
+                line,
+                settings["Antialiasing Text"],
+                settings["Background Font Colour"],
+            )
+            screen.blit(
+                text,
+                (
+                    settings["Width"] * 7 // 8
+                    - text.get_width() // 2
+                    - settings["Width"] // 200,
+                    height,
+                ),
+            )
+            height += text.get_height()
+        screen.blit(
+            round_text,
+            (
+                (settings["Width"] - round_text.get_width()) // 2,
+                settings["Height"] // 200,
+            ),
+        )
+        score_text = font.render(
+            f"Score: {int(score)}",
+            settings["Antialiasing Text"],
+            settings["Background Font Colour"],
+        )
+        screen.blit(
+            score_text,
+            (
+                (settings["Width"] - score_text.get_width()) // 2,
+                settings["Height"] // 200 + round_text.get_height(),
+            ),
+        )
+        getFps()
+        pygame.display.flip()
+    while True:
+        screen.fill(settings["Background Colour"])
         height = settings["Height"] // 200
         for line in return_text:
             text = font.render(
@@ -262,7 +383,6 @@ def cycle(settings, getFps, screen, font, exit):
             settings["Antialiasing Text"],
             settings["Background Font Colour"],
         )
-
         screen.blit(
             score_text,
             (
@@ -270,7 +390,22 @@ def cycle(settings, getFps, screen, font, exit):
                 settings["Height"] // 200,
             ),
         )
-        return None, None, "Game Menu"
+        round_text = font.render(
+            f"Round {round_number + 1}",
+            settings["Antialiasing Text"],
+            settings["Background Font Colour"],
+        )
+        screen.blit(
+            round_text,
+            (
+                (settings["Width"] - round_text.get_width()) // 2,
+                settings["Height"] // 200 + score_text.get_height(),
+            ),
+        )
+        getFps()
+        pygame.display.flip()
+        if round_number == -1:
+            break
 
         # state = 'memorize'
         # memorize_duration = 10 * 1000  # 10 seconds (in milliseconds)
@@ -285,72 +420,78 @@ def cycle(settings, getFps, screen, font, exit):
         # dt = clock.tick(60)  # Limit to 60 FPS
 
         # --- State Transitions ---
-        return None, None, "Game Menu"
-        if state == "memorize":
-            # After 10 seconds, hide the pattern by resetting all buttons to Button Primary Colour.
-            current_time = pygame.time.get_ticks()
-            if current_time - memorize_start_time >= memorize_duration:
-                for r in range(rows):
-                    for c in range(cols):
-                        buttons[r][c]["Colour"] = settings["Button Primary Colour"]
-                state = "replicate"
+        # if state == "memorize":
+        #     # After 10 seconds, hide the pattern by resetting all buttons to Button Primary Colour.
+        #     current_time = pygame.time.get_ticks()
+        #     if current_time - memorize_start_time >= memorize_duration:
+        #         for r in range(rows):
+        #             for c in range(cols):
+        #                 buttons[r][c]["Colour"] = settings["Button Primary Colour"]
+        #         state = "replicate"
 
-        # --- Drawing ---
-        screen.fill(settings["Background Colour"])
+        # # --- Drawing ---
+        # screen.fill(settings["Background Colour"])
 
-        # Draw all buttons on the grid.
-        for row in buttons:
-            for btn in row:
-                draw_button(screen, btn, font)
+        # # Draw all buttons on the grid.
+        # for row in buttons:
+        #     for btn in row:
+        #         draw_button(screen, btn, font)
 
-        # Display text based on the current state.
-        if state == "memorize":
-            remaining_time = max(
-                0,
-                (memorize_duration - (pygame.time.get_ticks() - memorize_start_time))
-                // 1000,
-            )
-            timer_text = font.render(
-                f"Memorize: {remaining_time}",
-                settings["Antialiasing Text"],
-                settings["Background Font Colour"],
-            )
-            screen.blit(
-                timer_text,
-                (
-                    settings["Width"] // 2 - timer_text.get_width() // 2,
-                    settings["Height"] - timer_text.get_height() - 20,
-                ),
-            )
-        elif state == "replicate":
-            instruct_text = font.render(
-                "Replicate the pattern by clicking the buttons",
-                settings["Antialiasing Text"],
-                settings["Background Font Colour"],
-            )
-            screen.blit(
-                instruct_text,
-                (
-                    settings["Width"] // 2 - instruct_text.get_width() // 2,
-                    settings["Height"] - instruct_text.get_height() - 20,
-                ),
-            )
-        elif state == "result":
-            result_text = font.render(
-                result_message,
-                settings["Antialiasing Text"],
-                settings["Background Font Colour"],
-            )
-            screen.blit(
-                result_text,
-                (
-                    settings["Width"] // 2 - result_text.get_width() // 2,
-                    settings["Height"] - result_text.get_height() - 20,
-                ),
-            )
+        # # Display text based on the current state.
+        # if state == "memorize":
+        #     remaining_time = max(
+        #         0,
+        #         (memorize_duration - (pygame.time.get_ticks() - memorize_start_time))
+        #         // 1000,
+        #     )
+        #     timer_text = font.render(
+        #         f"Memorize: {remaining_time}",
+        #         settings["Antialiasing Text"],
+        #         settings["Background Font Colour"],
+        #     )
+        #     screen.blit(
+        #         timer_text,
+        #         (
+        #             settings["Width"] // 2 - timer_text.get_width() // 2,
+        #             settings["Height"] - timer_text.get_height() - 20,
+        #         ),
+        #     )
+        # elif state == "replicate":
+        #     instruct_text = font.render(
+        #         "Replicate the pattern by clicking the buttons",
+        #         settings["Antialiasing Text"],
+        #         settings["Background Font Colour"],
+        #     )
+        #     screen.blit(
+        #         instruct_text,
+        #         (
+        #             settings["Width"] // 2 - instruct_text.get_width() // 2,
+        #             settings["Height"] - instruct_text.get_height() - 20,
+        #         ),
+        #     )
+        # elif state == "result":
+        #     result_text = font.render(
+        #         result_message,
+        #         settings["Antialiasing Text"],
+        #         settings["Background Font Colour"],
+        #     )
+        #     screen.blit(
+        #         result_text,
+        #         (
+        #             settings["Width"] // 2 - result_text.get_width() // 2,
+        #             settings["Height"] - result_text.get_height() - 20,
+        #         ),
+        #     )
 
-        getFps()
-        pygame.display.flip()
+        # getFps()
+        # pygame.display.flip()
+    common = pattern & guess  # Elements in both sets
+    missing = pattern - guess  # Elements in pattern but not in guess
+    extra = guess - pattern  # Elements in guess but not in pattern
+
+    print(f"Common elements: {len(common)} -> {common}")
+    print(f"Missing elements: {len(missing)} -> {missing}")
+    print(f"Extra elements: {len(extra)} -> {extra}")
 
 
 # Example usage:
