@@ -2,8 +2,8 @@ global random, pygame
 import random, pygame
 
 
-def init(settings):
-    makeButtons()
+def init(settings, small_font, font):
+    makeButtons(settings, small_font, font)
 
 
 def makeButtons(settings, small_font, font):
@@ -12,7 +12,7 @@ def makeButtons(settings, small_font, font):
     ready_text = font.size("Ready")
     buttons = [
         {
-            "Name": "Back to Main Menu",
+            "Text": "Back to Main Menu",
             "Pygame Button": pygame.Rect(
                 settings["Width"] // 94,
                 settings["Height"] // 16,
@@ -24,7 +24,7 @@ def makeButtons(settings, small_font, font):
             "Meta": "Main Menu",
         },
         {
-            "Name": "Ready",
+            "Text": "Ready",
             "Pygame Button": pygame.Rect(
                 settings["Width"] // 2 - (ready_text[0] + settings["Width"] // 64) // 2,
                 int(settings["Height"] * 0.9)
@@ -191,7 +191,12 @@ def cycle(settings, getFps, screen, font, exit):
     # 'result'   : display the outcome
     ready = False
     while not ready:
-
+        screen.fill(settings["Background Colour"])
+        for button in buttons:
+            pygame.draw.rect(screen,
+                button["Colour"],
+                button["Pygame Button"]
+                )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()
@@ -201,7 +206,14 @@ def cycle(settings, getFps, screen, font, exit):
                     return None, None, "Game Menu"
             # Only allow clicking during the replication phase.
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                pass
+                for button in buttons:
+                    if button["Pygame Button"].collidepoint(event.pos):
+                        meta = button["Meta"]
+                        if meta == "Main Menu":
+                            return None, None, "Main Menu"
+                        elif meta == "Ready":
+                            ready = True
+        
             # if state == "replicate":
             #     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             #         pos = pygame.mouse.get_pos()
@@ -226,7 +238,7 @@ def cycle(settings, getFps, screen, font, exit):
             #                             result_message = "Failure!"
             #                         state = "result"
 
-        screen.fill(settings["Background Colour"])
+
         draw_grid(screen, settings)
         height = settings["Height"] // 200
         for line in return_text:
