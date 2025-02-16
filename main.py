@@ -109,9 +109,6 @@ class Settings:
                 f"Error: Incorrect format in settings.txt ({e}). Using default values."
             )
         global choice
-        self.settings["Font Size"] = (
-            self.settings["Width"] // self.settings["Font Size"]
-        )
         choice = self.settings.copy()
         del choice["Font Type"]
         self.saveSettings()
@@ -162,19 +159,14 @@ class Settings:
         pygame.display.flip()
 
     def saveSettings(self):
-        choice["Font Size"] = choice["Width"] // choice["Font Size"]
         with open("settings.txt", "w") as file:
             for key, value in choice.items():
                 file.write(f'"{key}": {value},\n')
         self.settings = choice.copy()
-        choice["Font Size"] = choice["Width"] // choice["Font Size"]
         if os.path.isfile(os.path.join(r"assets/fonts/fonts", self.settings["Font"])):
             self.settings["Font Type"] = "Custom"
         else:
             self.settings["Font Type"] = "System"
-        self.settings["Font Size"] = (
-            self.settings["Width"] // self.settings["Font Size"]
-        )
 
 
 def loadUp():
@@ -252,11 +244,6 @@ def loadUpValues():
     mainMenuInit(settings, font, title_font)
     gameMenuInit(settings, small_font)
     gameOverInit(settings, font, title_font)
-    try:
-        meta = meta
-    except:
-        meta = "Main Menu"
-
 
 def getFps():
     global frame, i, screen, text_surface, settings, font
@@ -347,6 +334,7 @@ def adjustDifficulty(adjustment):
 
 
 loadUp()
+meta = "Main Menu"
 # meta = "Game Over"
 # game = "Expose the Criminal"
 # score = 530.7385
