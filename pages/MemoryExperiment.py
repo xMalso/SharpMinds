@@ -3,7 +3,40 @@ import random, pygame
 
 
 def init(settings):
-    pass
+    makeButtons()
+
+
+def makeButtons(settings, small_font, font):
+    global buttons
+    text = small_font.size("Back to Main Menu")
+    ready_text = font.size("Ready")
+    buttons = [
+        {
+            "Name": "Back to Main Menu",
+            "Pygame Button": pygame.Rect(
+                settings["Width"] // 94,
+                settings["Height"] // 16,
+                text[0] + settings["Width"] // 64,
+                text[1] + settings["Height"] // 90,
+            ),
+            "Colour": settings["Button Quinary Colour"],
+            "Font Colour": settings["Font Quinary Colour"],
+            "Meta": "Main Menu",
+        },
+        {
+            "Name": "Ready",
+            "Pygame Button": pygame.Rect(
+                settings["Width"] // 2 - (ready_text[0] + settings["Width"] // 64) // 2,
+                int(settings["Height"] * 0.9)
+                - (ready_text[1] + settings["Height"] // 90) // 2,
+                ready_text[0] + settings["Width"] // 64,
+                ready_text[1] + settings["Height"] // 90,
+            ),
+            "Colour": settings["Button Primary Colour"],
+            "Font Colour": settings["Font Primary Colour"],
+            "Meta": "Ready",
+        },
+    ]
 
 
 def findBestGrid():
@@ -28,20 +61,7 @@ def findBestGrid():
 
 
 def draw_grid(screen, settings):
-    for row in range(rows + 1):
-        pygame.draw.line(
-            screen,
-            settings["Grid Line Colour"],
-            (margin_width, row * (button_side + 1) + margin_height + 1),
-            (1 - margin_width, row * (button_side + 1) + margin_height + 1),
-        )
-    for col in range(cols + 1):
-        pygame.draw.line(
-            screen,
-            settings["Grid Line Colour"],
-            (col * (button_side + 1) + margin_width + 1, margin_height),
-            (col * (button_side + 1) + margin_width + 1, 1 - margin_height),
-        )
+    draw_empty_grid(screen, settings)
     for loc in pattern:
         r, c = loc
         button = buttons[r][c]
@@ -74,6 +94,23 @@ def draw_grid(screen, settings):
                 ),
             ]
             pygame.draw.polygon(screen, button["Colour"], points)
+
+
+def draw_empty_grid(screen, settings):
+    for row in range(rows + 1):
+        pygame.draw.line(
+            screen,
+            settings["Grid Line Colour"],
+            (margin_width, row * (button_side + 1) + margin_height + 1),
+            (1 - margin_width, row * (button_side + 1) + margin_height + 1),
+        )
+    for col in range(cols + 1):
+        pygame.draw.line(
+            screen,
+            settings["Grid Line Colour"],
+            (col * (button_side + 1) + margin_width + 1, margin_height),
+            (col * (button_side + 1) + margin_width + 1, 1 - margin_height),
+        )
 
 
 def split_text(font, max_width):
@@ -163,29 +200,31 @@ def cycle(settings, getFps, screen, font, exit):
                 if event.key == pygame.K_ESCAPE:
                     return None, None, "Game Menu"
             # Only allow clicking during the replication phase.
-            if state == "replicate":
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    pos = pygame.mouse.get_pos()
-                    # Check which button (if any) was clicked.
-                    for r in range(rows):
-                        for c in range(cols):
-                            btn = buttons[r][c]
-                            if (
-                                btn["rect"].collidepoint(pos)
-                                and (r, c) not in player_selection
-                            ):
-                                # Mark the player's selection by changing its colour to Game Secondary Colour.
-                                btn["Colour"] = settings["Game Secondary Colour"]
-                                player_selection.append((r, c))
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                pass
+            # if state == "replicate":
+            #     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            #         pos = pygame.mouse.get_pos()
+            #         # Check which button (if any) was clicked.
+            #         for r in range(rows):
+            #             for c in range(cols):
+            #                 btn = buttons[r][c]
+            #                 if (
+            #                     btn["rect"].collidepoint(pos)
+            #                     and (r, c) not in player_selection
+            #                 ):
+            #                     # Mark the player's selection by changing its colour to Game Secondary Colour.
+            #                     btn["Colour"] = settings["Game Secondary Colour"]
+            #                     player_selection.append((r, c))
 
-                                # When the player has selected enough buttons, check if they match the pattern.
-                                if len(player_selection) == len(pattern):
-                                    # For this example, the order does not matter.
-                                    if sorted(player_selection) == sorted(pattern):
-                                        result_message = "Success!"
-                                    else:
-                                        result_message = "Failure!"
-                                    state = "result"
+            #                     # When the player has selected enough buttons, check if they match the pattern.
+            #                     if len(player_selection) == len(pattern):
+            #                         # For this example, the order does not matter.
+            #                         if sorted(player_selection) == sorted(pattern):
+            #                             result_message = "Success!"
+            #                         else:
+            #                             result_message = "Failure!"
+            #                         state = "result"
 
         screen.fill(settings["Background Colour"])
         draw_grid(screen, settings)
@@ -220,7 +259,7 @@ def cycle(settings, getFps, screen, font, exit):
             ),
         )
         return None, None, "Game Menu"
-    
+
         # state = 'memorize'
         # memorize_duration = 10 * 1000  # 10 seconds (in milliseconds)
         # memorize_start_time = pygame.time.get_ticks()
