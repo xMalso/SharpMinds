@@ -1,6 +1,5 @@
-global colour_buttons, selected, pygame
+global colour_buttons, pygame
 import pygame
-selected = False
 colour_buttons = {}
 
 def getColourButtons():
@@ -17,16 +16,11 @@ def updateButton(new_button):
     colour_buttons[button_name] = new_button
 
 
-def selectInput(selection):
-    global selected
-    selected = selection
-
-
 def displayPage(settings, font, screen, button, colour_picker_buttons, scroll, input_text):
     y = button["Pygame Button"].y
     x = button["Pygame Button"].x
     width = button["Pygame Button"].width
-    for option in colour_picker_buttons[2:]:
+    for option in colour_picker_buttons:
         temp = pygame.Rect(
             x + width + option["Buffer Size"][0],
             y - option["Buffer Size"][1] - scroll,
@@ -35,8 +29,10 @@ def displayPage(settings, font, screen, button, colour_picker_buttons, scroll, i
         )
         updateButton({"Name": option["Name"], "Pygame Button": temp})
         pygame.draw.rect(screen, option["Colour"], temp, border_radius=25)
+        if option["Name"] == "Input": text = f"#{input_text}"
+        else: text = option["Text"]
         text_surface = font.render(
-            f"{option["Text"]}",
+            text,
             settings["Antialiasing Text"],
             option["Font Colour"],
         )
@@ -47,22 +43,6 @@ def displayPage(settings, font, screen, button, colour_picker_buttons, scroll, i
                 temp.y + (temp.height - text_surface.get_height()) // 2,
             ),
         )
-    global selected
-    if selected:
-        button = colour_picker_buttons[1]
-    else:
-        button = colour_picker_buttons[0]
-    temp = pygame.Rect(
-        x + width + button["Buffer Size"][0],
-        y - button["Buffer Size"][1] - scroll,
-        button["Size"][0],
-        button["Size"][1],
-    )
-    updateButton({"Name": button["Name"], "Pygame Button": temp})
-    pygame.draw.rect(screen, button["Colour"], temp, border_radius=25)
-    text_surface = font.render(
-        input_text, settings["Antialiasing Text"], button["Font Colour"]
-    )
     screen.blit(
         text_surface,
         (

@@ -7,10 +7,9 @@ from .ColourPicker import (
     displayPage as colourPickerDisplay,
     resetColourButtons,
     getColourButtons,
-    selectInput,
 )
 
-global os, pygame, current_colour_picker, current_dropdown, options_buttons
+global os, pygame, current_colour_picker, current_dropdown, options_buttons, backspace_held
 import os, pygame
 
 current_colour_picker = None
@@ -21,7 +20,7 @@ confirmation_text = {
     "Discard": "discard changes",
     "Default": "return to default settings",
 }
-
+backspace_held = False
 
 def init(settings, font, small_font):
     makeColourPickerButtons(settings, font)
@@ -47,17 +46,6 @@ def makeColourPickerButtons(settings, font):
                 (settings["Height"] * 3) // 128 + text_size[1] * 2,
             ),
             "Colour": settings["Input Background Colour"],
-            "Font Colour": settings["Input Font Colour"],
-        },
-        {
-            "Name": "Selected Input",
-            "Size": text_size,
-            "Buffer Size": (
-                settings["Width"] // 100,
-                # (settings["Width"] * 21) // 100,
-                (settings["Height"] * 3) // 128 + text_size[1] * 2,
-            ),
-            "Colour": settings["Selected Input Colour"],
             "Font Colour": settings["Input Font Colour"],
         },
         {
@@ -239,7 +227,7 @@ def makeButtons(settings, small_font):
 
 
 def checkCollide(loc):
-    global current_dropdown, current_colour_picker, input_text, input_selected, choice
+    global current_dropdown, current_colour_picker, input_text, input_selected, choice, backspace_held
     colour_buttons = getColourButtons()
     dropdown_buttons = getDropdownButtons()
     if current_dropdown != None:
@@ -252,32 +240,31 @@ def checkCollide(loc):
         for button in colour_buttons.values():
             if button["Pygame Button"].collidepoint(loc):
                 if button["Name"] == "Confirm":
-                    input_text = input_text[1:].ljust(6, "0")
+                    input_text = input_text.ljust(6, "0")
                     hex = tuple(int(input_text[i : i + 2], 16) for i in (0, 2, 4))
                     choice[current_colour_picker["Name"]] = hex
                     current_colour_picker = None
-                    input_text = "#"
+                    input_text = ""
                     input_selected = False
-                    selectInput(False)
+                    backspace_held = False
                     resetColourButtons()
                     return
                 elif button["Name"] == "Discard":
                     current_colour_picker = None
-                    input_text = "#"
+                    input_text = ""
                     input_selected = False
-                    selectInput(False)
+                    backspace_held = False
                     resetColourButtons()
                     return
                 elif button["Name"] == "Input":
-                    input_selected = not input_selected
-                    selectInput(input_selected)
+                    input_selected = True
                     return
                 else:
                     print("Unknown colour picker button.")
         current_colour_picker = None
-        input_text = "#"
+        input_text = ""
         input_selected = False
-        selectInput(False)
+        backspace_held = False
         resetColourButtons()
 
 
@@ -312,7 +299,7 @@ def pasteButton(button, settings, screen):
 
 
 def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps, exit):
-    global current_dropdown, current_colour_picker, input_selected, choice, input_text, small_font
+    global current_dropdown, current_colour_picker, input_selected, choice, input_text, small_font, backspace_held
     small_font = small_fonts
     font_height = font.size("Save and Leave")[1]
     content_height = (
@@ -531,7 +518,8 @@ def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps
                                 current_dropdown = button
                             elif button["Type"] == "Colour Picker":
                                 current_colour_picker = button
-                                input_text = "#{:02X}{:02X}{:02X}".format(
+                                input_selected = True
+                                input_text = "{:02X}{:02X}{:02X}".format(
                                     *choice[current_colour_picker["Name"]]
                                 )
                 if confirmation != None:
@@ -600,10 +588,19 @@ def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps
                         return None, "Main Menu"
                 elif input_selected:
                     if event.key == pygame.K_BACKSPACE:
-                        if len(input_text) > 1:
-                            input_text = input_text[:-1]
+                        backspace_held = True
+                        time_held = pygame.time.get_ticks() + 250
+                        input_text = input_text[:-1]
                     elif event.unicode.upper() in "0123456789ABCDEF":
-                        if len(input_text) != 7:
+                        if len(input_text) != 6:
                             input_text += event.unicode.upper()
+            elif input_selected and event.type == pygame.KEYUP:
+                if event.key == pygame.K_BACKSPACE:
+                    backspace_held = False
+        if backspace_held:
+            current = pygame.time.get_ticks()
+            if current - time_held > 60:
+                time_held = current
+                input_text = input_text[:-1]
         getFps()
         pygame.display.flip()

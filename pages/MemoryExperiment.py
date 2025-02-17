@@ -1,5 +1,5 @@
-global random, pygame
-import random, pygame
+global random, pygame, math
+import random, pygame, math
 
 
 def init(settings, small_font, font):
@@ -9,7 +9,7 @@ def init(settings, small_font, font):
 def makeButtons(settings, small_font, font):
     # global buttons
     # text = small_font.size("Back to Main Menu")
-    global ready_button
+    global ready_button, ready_text
     ready_text = font.size("Ready")
     # buttons = [
     # {
@@ -30,10 +30,10 @@ def makeButtons(settings, small_font, font):
         "Text": "Ready",
         "Pygame Button": pygame.Rect(
             settings["Width"] // 2 - (ready_text[0] + settings["Width"] // 64) // 2,
-            int(settings["Height"] * 0.9)
-            - (ready_text[1] + settings["Height"] // 90) // 2,
+            int(settings["Height"])
+            - (ready_text[1] + settings["Height"] // 50),
             ready_text[0] + settings["Width"] // 64,
-            ready_text[1] + settings["Height"] // 90,
+            ready_text[1],
         ),
         "Colour": settings["Button Primary Colour"],
         "Font Colour": settings["Font Primary Colour"],
@@ -42,25 +42,25 @@ def makeButtons(settings, small_font, font):
 
 
 def findBestGrid():
-    target = avg
-    target = round(target)
+    # target = avg
+    # target = round(target)
 
-    best_diff = target
-    best_pair = (None, None)
-    for i in range(1, target + 1):
-        for j in range(i, min(target + 1, i + 6)):
-            product = i * j
-            diff = abs(product - target)
-            if diff < best_diff:
-                best_diff = diff
-                best_pair = (i, j)
-            elif diff == best_diff:
-                if abs(i - j) < abs(best_pair[0] - best_pair[1]):
-                    best_pair = (i, j)
-        if best_pair[0] < best_pair[1]:
-            best_pair = (best_pair[1], best_pair[0])
-    return best_pair
-
+    # best_diff = target
+    # best_pair = (None, None)
+    # for i in range(1, target + 1):
+    #     for j in range(i, min(target + 1, i + 6)):
+    #         product = i * j
+    #         diff = abs(product - target)
+    #         if diff < best_diff:
+    #             best_diff = diff
+    #             best_pair = (i, j)
+    #         elif diff == best_diff:
+    #             if abs(i - j) < abs(best_pair[0] - best_pair[1]):
+    #                 best_pair = (i, j)
+    #     if best_pair[0] < best_pair[1]:
+    #         best_pair = (best_pair[1], best_pair[0])
+    # return best_pair
+    return math.ceil(avg**0.5), math.ceil(avg**0.5)
 
 def draw_grid(screen, settings):
     draw_empty_grid(screen, settings)
@@ -70,7 +70,6 @@ def draw_grid(screen, settings):
         if button["Shape"] == "Circle":
             pygame.draw.circle(screen, button["Colour"], button["rect"].center, radius)
         elif button["Shape"] == "Square":
-            pygame.draw.rect(screen, settings["Grid Background Colour"], button["rect"])
             pygame.draw.rect(
                 screen,
                 button["Colour"],
@@ -82,36 +81,42 @@ def draw_grid(screen, settings):
                 ),
             )
         else:
-            side_length = min(button["rect"].width, button["rect"].height)
-            height = (side_length * (3**0.5)) / 2
+            height = (radius * (3**0.5)) // 2
             points = [
-                (button["rect"].centerx, button["rect"].centery - height / 2),
+                (button["rect"].centerx, button["rect"].centery - height),
                 (
-                    button["rect"].centerx - side_length / 2,
-                    button["rect"].centery + height / 2,
+                    button["rect"].centerx - radius,
+                    button["rect"].centery + height,
                 ),
                 (
-                    button["rect"].centerx + side_length / 2,
-                    button["rect"].centery + height / 2,
+                    button["rect"].centerx + radius,
+                    button["rect"].centery + height,
                 ),
             ]
             pygame.draw.polygon(screen, button["Colour"], points)
 
 
 def draw_empty_grid(screen, settings):
+    pygame.draw.rect(screen, settings["Grid Background Colour"], (margin_width, margin_height, cols * (button_side + 1), rows * (button_side + 1)))
     for row in range(rows + 1):
         pygame.draw.line(
             screen,
             settings["Grid Line Colour"],
-            (margin_width, row * (button_side + 1) + margin_height + 1),
-            (1 - margin_width, row * (button_side + 1) + margin_height + 1),
+            (margin_width, row * (button_side + 1) + margin_height),
+            (
+                margin_width + (cols) * (button_side + 1),
+                row * (button_side + 1) + margin_height,
+            ),
         )
     for col in range(cols + 1):
         pygame.draw.line(
             screen,
             settings["Grid Line Colour"],
-            (col * (button_side + 1) + margin_width + 1, margin_height),
-            (col * (button_side + 1) + margin_width + 1, 1 - margin_height),
+            (col * (button_side + 1) + margin_width, margin_height),
+            (
+                col * (button_side + 1) + margin_width,
+                (rows) * (button_side + 1) + margin_height,
+            ),
         )
 
 
@@ -146,15 +151,16 @@ def Game2(settings, screen, font, getFps, exit):
     avg = difficulty**0.5 * 10
     cols, rows = findBestGrid()
     avg = int(avg // 2)
-    button_width = (settings["Width"] * 0.8 + 1) // cols - 1
-    button_height = (settings["Height"] * 0.8 + 1) // rows - 1
-    button_side = min(button_width, button_height)
-    radius = int(min(button_side, button_side) * 0.45)
-    margin_width, margin_height = (1 - (button_side * cols)) // 2, (
-        1 - (settings["Height"] * cols)
-    ) // 2
-    button_margin = settings["Width"] // 100, settings["Height"] // 100
-    shape_size = button_side - button_margin[0], button_side - button_margin[1]
+    
+    buffer = (settings["Width"] * .2,max(ready_text[1] * 2, ready_text[1] + settings["Height"] // 50) + settings["Height"] * .2)
+    button_width = (settings["Width"] - buffer[0]) // cols
+    button_height = (settings["Height"] - buffer[1]) // rows
+    button_side = int(min(button_width, button_height)) - 1
+    radius = int(button_side * 0.3)
+    margin_width, margin_height = (
+    (settings["Width"] - (button_side * cols)) // 2, 
+    (settings["Height"] - (button_side * rows)) // 2
+    )
     buttons = []
     for row in range(rows):
         button_row = []
@@ -162,10 +168,10 @@ def Game2(settings, screen, font, getFps, exit):
             x = margin_width + col * (button_side)
             y = margin_height + row * (button_side)
             button = {
-                "rect": pygame.Rect(x, y, *shape_size),
+                "rect": pygame.Rect(x, y, button_side, button_side),
             }
             button_row.append(button)
-            buttons.append(button_row)
+        buttons.append(button_row)
     rounds = 3
     for i in range(rounds):
         score, adjustment, meta = cycle(i, settings, getFps, screen, font, exit)
@@ -183,7 +189,8 @@ def cycle(round_number, settings, getFps, screen, font, exit):
         settings["Background Font Colour"],
     )
     all_positions = [(r, c) for r in range(rows) for c in range(cols)]
-    num_shapes = avg + random.randint(-2, 2)
+    # num_shapes = avg + random.randint(-2, 2)
+    num_shapes = avg
     random.shuffle(all_positions)
     pattern = set(all_positions[:num_shapes])
     for r, c in pattern:
@@ -212,7 +219,6 @@ def cycle(round_number, settings, getFps, screen, font, exit):
         #         button["Colour"],
         #         button["Pygame Button"]
         #         )
-        pygame.draw.rect(screen, ready_button["Colour"], ready_button["Pygame Button"])
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()
@@ -259,6 +265,7 @@ def cycle(round_number, settings, getFps, screen, font, exit):
 
         draw_grid(screen, settings)
         height = settings["Height"] // 200
+        pygame.draw.rect(screen, ready_button["Colour"], ready_button["Pygame Button"])
         for line in return_text:
             text = font.render(
                 line,
@@ -294,6 +301,8 @@ def cycle(round_number, settings, getFps, screen, font, exit):
                 settings["Height"] // 200 + round_text.get_height(),
             ),
         )
+        ready_text = font.render(ready_button["Text"], settings["Antialiasing Text"], ready_button["Font Colour"])
+        screen.blit(ready_text, (ready_button["Pygame Button"].left + settings["Width"] // 128, ready_button["Pygame Button"].top))
         getFps()
         pygame.display.flip()
     current = start = pygame.time.get_ticks()
