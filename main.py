@@ -29,7 +29,6 @@ from pages import *
 
 
 class Settings:
-    # Default incase it wants to be reset to default
 
     def __init__(self):
         global screen, font, pygame
@@ -226,6 +225,9 @@ def loadUp():
         "Game Primary Colour": (0, 255, 127),
         "Game Secondary Colour": (255, 191, 191),
         "Game Tertiary Colour": (0, 0, 255),
+        "Game Primary Font Colour": (0, 0, 0),
+        "Game Secondary Font Colour": (0, 0, 0),
+        "Game Tertiary Font Colour": (0, 0, 0),
         "Adaptive Difficulty": (2, 2, 2),
         # "Scroll Speed": 100,
     }
@@ -244,7 +246,7 @@ def loadUpValues():
     mainMenuInit(settings, font, title_font)
     gameMenuInit(settings, small_font)
     gameOverInit(settings, font, title_font)
-    game2Init(settings, font)
+    game2Init(settings, font, title_font)
 
 
 def getFps():
