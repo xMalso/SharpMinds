@@ -8,10 +8,12 @@ FPS limiter
 Functions and Classes files for main
 folders for each downloaded font instead of filtering each file
 
-
-
-90% correct = no adjustment
+90% correct = avg score aka difficulty wont change
 
 score = % * 600 * ((difficulty - 1) / 10 + 1)
 
 replicate (drag and drop? pick shape and colour and drop?)
+
+
+
+give 1/3 of the points for shape/colour right but not both??

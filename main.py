@@ -244,7 +244,7 @@ def loadUpValues():
     mainMenuInit(settings, font, title_font)
     gameMenuInit(settings, small_font)
     gameOverInit(settings, font, title_font)
-    game2Init(settings, small_font, font)
+    game2Init(settings, font)
 
 
 def getFps():

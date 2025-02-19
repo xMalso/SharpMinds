@@ -25,7 +25,7 @@ def removeCircle(pos, current):
     return 0
 
 
-def split_text(font, max_width):
+def splitText(font, max_width):
     words = ["Press", "ESC", "to", "return", "to", "games", "menu"]
     lines = []
     current_line = ""
@@ -49,7 +49,7 @@ def split_text(font, max_width):
 def Game1(settings, screen, font, getFps, exit):
     global radius, circles, despawn_time, max_score
     difficulty = settings["Adaptive Difficulty"][0]
-    return_text = split_text(font, settings["Width"] // 4)
+    return_text = splitText(font, settings["Width"] // 4)
     circle_colour = {
         "Green": settings["Game Primary Colour"],
         "Red": settings["Game Secondary Colour"],
