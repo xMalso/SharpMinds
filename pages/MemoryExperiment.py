@@ -80,10 +80,6 @@ def makePickerButtons(settings, font):
                 side,
                 side,
             ),
-            # "x": settings["Width"] - (margin_width * 1.15) // 1.3,
-            # "y": settings["Height"] * 0.95 - width,
-            # "Width": width * 2,
-            # "Height": width * 2,
             "Type": "Shape",
         },
         {
@@ -171,30 +167,7 @@ def makePickerButtons(settings, font):
     ]
 
 
-def findBestGrid():
-    # target = avg
-    # target = round(target)
-
-    # best_diff = target
-    # best_pair = (None, None)
-    # for i in range(1, target + 1):
-    #     for j in range(i, min(target + 1, i + 6)):
-    #         product = i * j
-    #         diff = abs(product - target)
-    #         if diff < best_diff:
-    #             best_diff = diff
-    #             best_pair = (i, j)
-    #         elif diff == best_diff:
-    #             if abs(i - j) < abs(best_pair[0] - best_pair[1]):
-    #                 best_pair = (i, j)
-    #     if best_pair[0] < best_pair[1]:
-    #         best_pair = (best_pair[1], best_pair[0])
-    # return best_pair
-    return math.ceil(avg**0.5), math.ceil(avg**0.5)
-
-
 def drawGrid(screen, settings, buffer_width, patterns, shift):
-    # drawEmptyGrid(screen, settings, buffer_width)
     pygame.draw.rect(
         screen,
         settings["Grid Background Colour"],
@@ -265,39 +238,6 @@ def drawGrid(screen, settings, buffer_width, patterns, shift):
             pygame.draw.polygon(screen, details["Colour"], points)
         if shift:
             button["Pygame Button"].left -= margin_width
-
-
-# def drawEmptyGrid(screen, settings, buffer_width):
-#     pygame.draw.rect(
-#         screen,
-#         settings["Grid Background Colour"],
-#         (
-#             buffer_width,
-#             margin_height,
-#             cols * (button_side + 1),
-#             rows * (button_side + 1),
-#         ),
-#     )
-#     for row in range(rows + 1):
-#         pygame.draw.line(
-#             screen,
-#             settings["Grid Line Colour"],
-#             (buffer_width, row * (button_side + 1) + margin_height),
-#             (
-#                 buffer_width + (cols) * (button_side + 1),
-#                 row * (button_side + 1) + margin_height,
-#             ),
-#         )
-#     for col in range(cols + 1):
-#         pygame.draw.line(
-#             screen,
-#             settings["Grid Line Colour"],
-#             (col * (button_side + 1) + buffer_width, margin_height),
-#             (
-#                 col * (button_side + 1) + buffer_width,
-#                 (rows) * (button_side + 1) + margin_height,
-#             ),
-#         )
 
 
 def drawPicker(screen, settings, font):
@@ -487,7 +427,7 @@ def calculateScore(score):
     for r, c in all_positions:
         if (r, c) not in answer and (r, c) not in guess:
             score += max_score / 20
-        elif (r, c) in answer and (r, c) in guess: 
+        elif (r, c) in answer and (r, c) in guess:
             if pattern[(r, c)] == guess[(r, c)]:
                 score += max_score
             elif (
@@ -495,9 +435,6 @@ def calculateScore(score):
                 or pattern[(r, c)]["Shape"] == guess[(r, c)]["Shape"]
             ):
                 score += max_score / 3
-    # for (r, c) in :
-    #     if not((r, c) in answer):
-    #         score += max_score / 20
     return score
 
 
@@ -507,7 +444,7 @@ def Game2(settings, screen, font, getFps, exit):
     difficulty = settings["Adaptive Difficulty"][1]
     multiplier = (difficulty - 1) / 10 + 1
     avg = difficulty**0.5 * 10
-    cols, rows = findBestGrid()
+    cols = rows = math.ceil(avg**0.5)
     avg = int(avg // 3)
     button_width = (settings["Width"] - buffer[0]) // cols
     button_height = (settings["Height"] - buffer[1]) // rows
@@ -549,8 +486,7 @@ def cycle(round_number, settings, getFps, screen, font, exit):
         settings["Background Font Colour"],
     )
     all_positions = [(r, c) for r in range(rows) for c in range(cols)]
-    num_shapes = avg + random.randint(-1, 1)
-    # num_shapes = avg
+    num_shapes = avg
     missing = rows * cols - num_shapes
     max_score = 600 * multiplier / (num_shapes + missing * 0.05)
     random.shuffle(all_positions)
@@ -567,21 +503,6 @@ def cycle(round_number, settings, getFps, screen, font, exit):
                 ]
             ),
         }
-        # button = buttons[r][c]
-        # button["Shape"] = random.choice(["Circle", "Square", "Triangle"])
-        # button["Colour"] = random.choice(
-        #     [
-        #         settings["Game Primary Colour"],
-        #         settings["Game Secondary Colour"],
-        #         settings["Game Tertiary Colour"],
-        #     ]
-        # )
-        # pattern[(r,c)] = {"Colour": button["Colour"], "Shape": button["Shape"]}
-
-    # --- Game States ---
-    # 'memorize' : pattern is visible for 10 seconds
-    # 'replicate': pattern is hidden and the player clicks buttons to reproduce it
-    # 'result'   : display the outcome
     ready = False
     while not ready:
         screen.fill(settings["Background Colour"])
@@ -595,31 +516,6 @@ def cycle(round_number, settings, getFps, screen, font, exit):
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if ready_button["Pygame Button"].collidepoint(event.pos):
                     ready = True
-
-            # if state == "replicate":
-            #     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            #         pos = pygame.mouse.get_pos()
-            #         # Check which button (if any) was clicked.
-            #         for r in range(rows):
-            #             for c in range(cols):
-            #                 btn = buttons[r][c]
-            #                 if (
-            #                     btn["Pygame Button"].collidepoint(pos)
-            #                     and (r, c) not in player_selection
-            #                 ):
-            #                     # Mark the player's selection by changing its colour to Game Secondary Colour.
-            #                     btn["Colour"] = settings["Game Secondary Colour"]
-            #                     player_selection.append((r, c))
-
-            #                     # When the player has selected enough buttons, check if they match the pattern.
-            #                     if len(player_selection) == len(pattern):
-            #                         # For this example, the order does not matter.
-            #                         if sorted(player_selection) == sorted(pattern):
-            #                             result_message = "Success!"
-            #                         else:
-            #                             result_message = "Failure!"
-            #                         state = "result"
-
         drawGrid(screen, settings, margin_width * 2, pattern, True)
         height = settings["Height"] // 200
         pygame.draw.rect(screen, ready_button["Colour"], ready_button["Pygame Button"])
@@ -818,7 +714,6 @@ def cycle(round_number, settings, getFps, screen, font, exit):
             round_text,
             (
                 (settings["Width"] - round_text.get_width()) // 2,
-                # settings["Height"] // 200 + score_text.get_height(),
                 settings["Height"] // 200,
             ),
         )
@@ -881,120 +776,8 @@ def cycle(round_number, settings, getFps, screen, font, exit):
             (
                 (settings["Width"] - answer_text.get_width()) // 2,
                 settings["Height"] // 200,
-            )
+            ),
         )
         getFps()
         pygame.display.flip()
     return score, "Game Over"
-        # state = 'memorize'
-        # memorize_duration = 10 * 1000  # 10 seconds (in milliseconds)
-        # memorize_start_time = pygame.time.get_ticks()
-
-        # Player's clicks will be stored here (as (row, col) tuples)
-        # player_selection = []
-        # result_message = ""
-
-        # running = True
-        # while running:
-        # dt = clock.tick(60)  # Limit to 60 FPS
-
-        # --- State Transitions ---
-        # if state == "memorize":
-        #     # After 10 seconds, hide the pattern by resetting all buttons to Button Primary Colour.
-        #     current_time = pygame.time.get_ticks()
-        #     if current_time - memorize_start_time >= memorize_duration:
-        #         for r in range(rows):
-        #             for c in range(cols):
-        #                 buttons[r][c]["Colour"] = settings["Button Primary Colour"]
-        #         state = "replicate"
-
-        # # --- Drawing ---
-        # screen.fill(settings["Background Colour"])
-
-        # # Draw all buttons on the grid.
-        # for row in buttons:
-        #     for btn in row:
-        #         draw_button(screen, btn, font)
-
-        # # Display text based on the current state.
-        # if state == "memorize":
-        #     remaining_time = max(
-        #         0,
-        #         (memorize_duration - (pygame.time.get_ticks() - memorize_start_time))
-        #         // 1000,
-        #     )
-        #     timer_text = font.render(
-        #         f"Memorize: {remaining_time}",
-        #         settings["Antialiasing Text"],
-        #         settings["Background Font Colour"],
-        #     )
-        #     screen.blit(
-        #         timer_text,
-        #         (
-        #             settings["Width"] // 2 - timer_text.get_width() // 2,
-        #             settings["Height"] - timer_text.get_height() - 20,
-        #         ),
-        #     )
-        # elif state == "replicate":
-        #     instruct_text = font.render(
-        #         "Replicate the pattern by clicking the buttons",
-        #         settings["Antialiasing Text"],
-        #         settings["Background Font Colour"],
-        #     )
-        #     screen.blit(
-        #         instruct_text,
-        #         (
-        #             settings["Width"] // 2 - instruct_text.get_width() // 2,
-        #             settings["Height"] - instruct_text.get_height() - 20,
-        #         ),
-        #     )
-        # elif state == "result":
-        #     result_text = font.render(
-        #         result_message,
-        #         settings["Antialiasing Text"],
-        #         settings["Background Font Colour"],
-        #     )
-        #     screen.blit(
-        #         result_text,
-        #         (
-        #             settings["Width"] // 2 - result_text.get_width() // 2,
-        #             settings["Height"] - result_text.get_height() - 20,
-        #         ),
-        #     )
-
-        # getFps()
-        # pygame.display.flip()
-    # common = answer & guess  # Elements in both sets
-    # missing = answer - guess  # Elements in pattern but not in guess
-    # extra = guess - answer  # Elements in guess but not in pattern
-
-    # print(f"Common elements: {len(common)} -> {common}")
-    # print(f"Missing elements: {len(missing)} -> {missing}")
-    # print(f"Extra elements: {len(extra)} -> {extra}")
-
-
-# while True:
-#     Example usage:
-#     Assuming you have already called pygame.init() and set up your display:
-#     screen = pygame.display.set_mode((settings["Width"], settings["Height"]))
-#     game_loop(screen)
-
-#     remaining_time = 30 - (current_frame - start) / 1000
-#     if remaining_time >= 10:
-#         remaining_time = int(remaining_time)
-#     elif remaining_time >= 0:
-#         remaining_time = math.trunc(remaining_time * 10) / 10
-#     # else:
-#     #     remaining_time = math.trunc(remaining_time * 100) / 100
-#     time_text = font.render(
-#         f"Time: {remaining_time}s",
-#         settings["Antialiasing Text"],
-#         settings["Background Font Colour"],
-#     )
-#     screen.blit(
-#         time_text,
-#         (
-#             (settings["Width"] - time_text.get_width()) // 2,
-#             settings["Height"] // 200 + score_text.get_height(),
-#         ),
-#     )

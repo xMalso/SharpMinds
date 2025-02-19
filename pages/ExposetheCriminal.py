@@ -17,10 +17,11 @@ def removeCircle(pos, current):
             if colour == "Green":
                 return -50
             else:
-                time = current-tick if current-tick != 0 else 1
-                score = (max_score * min(
-                    (0.012 * (despawn_time * 5 /
-                              (time))) - 0.06, 1)**0.2)
+                time = current - tick if current - tick != 0 else 1
+                score = (
+                    max_score
+                    * min((0.012 * (despawn_time * 5 / (time))) - 0.06, 1) ** 0.2
+                )
                 return score
     return 0
 
@@ -103,8 +104,9 @@ def Game1(settings, screen, font, getFps, exit):
             screen.blit(
                 text,
                 (
-                    settings["Width"] * 7 // 8 - text.get_width() // 2 -
-                    settings["Width"] // 200,
+                    settings["Width"] * 7 // 8
+                    - text.get_width() // 2
+                    - settings["Width"] // 200,
                     height,
                 ),
             )

@@ -1,11 +1,14 @@
 global math, pygame
 import math
 import pygame
+
+
 def rotate_point(point_x, point_y, centre_x, centre_y, angle):
     difference_x, difference_y = point_x - centre_x, point_y - centre_y
     new_x = centre_x + difference_x * math.cos(angle) - difference_y * math.sin(angle)
     new_y = centre_y + difference_x * math.sin(angle) + difference_y * math.cos(angle)
     return new_x, new_y
+
 
 def draw_rotated_rect(screen, x, y, width, height, angle, colour):
     angle_rad = math.radians(angle)
@@ -16,13 +19,15 @@ def draw_rotated_rect(screen, x, y, width, height, angle, colour):
     # Define original rectangle corners relative to the top-left
     corners = [
         (-width / 2, -height / 2),  # Top-left
-        (width / 2, -height / 2),   # Top-right
-        (width / 2, height / 2),    # Bottom-right
-        (-width / 2, height / 2)    # Bottom-left
+        (width / 2, -height / 2),  # Top-right
+        (width / 2, height / 2),  # Bottom-right
+        (-width / 2, height / 2),  # Bottom-left
     ]
 
     # Rotate the rectangle corners around its centre
-    rotated_corners = [rotate_point(px + cx, py + cy, cx, cy, angle_rad) for px, py in corners]
+    rotated_corners = [
+        rotate_point(px + cx, py + cy, cx, cy, angle_rad) for px, py in corners
+    ]
 
     # Draw the main rotated rectangle
     pygame.draw.polygon(screen, colour, rotated_corners, 2)
@@ -30,7 +35,7 @@ def draw_rotated_rect(screen, x, y, width, height, angle, colour):
     # === Draw smaller rotated shapes inside ===
     inner_shapes = [
         (-width / 4, -height / 4, width / 4, height / 4),  # Top-left small box
-        (width / 8, height / 8, width / 3, height / 3),    # Bottom-right larger box
+        (width / 8, height / 8, width / 3, height / 3),  # Bottom-right larger box
     ]
 
     for sx, sy, sw, sh in inner_shapes:
@@ -54,14 +59,17 @@ def draw_inner_rotated_rect(x, y, width, height, angle, colour=(0, 255, 255)):
         (-width / 2, -height / 2),
         (width / 2, -height / 2),
         (width / 2, height / 2),
-        (-width / 2, height / 2)
+        (-width / 2, height / 2),
     ]
 
     # Rotate and position the small rectangle
-    rotated_corners = [rotate_point(px + cx, py + cy, cx, cy, angle_rad) for px, py in corners]
+    rotated_corners = [
+        rotate_point(px + cx, py + cy, cx, cy, angle_rad) for px, py in corners
+    ]
 
     # Draw the rotated small rectangle
     pygame.draw.polygon(screen, colour, rotated_corners, 2)
+
 
 def Game3(settings, screen, font, getFps, exit):
     return None, None, "Game Menu"

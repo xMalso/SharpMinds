@@ -22,6 +22,7 @@ confirmation_text = {
 }
 backspace_held = False
 
+
 def init(settings, font, small_font):
     makeColourPickerButtons(settings, font)
     makeOptions(settings, font)
@@ -42,7 +43,6 @@ def makeColourPickerButtons(settings, font):
             "Size": text_size,
             "Buffer Size": (
                 settings["Width"] // 100,
-                # (settings["Width"] * 21) // 100,
                 (settings["Height"] * 3) // 128 + text_size[1] * 2,
             ),
             "Colour": settings["Input Background Colour"],
@@ -53,7 +53,6 @@ def makeColourPickerButtons(settings, font):
             "Size": text_size,
             "Buffer Size": (
                 settings["Width"] // 100,
-                # (settings["Width"] * 21) // 100,
                 settings["Height"] // 64 + text_size[1],
             ),
             "Text": "Confirm",
@@ -64,7 +63,6 @@ def makeColourPickerButtons(settings, font):
             "Name": "Discard",
             "Size": text_size,
             "Buffer Size": (settings["Width"] // 100, settings["Height"] // 128),
-            # "Buffer Size": ((settings["Width"] * 21) // 100, settings["Height"] // 128),
             "Text": "Discard",
             "Colour": settings["Button Quinary Colour"],
             "Font Colour": settings["Font Quinary Colour"],
@@ -99,7 +97,6 @@ def makeOptions(settings, font):
         "BoldItalic Font": {"Options": []},
         "Font Size": {"Options": [48, 56, 64, 72, 80, 128, 160]},
         "Antialiasing Text": {"Options": [True, False]},
-        # "Scroll Speed": {"Options": [50, 75, 100, 125, 150]},
     }
     dir = r"assets/fonts/fonts"
     if os.path.exists(dir):
@@ -323,7 +320,6 @@ def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps
     arrow_width = font.size("▼ ")[0]
     settings_surface = pygame.Surface((settings["Width"], content_height))
     while True:
-        # screen.fill(settings["Background Colour"])
         settings_surface.fill(settings["Background Colour"])
         settings_surface.blit(
             title_text,

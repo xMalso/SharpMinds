@@ -83,13 +83,13 @@ class Settings:
                                     map(float, value.strip("()").split(", "))
                                     # Convert to float tuple (for adaptive difficulty)
                                 )
-                        elif value.isdigit():  # Check for numbers
+                        elif value.isdigit():
                             self.settings[key] = int(value)
                         elif (
                             value.lower() == "true" or value.lower() == "false"
                         ):  # Check for boolean
                             self.settings[key] = value.lower() == "true"
-                        else:  # Otherwise must be a string
+                        else:  # Otherwise assume to be a string
                             self.settings[key] = value.strip('"')
                     else:
                         print(
@@ -229,7 +229,6 @@ def loadUp():
         "Game Secondary Font Colour": (0, 0, 0),
         "Game Tertiary Font Colour": (0, 0, 0),
         "Adaptive Difficulty": (2, 2, 2),
-        # "Scroll Speed": 100,
     }
     settingsClass = Settings()
     loadUpValues()
@@ -312,7 +311,7 @@ def adjustDifficulty(adjustment):
             difficulty2,
             difficulty3,
         )
-        
+
     elif game == "Memory Experiment":
         settings["Adaptive Difficulty"] = (
             difficulty1,
@@ -343,7 +342,7 @@ meta = "Main Menu"
 # game = "Expose the Criminal"
 # score = 530.7385
 
-while True:  # Main loop
+while True:
     if meta == "Main Menu":
         meta, choice = mainMenuDisplay(settings, screen, font, getFps, exit)
     elif meta == "Game Menu":

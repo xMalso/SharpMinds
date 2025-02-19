@@ -1,6 +1,8 @@
 global colour_buttons, pygame
 import pygame
+
 colour_buttons = {}
+
 
 def getColourButtons():
     return colour_buttons
@@ -16,7 +18,9 @@ def updateButton(new_button):
     colour_buttons[button_name] = new_button
 
 
-def displayPage(settings, font, screen, button, colour_picker_buttons, scroll, input_text):
+def displayPage(
+    settings, font, screen, button, colour_picker_buttons, scroll, input_text
+):
     y = button["Pygame Button"].y
     x = button["Pygame Button"].x
     width = button["Pygame Button"].width
@@ -29,8 +33,10 @@ def displayPage(settings, font, screen, button, colour_picker_buttons, scroll, i
         )
         updateButton({"Name": option["Name"], "Pygame Button": temp})
         pygame.draw.rect(screen, option["Colour"], temp, border_radius=25)
-        if option["Name"] == "Input": text = f"#{input_text}"
-        else: text = option["Text"]
+        if option["Name"] == "Input":
+            text = f"#{input_text}"
+        else:
+            text = option["Text"]
         text_surface = font.render(
             text,
             settings["Antialiasing Text"],
