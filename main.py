@@ -193,10 +193,13 @@ def loadUp():
         ),
     )
     pygame.display.flip()
+    info = pygame.display.Info()
     global settingsClass, default_settings
+    print(info.current_w, info.current_h)
+    print(info)
     default_settings = {
-        "Width": 1920,
-        "Height": 1080,
+        "Width": info.current_w,
+        "Height": info.current_h,
         "Window Type": "Borderless",
         "Show FPS": True,
         "FPS Limit": 0,
@@ -226,19 +229,21 @@ def loadUp():
         "Font Size": 30,
         "Antialiasing Text": True,
         "Game Primary Colour": (0, 255, 127),
-        "Game Secondary Colour": (255, 191, 191),
-        "Game Tertiary Colour": (0, 0, 255),
         "Game Primary Font Colour": (0, 0, 0),
+        "Game Secondary Colour": (255, 191, 191),
         "Game Secondary Font Colour": (0, 0, 0),
+        "Game Tertiary Colour": (85, 85, 221),
         "Game Tertiary Font Colour": (0, 0, 0),
         "Adaptive Difficulty": (2, 2, 2),
     }
     settingsClass = Settings()
     loadUpValues()
+    default_settings["Width"] = info.current_w
+    default_settings["Height"] = info.current_h
 
 
 def loadUpValues():
-    global meta, choice, settings, text_surface, i, frame, confirmation_buttons
+    global meta, choice, settings, text_surface, i, frame
     settings = settingsClass.getSettings()
     settingsClass.applySettings()
     frame = pygame.time.get_ticks()

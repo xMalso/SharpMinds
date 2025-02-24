@@ -73,8 +73,8 @@ def makeColourPickerButtons(settings, font):
 def makeOptions(settings, font):
     global options
     options = {
-        "Width": {"Options": [3840, 2560, 1920, 1440, 1366, 1280, 1024]},
-        "Height": {"Options": [2160, 1440, 1080, 768, 720]},
+        "Width": {"Options": [3840, 2560, 1920, 1600, 1536, 1440, 1366, 1280, 1024]},
+        "Height": {"Options": [2160, 1440, 1080, 900, 768, 720]},
         "Window Type": {"Options": ["Borderless", "Fullscreen", "Windowed"]},
         "Show FPS": {"Options": [True, False]},
         "FPS Limit": {"Options": [0, 30, 60, 120, 144, 165, 240]},

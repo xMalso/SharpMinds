@@ -80,20 +80,35 @@ def displayPage(settings, screen, font, title_font, small_font, getFps, exit):
                 button["Pygame Button"].height,
                 button["Pygame Button"].width,
             )
-            height = 408
-            width = 370
-            scale = max(button_width / width, button_height / height)
-            cropped_surface = pygame.Rect(
-                0,
-                0,
-                button_width / scale,
-                button_height / scale,
-            )
-            cropped_image = button["Image"].subsurface(cropped_surface)
-            scaled_image = pygame.transform.scale(
-                cropped_image, (button_width, button_height)
-            )
-            screen.blit(scaled_image, button["Pygame Button"].topleft)
+            height = button["Image"].get_height()
+            width = button["Image"].get_width()
+            if button["Name"] == "Expose the Criminal":
+                scale = max(button_width / width, button_height / height)
+                left = (width - button_width / scale) / 2
+                top = (height - button_height / scale) / 2
+                cropped_surface = pygame.Rect(
+                    left,
+                    top,
+                    button_width / scale,
+                    button_height / scale,
+                )
+                cropped_image = button["Image"].subsurface(cropped_surface)
+                scaled_image = pygame.transform.scale(
+                    cropped_image, (button_width, button_height)
+                )
+                screen.blit(scaled_image, button["Pygame Button"].topleft)
+            else:
+                scale = min(button_width / width, button_height / height)
+                left = (width - button_width / scale) / 2 * scale
+                top = (height - button_height / scale) / 2 * scale
+                button_width, button_height = (width * scale, height * scale)
+                scaled_image = pygame.transform.scale(
+                    button["Image"], (button_width, button_height)
+                )
+                screen.blit(
+                    scaled_image,
+                    (button["Pygame Button"].x - left, button["Pygame Button"].y - top),
+                )
             button_text = font.render(
                 button["Name"], settings["Antialiasing Text"], button["Font Colour"]
             )
@@ -109,7 +124,10 @@ def displayPage(settings, screen, font, title_font, small_font, getFps, exit):
                 ),
             )
         pygame.draw.rect(
-            screen, back["Colour"], back["Pygame Button"], border_radius=settings["Width"] // 40
+            screen,
+            back["Colour"],
+            back["Pygame Button"],
+            border_radius=settings["Width"] // 40,
         )
         back_text = small_font.render(
             back["Name"], settings["Antialiasing Text"], button["Font Colour"]
