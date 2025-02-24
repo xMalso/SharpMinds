@@ -32,7 +32,7 @@ def displayPage(
             option["Size"][1],
         )
         updateButton({"Name": option["Name"], "Pygame Button": temp})
-        pygame.draw.rect(screen, option["Colour"], temp, border_radius=25)
+        pygame.draw.rect(screen, option["Colour"], temp, border_radius=settings["Width"] // 40)
         if option["Name"] == "Input":
             text = f"#{input_text}"
         else:

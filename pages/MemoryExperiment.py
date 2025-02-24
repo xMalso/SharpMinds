@@ -174,29 +174,31 @@ def drawGrid(screen, settings, buffer_width, patterns, shift):
         (
             buffer_width,
             margin_height,
-            cols * (button_side + 1),
-            rows * (button_side + 1),
+            cols * (button_side + 2),
+            rows * (button_side + 2),
         ),
     )
     for row in range(rows + 1):
         pygame.draw.line(
             screen,
             settings["Grid Line Colour"],
-            (buffer_width, row * (button_side + 1) + margin_height),
+            (buffer_width, row * (button_side + 2) + margin_height),
             (
-                buffer_width + (cols) * (button_side + 1),
-                row * (button_side + 1) + margin_height,
+                buffer_width + (cols) * (button_side + 2),
+                row * (button_side + 2) + margin_height,
             ),
+            2
         )
     for col in range(cols + 1):
         pygame.draw.line(
             screen,
             settings["Grid Line Colour"],
-            (col * (button_side + 1) + buffer_width, margin_height),
+            (col * (button_side + 2) + buffer_width, margin_height),
             (
-                col * (button_side + 1) + buffer_width,
-                (rows) * (button_side + 1) + margin_height,
+                col * (button_side + 2) + buffer_width,
+                (rows) * (button_side + 2) + margin_height,
             ),
+            2
         )
 
     for r, c in patterns:
@@ -273,7 +275,12 @@ def drawPicker(screen, settings, font):
                     button["Pygame Button"].width // 2,
                 )
         elif button_type == "Colour":
-            pygame.draw.rect(screen, settings[button["Meta"]], button["Pygame Button"])
+            pygame.draw.rect(
+                screen,
+                settings[button["Meta"]],
+                button["Pygame Button"],
+                border_radius=settings["Width"] // 60,
+            )
             text = font.render(
                 button["Text"],
                 settings["Antialiasing Text"],
@@ -287,7 +294,12 @@ def drawPicker(screen, settings, font):
                 ),
             )
         else:
-            pygame.draw.rect(screen, button["Colour"], button["Pygame Button"])
+            pygame.draw.rect(
+                screen,
+                button["Colour"],
+                button["Pygame Button"],
+                border_radius=settings["Width"] // 60,
+            )
             text = font.render(
                 button["Text"],
                 settings["Antialiasing Text"],
@@ -438,7 +450,7 @@ def calculateScore(score):
     return score
 
 
-def Game2(settings, screen, font, getFps, exit):
+def game2(settings, screen, font, getFps, exit):
     global difficulty, buttons, rows, cols, button_side, radius, margin_width, margin_height, return_text, multiplier, pause_duration, avg
     score = 0
     difficulty = settings["Adaptive Difficulty"][1]
@@ -448,7 +460,7 @@ def Game2(settings, screen, font, getFps, exit):
     avg = int(avg // 3)
     button_width = (settings["Width"] - buffer[0]) // cols
     button_height = (settings["Height"] - buffer[1]) // rows
-    button_side = int(min(button_width, button_height)) - 1
+    button_side = int(min(button_width, button_height))
     radius = int(button_side * 0.3)
     margin_width, margin_height = (
         (settings["Width"] - (button_side * cols)) // 4,
@@ -456,17 +468,17 @@ def Game2(settings, screen, font, getFps, exit):
     )
     makePickerButtons(settings, font)
     buttons = []
-    y = margin_height
+    y = margin_height + 2
     for row in range(rows):
-        x = margin_width
+        x = margin_width + 2
         button_row = []
         for col in range(cols):
             button = {
                 "Pygame Button": pygame.Rect(x, y, button_side, button_side),
             }
             button_row.append(button)
-            x += button_side
-        y += button_side
+            x += button_side + 2
+        y += button_side + 2
         buttons.append(button_row)
     rounds = 1
     for i in range(rounds):
@@ -474,7 +486,7 @@ def Game2(settings, screen, font, getFps, exit):
         if round_score is None:
             return (round_score, None, meta)
         score += round_score
-    adjustment = ((score / rounds) - (540 * multiplier)) / 100
+    adjustment = ((score / rounds) - (540 * multiplier)) / 1000
     return (score, adjustment, meta)
 
 
@@ -518,7 +530,12 @@ def cycle(round_number, settings, getFps, screen, font, exit):
                     ready = True
         drawGrid(screen, settings, margin_width * 2, pattern, True)
         height = settings["Height"] // 200
-        pygame.draw.rect(screen, ready_button["Colour"], ready_button["Pygame Button"])
+        pygame.draw.rect(
+            screen,
+            ready_button["Colour"],
+            ready_button["Pygame Button"],
+            border_radius=settings["Width"] // 60,
+        )
         for line in return_text:
             text = font.render(
                 line,
@@ -739,7 +756,12 @@ def cycle(round_number, settings, getFps, screen, font, exit):
                     return score, "Game Over"
         drawGrid(screen, settings, margin_width * 2, pattern, True)
         height = settings["Height"] // 200
-        pygame.draw.rect(screen, next_button["Colour"], next_button["Pygame Button"])
+        pygame.draw.rect(
+            screen,
+            next_button["Colour"],
+            next_button["Pygame Button"],
+            border_radius=settings["Width"] // 60,
+        )
         screen.blit(
             round_text,
             (

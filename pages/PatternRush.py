@@ -71,5 +71,5 @@ def draw_inner_rotated_rect(x, y, width, height, angle, colour=(0, 255, 255)):
     pygame.draw.polygon(screen, colour, rotated_corners, 2)
 
 
-def Game3(settings, screen, font, getFps, exit):
+def game3(settings, screen, font, getFps, exit):
     return None, None, "Game Menu"

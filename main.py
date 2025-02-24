@@ -78,6 +78,10 @@ class Settings:
                                 self.settings[key] = tuple(
                                     map(int, value.strip("()").split(", "))
                                 )  # Convert to int tuple (for RGB values)
+                                # hex = "{:02X}{:02X}{:02X}".format(
+                                #     *self.settings[key]
+                                # )
+                                # print(hex)
                             except:
                                 self.settings[key] = tuple(
                                     map(float, value.strip("()").split(", "))
@@ -95,12 +99,12 @@ class Settings:
                         print(
                             f"Warning: Unknown setting '{key}' found in settings.txt. Ignoring."
                         )
-                if os.path.isfile(
-                    os.path.join(r"assets/fonts/fonts", self.settings["Font"])
-                ):
-                    self.settings["Font Type"] = "Custom"
-                else:
-                    self.settings["Font Type"] = "System"
+            if os.path.isfile(
+                os.path.join(r"assets/fonts/fonts", self.settings["Font"])
+            ):
+                self.settings["Font Type"] = "Custom"
+            else:
+                self.settings["Font Type"] = "System"
         except FileNotFoundError:
             print("Error: settings.txt not found. Using default values.")
         except ValueError as e:
@@ -203,7 +207,6 @@ def loadUp():
         "Dropdown Background Colour": (63, 63, 63),
         "Dropdown Font Colour": (217, 217, 217),
         "Input Background Colour": (85, 85, 85),
-        "Selected Input Colour": (60, 60, 60),
         "Input Font Colour": (217, 217, 217),
         "Button Primary Colour": (99, 139, 102),
         "Font Primary Colour": (217, 217, 217),
@@ -244,8 +247,9 @@ def loadUpValues():
     settingsInit(settings, font, small_font)
     mainMenuInit(settings, font, title_font)
     gameMenuInit(settings, small_font)
-    gameOverInit(settings, font, title_font)
+    game1Init(settings, font)
     game2Init(settings, font, title_font)
+    gameOverInit(settings, font, title_font)
 
 
 def getFps():
@@ -359,18 +363,20 @@ while True:
         pygame.quit()
         sys.exit()
     elif meta == "Expose the Criminal":
-        score, adjustment, meta = Game1(settings, screen, font, getFps, exit)
-        if score != None:
-            game = "Expose the Criminal"
-            adjustDifficulty(adjustment)
+        meta = game1Tutorial(screen, settings, font, getFps, exit)
+        if meta == "Ready":
+            score, adjustment, meta = game1(settings, screen, font, getFps, exit)
+            if score != None:
+                game = "Expose the Criminal"
+                adjustDifficulty(adjustment)
     elif meta == "Memory Experiment":
-        score, adjustment, meta = Game2(settings, screen, font, getFps, exit)
+        score, adjustment, meta = game2(settings, screen, font, getFps, exit)
         if score != None:
             game = "Memory Experiment"
             adjustDifficulty(adjustment)
     elif meta == "Pattern Rush":
         print(f"Page '{meta}' is currently in development, sending back to main menu.")
-        score, adjustment, meta = Game3(settings, screen, font, getFps, exit)
+        score, adjustment, meta = game3(settings, screen, font, getFps, exit)
         if score != None:
             game = "Pattern Rush"
             adjustDifficulty(adjustment)

@@ -277,7 +277,7 @@ def pasteButton(button, settings, screen):
         screen,
         (button["Colour"]),
         button["Pygame Button"],
-        border_radius=25,
+        border_radius=settings["Width"] // 40,
     )
     button_text = small_font.render(
         button["Name"], settings["Antialiasing Text"], button["Font Colour"]
@@ -356,7 +356,7 @@ def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps
                         settings_surface,
                         choice["Background Font Colour"],
                         (colour_box_rect),
-                        border_radius=25,
+                        border_radius=settings["Width"] // 40,
                     )
                     pygame.draw.rect(
                         settings_surface,
@@ -367,7 +367,7 @@ def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps
                             colour_box_rect.width - 2,
                             colour_box_rect.height - 2,
                         ),
-                        border_radius=25,
+                        border_radius=settings["Width"] // 40,
                     )
                     updateButton(
                         {
@@ -387,7 +387,7 @@ def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps
                         settings_surface,
                         settings["Dropdown Background Colour"],
                         dropdown_rect,
-                        border_radius=25,
+                        border_radius=settings["Width"] // 40,
                     )
                     dropdown_surface = font.render(
                         f"{key}: ▼ {choice[key]}",
@@ -423,7 +423,7 @@ def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps
                         settings_surface,
                         choice[key],
                         (colour_box_rect),
-                        border_radius=25,
+                        border_radius=settings["Width"] // 40,
                     )
                     updateButton(
                         {
@@ -452,7 +452,7 @@ def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps
                 confirmation_surface,
                 settings["Button Quaternary Colour"],
                 confirmation_surface.get_rect(),
-                border_radius=25,
+                border_radius=settings["Width"] // 40,
             )
             text_surface = small_font.render(
                 f"Are you sure you want to {confirmation_text[confirmation]}?",

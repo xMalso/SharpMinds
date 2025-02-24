@@ -42,7 +42,7 @@ def displayPage(settings, font, screen, button, options, scroll):
                 screen,
                 settings["Dropdown Background Colour"],
                 dropdown_rect,
-                border_radius=25,
+                border_radius=settings["Width"] // 40,
             )
         elif (index == 0 and not inverted) or (
             inverted and index == len(options["Options"]) - 1

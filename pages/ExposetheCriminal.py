@@ -2,6 +2,28 @@ global pygame, math, random
 import pygame, math, random
 
 
+def init(settings, font):
+    makeButtons(settings, font)
+
+
+def makeButtons(settings, font):
+    global tutorial_button
+    text = font.size("Start")
+    # tutorial_button = [{
+    tutorial_button = {
+        "Text": "Start",
+        "Pygame Button": pygame.Rect(
+            (settings["Width"] - text[0]) // 2,
+            (settings["Height"] * 95) // 100 - text[1],
+            text[0] + settings["Width"] // 100,
+            text[1] + settings["Height"] // 100,
+        ),
+        "Colour": settings["Button Primary Colour"],
+        "Font Colour": settings["Font Primary Colour"],
+    }
+    # ]
+
+
 def overlap(new_x, new_y):
     for x, y, _, _ in circles:
         if math.dist((new_x, new_y), (x, y)) < 2 * radius:
@@ -47,7 +69,42 @@ def splitText(font, max_width):
     return lines
 
 
-def Game1(settings, screen, font, getFps, exit):
+def tutorial(screen, settings, font, getFps, exit):
+    while True:
+        screen.fill(settings["Background Colour"])
+        pygame.draw.rect(
+            screen,
+            tutorial_button["Colour"],
+            tutorial_button["Pygame Button"],
+            border_radius=settings["Width"] // 60,
+        )
+        text = font.render(
+            tutorial_button["Text"],
+            settings["Antialiasing Text"],
+            tutorial_button["Font Colour"],
+        )
+        screen.blit(
+            text,
+            (
+                tutorial_button["Pygame Button"].centerx - text.get_width() // 2,
+                tutorial_button["Pygame Button"].centery - text.get_height() // 2,
+            ),
+        )
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if tutorial_button["Pygame Button"].collidepoint(event.pos):
+                    return "Ready"
+            if event.type == pygame.QUIT:
+                exit()
+                return "Quit"
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return "Game Menu"
+        getFps()
+        pygame.display.flip()
+
+
+def game1(settings, screen, font, getFps, exit):
     global radius, circles, despawn_time, max_score
     difficulty = settings["Adaptive Difficulty"][0]
     return_text = splitText(font, settings["Width"] // 4)

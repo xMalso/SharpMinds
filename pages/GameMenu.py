@@ -109,7 +109,7 @@ def displayPage(settings, screen, font, title_font, small_font, getFps, exit):
                 ),
             )
         pygame.draw.rect(
-            screen, back["Colour"], back["Pygame Button"], border_radius=25
+            screen, back["Colour"], back["Pygame Button"], border_radius=settings["Width"] // 40
         )
         back_text = small_font.render(
             back["Name"], settings["Antialiasing Text"], button["Font Colour"]

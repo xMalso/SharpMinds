@@ -66,7 +66,7 @@ def displayPage(screen, settings, font, game, score, getFps, exit):
                 screen,
                 (button["Colour"]),
                 button["Pygame Button"],
-                border_radius=25,
+                border_radius=settings["Width"] // 40,
             )
             button_text = font.render(
                 button["Name"], settings["Antialiasing Text"], button["Font Colour"]
