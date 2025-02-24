@@ -26,8 +26,29 @@ backspace_held = False
 def init(settings, font, small_font):
     makeColourPickerButtons(settings, font)
     makeOptions(settings, font)
-    makeConfirmationButtons(settings, font)
+    makeConfirmationButtons(settings, small_font)
     makeButtons(settings, small_font)
+
+
+def splitText(font, max_width, words):
+    words = words.split()
+    lines = []
+    current_line = ""
+
+    for word in words:
+        test_line = current_line + " " + word if current_line else word
+        text_width, _ = font.size(test_line)
+
+        if text_width <= max_width:
+            current_line = test_line
+        else:
+            lines.append(current_line)
+            current_line = word
+
+    if current_line:
+        lines.append(current_line)
+
+    return lines
 
 
 def makeColourPickerButtons(settings, font):
@@ -120,16 +141,16 @@ def makeOptions(settings, font):
         option["Largest"] = largest
 
 
-def makeConfirmationButtons(settings, font):
+def makeConfirmationButtons(settings, small_font):
     global confirmation_buttons
-    text_size = font.size("Confirm")
+    text_size = small_font.size("Confirm")
     confirmation_buttons = [
         {
             "Pygame Button": pygame.Rect(
                 settings["Width"] * 28 // 60 - text_size[0],
-                settings["Height"] // 2,
+                settings["Height"] // 2 - text_size[1],
                 text_size[0] + settings["Width"] // 96,
-                text_size[1] // 2 + settings["Height"] // 54,
+                text_size[1] + settings["Height"] // 100,
             ),
             "Name": "Confirm",
             "Colour": settings["Button Quinary Colour"],
@@ -138,9 +159,9 @@ def makeConfirmationButtons(settings, font):
         {
             "Pygame Button": pygame.Rect(
                 settings["Width"] * 32 // 60,
-                settings["Height"] // 2,
+                settings["Height"] // 2 - text_size[1],
                 text_size[0] + settings["Width"] // 96,
-                text_size[1] // 2 + settings["Height"] // 54,
+                text_size[1] + settings["Height"] // 100,
             ),
             "Name": "Decline",
             "Colour": settings["Button Primary Colour"],
@@ -275,7 +296,7 @@ def pasteButton(button, settings, screen):
     global small_font
     pygame.draw.rect(
         screen,
-        (button["Colour"]),
+        button["Colour"],
         button["Pygame Button"],
         border_radius=settings["Width"] // 40,
     )
@@ -444,31 +465,47 @@ def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps
         for button in last:
             pasteButton(button, settings, screen)
         if confirmation != None:
-            confirmation_surface = pygame.Surface(
-                (settings["Width"] // 3, settings["Height"] // 8), pygame.SRCALPHA
+            printed_text = splitText(
+                font,
+                settings["Width"] // 3.1,
+                f"Are you sure you want to {confirmation_text[confirmation]}?",
             )
-            confirmation_surface.fill((0, 0, 0, 0))
+            small_text = small_font.size(printed_text[0])[1]
+            buffer_height = small_text * (len(printed_text) - 1)
+            confirmation_surface = pygame.Surface(
+                (
+                    settings["Width"] // 3,
+                    settings["Height"] // 12 + buffer_height,
+                ),
+                pygame.SRCALPHA,
+            )
             pygame.draw.rect(
                 confirmation_surface,
                 settings["Button Quaternary Colour"],
                 confirmation_surface.get_rect(),
                 border_radius=settings["Width"] // 40,
             )
-            text_surface = small_font.render(
-                f"Are you sure you want to {confirmation_text[confirmation]}?",
-                settings["Antialiasing Text"],
-                settings["Font Quaternary Colour"],
-            )
-            confirmation_surface.blit(
-                text_surface,
-                (
-                    settings["Width"] // 6 - text_surface.get_width() // 2,
-                    settings["Height"] // 64,
-                ),
-            )
+            height = small_text * (len(printed_text)) + settings["Height"] // 100
+            for line in printed_text[::-1]:
+                text_surface = small_font.render(
+                    line,
+                    settings["Antialiasing Text"],
+                    settings["Font Quaternary Colour"],
+                )
+                height -= text_surface.get_height()
+                confirmation_surface.blit(
+                    text_surface,
+                    (
+                        settings["Width"] // 6 - text_surface.get_width() // 2,
+                        height,
+                    ),
+                )
             screen.blit(
                 confirmation_surface,
-                (settings["Width"] * 2 // 6, settings["Height"] * 7 // 16),
+                (
+                    settings["Width"] * 2 // 6,
+                    settings["Height"] * 7 // 16 - buffer_height,
+                ),
             )
             for button in confirmation_buttons:
                 pasteButton(button, settings, screen)

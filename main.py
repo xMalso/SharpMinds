@@ -175,9 +175,11 @@ class Settings:
 def loadUp():
     global pygame
     pygame.init()
+    info = pygame.display.Info()
     pygame.display.set_caption("Sharp Minds")
 
-    screen = pygame.display.set_mode((1920, 1080), pygame.NOFRAME)
+    screen = pygame.display.set_mode((info.current_w, info.current_h), pygame.NOFRAME)
+    os.environ['SDL_VIDEO_CENTERED'] = '1'
     screen.fill((31, 31, 31))
     default_font = pygame.font.Font(
         "assets\\fonts\\fonts\\OpenDyslexic-Regular.otf", 30
@@ -193,7 +195,6 @@ def loadUp():
         ),
     )
     pygame.display.flip()
-    info = pygame.display.Info()
     global settingsClass, default_settings
     print(info.current_w, info.current_h)
     print(info)
@@ -246,6 +247,7 @@ def loadUpValues():
     global meta, choice, settings, text_surface, i, frame
     settings = settingsClass.getSettings()
     settingsClass.applySettings()
+    os.environ['SDL_VIDEO_CENTERED'] = '1'
     frame = pygame.time.get_ticks()
     i = 1
     text_surface = None
