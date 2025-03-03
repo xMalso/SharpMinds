@@ -5,3 +5,4 @@ from .ExposetheCriminal import game1, init as game1Init, tutorial as game1Tutori
 from .MemoryExperiment import game2, init as game2Init
 from .PatternRush import game3
 from .GameOver import displayPage as gameOverDisplay, init as gameOverInit
+from .Leaderboards import displayPage as leaderboardsDisplay, init as leaderboardInit

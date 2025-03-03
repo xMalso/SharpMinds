@@ -257,11 +257,12 @@ def loadUpValues():
     game1Init(settings, font)
     game2Init(settings, font, title_font)
     gameOverInit(settings, font, title_font)
+    leaderboardInit()
 
 
 def getFps():
     global frame, i, screen, text_surface, settings, font
-    if (pygame.time.get_ticks() - frame) > 100:
+    if (pygame.time.get_ticks() - frame) > 1000:
         fps = 1 / (pygame.time.get_ticks() - frame) * i * 1000
         if settings["Show FPS"] == True:
             text_surface = font.render(
@@ -390,6 +391,7 @@ while True:
     elif meta == "Game Over":
         meta = gameOverDisplay(screen, settings, font, game, score, getFps, exit)
     elif meta == "Leaderboards":
+        meta == leaderboardsDisplay(settings, screen, font, getFps, exit)
         meta = "Main Menu"
     else:
         print(f"Page '{meta}' is currently in development, sending back to main menu.")

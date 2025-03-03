@@ -486,7 +486,8 @@ def game2(settings, screen, font, getFps, exit):
         if round_score is None:
             return (round_score, None, meta)
         score += round_score
-    adjustment = ((score / rounds) - (540 * multiplier)) / 1000
+    adjustment = ((score / rounds) - (540 * multiplier)) / 100
+    if adjustment < 0: adjustment /= 10
     return (score, adjustment, meta)
 
 

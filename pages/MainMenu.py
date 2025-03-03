@@ -22,7 +22,8 @@ def makeButtons(settings, font):
             "Name": "Games Menu",
             "Pygame Button": pygame.Rect(
                 (settings["Width"] - (text[0] + settings["Width"] // 19.2)) // 2,
-                settings["Height"] // 3,
+                # settings["Height"] // 3,
+                settings["Height"] // 3 + (text[1] + settings["Height"] // 18),
                 text[0] + settings["Width"] // 19.2,
                 text[1] + settings["Height"] // 27,
             ),
@@ -34,7 +35,8 @@ def makeButtons(settings, font):
             "Name": "Leaderboards and Personal Bests",
             "Pygame Button": pygame.Rect(
                 (settings["Width"] - (text[0] + settings["Width"] // 19.2)) // 2,
-                settings["Height"] // 3 + (text[1] + settings["Height"] // 18),
+                # settings["Height"] // 3 + (text[1] + settings["Height"] // 18),
+                settings["Height"] // 3 + (text[1] + settings["Height"] // 18) * 2,
                 text[0] + settings["Width"] // 19.2,
                 text[1] + settings["Height"] // 27,
             ),
@@ -42,18 +44,18 @@ def makeButtons(settings, font):
             "Font Colour": settings["Font Secondary Colour"],
             "Meta": "Leaderboards",
         },
-        {
-            "Name": "Friends",
-            "Pygame Button": pygame.Rect(
-                (settings["Width"] - (text[0] + settings["Width"] // 19.2)) // 2,
-                settings["Height"] // 3 + (text[1] + settings["Height"] // 18) * 2,
-                text[0] + settings["Width"] // 19.2,
-                text[1] + settings["Height"] // 27,
-            ),
-            "Colour": settings["Button Tertiary Colour"],
-            "Font Colour": settings["Font Tertiary Colour"],
-            "Meta": "Friends",
-        },
+        # {
+        #     "Name": "Friends",
+        #     "Pygame Button": pygame.Rect(
+        #         (settings["Width"] - (text[0] + settings["Width"] // 19.2)) // 2,
+                # settings["Height"] // 3 + (text[1] + settings["Height"] // 18) * 2,
+        #         text[0] + settings["Width"] // 19.2,
+        #         text[1] + settings["Height"] // 27,
+        #     ),
+        #     "Colour": settings["Button Tertiary Colour"],
+        #     "Font Colour": settings["Font Tertiary Colour"],
+        #     "Meta": "Friends",
+        # },
         {
             "Name": "Settings",
             "Pygame Button": pygame.Rect(
@@ -89,7 +91,9 @@ def displayPage(settings, screen, font, getFps, exit):
             title_text,
             (
                 settings["Width"] // 2 - title_text.get_width() // 2,
-                (settings["Height"] * 17) // 100 - title_text.get_height() // 2,
+                # (settings["Height"] * 17) // 100 - title_text.get_height() // 2,
+                (settings["Height"] * 25) // 100 - title_text.get_height() // 2,
+
             ),
         )
         for button in buttons:
