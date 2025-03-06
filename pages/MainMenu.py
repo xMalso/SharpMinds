@@ -118,7 +118,7 @@ def displayPage(settings, screen, font, getFps, exit):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for button in buttons:  # Check for each button
                     if button["Pygame Button"].collidepoint(event.pos):
                         meta = button["Meta"]

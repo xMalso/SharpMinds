@@ -102,10 +102,10 @@ def tutorial(screen, settings, font, getFps, exit):
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if tutorial_button["Pygame Button"].collidepoint(event.pos):
                     return "Ready"
-            if event.type == pygame.QUIT:
+            elif event.type == pygame.QUIT:
                 exit()
                 return "Quit"
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return "Game Menu"
         getFps(never)
@@ -154,10 +154,10 @@ def game1(settings, screen, font, getFps, exit):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 score = max(removeCircle(event.pos, current_frame) + score, 0)
-            if event.type == pygame.QUIT:
+            elif event.type == pygame.QUIT:
                 exit()
                 return None, None, "Quit"
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return None, None, "Game Menu"
         screen.fill(settings["Background Colour"])

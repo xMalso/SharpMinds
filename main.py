@@ -1,6 +1,4 @@
-import pygame
-import sys
-import os
+import pygame, sys, os, random, hashlib
 from pages import *
 
 # import firebase_admin
@@ -177,7 +175,6 @@ def loadUp():
     pygame.init()
     info = pygame.display.Info()
     pygame.display.set_caption("Sharp Minds")
-
     screen = pygame.display.set_mode((info.current_w, info.current_h), pygame.NOFRAME)
     os.environ['SDL_VIDEO_CENTERED'] = '1'
     screen.fill((31, 31, 31))
@@ -241,6 +238,7 @@ def loadUp():
     loadUpValues()
     default_settings["Width"] = info.current_w
     default_settings["Height"] = info.current_h
+    getID()
 
 
 def loadUpValues():
@@ -259,6 +257,66 @@ def loadUpValues():
     gameOverInit(settings, font, title_font)
     leaderboardInit(settings)
 
+def getID():
+    global id, username
+    try:
+        with open("id.txt", "r") as file:
+            for line in file:
+                id, username = line.split(", ")
+    except FileNotFoundError:
+        username = generateID(settings, font, getFps, exit)
+        id = hashlib.sha256(f"{username}{random.randint(0,2**32)}".encode()).hexdigest()
+        with open("id.txt", "w") as file:
+            file.write(f"{id}, {username}")
+
+def generateID(settings, font, getFps, exit):
+    username = ""
+    never = True
+    while True:
+        screen.fill(settings["Background Colour"])
+        text_surface = font.render(
+            "Welcome to Sharp Minds!", settings["Antialiasing Text"], settings["Background Font Colour"]
+        )
+        screen.blit(
+            text_surface,
+            (
+                settings["Width"] // 2 - text_surface.get_width() // 2,
+                settings["Height"] // 3 - text_surface.get_height() // 2,
+            ),
+        )
+        text_surface = font.render(
+            "Please enter a username:", settings["Antialiasing Text"], settings["Background Font Colour"]
+        )
+        screen.blit(
+            text_surface,
+            (
+                settings["Width"] // 2 - text_surface.get_width() // 2,
+                settings["Height"] // 2 - text_surface.get_height() // 2,
+            ),
+        )
+        text_surface = font.render(
+            username, settings["Antialiasing Text"], settings["Background Font Colour"]
+        )
+        screen.blit(
+            text_surface,
+            (
+                settings["Width"] // 2 - text_surface.get_width() // 2,
+                settings["Height"] // 2 + text_surface.get_height() // 2,
+            ),
+        )
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    username = username[:-1]
+                elif event.key == pygame.K_RETURN:
+                    return username
+                else:
+                    username += event.unicode
+        getFps(never)
+        never = False
+        pygame.display.flip()
 
 def getFps(never):
     global frame, i, screen, text_surface, settings, font

@@ -524,10 +524,10 @@ def cycle(round_number, settings, getFps, screen, font, exit):
             if event.type == pygame.QUIT:
                 exit()
                 return None, "Quit"
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return None, "Game Menu"
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if ready_button["Pygame Button"].collidepoint(event.pos):
                     ready = True
         drawGrid(screen, settings, margin_width * 2, pattern, True)
@@ -596,7 +596,7 @@ def cycle(round_number, settings, getFps, screen, font, exit):
             if event.type == pygame.QUIT:
                 exit()
                 return None, "Quit"
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return None, "Game Menu"
         current = pygame.time.get_ticks()
@@ -662,10 +662,10 @@ def cycle(round_number, settings, getFps, screen, font, exit):
             if event.type == pygame.QUIT:
                 exit()
                 return None, "Quit"
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return None, "Game Menu"
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for button in picker_buttons:
                     if button["Pygame Button"].collidepoint(event.pos):
                         meta = button["Meta"]
@@ -753,10 +753,10 @@ def cycle(round_number, settings, getFps, screen, font, exit):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return score, "Quit"
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return score, "Game Menu"
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if next_button["Pygame Button"].collidepoint(event.pos):
                     return score, "Game Over"
         drawGrid(screen, settings, margin_width * 2, pattern, True)
