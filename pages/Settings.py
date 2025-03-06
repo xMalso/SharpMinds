@@ -318,6 +318,7 @@ def pasteButton(button, settings, screen):
 
 def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps, exit):
     global current_dropdown, current_colour_picker, input_selected, choice, input_text, small_font, backspace_held
+    never = True
     small_font = small_fonts
     font_height = font.size("Save and Leave")[1]
     content_height = (
@@ -635,5 +636,6 @@ def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps
             if current - time_held > 60:
                 time_held = current
                 input_text = input_text[:-1]
-        getFps()
+        getFps(never)
+        never = False
         pygame.display.flip()

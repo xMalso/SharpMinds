@@ -1,6 +1,11 @@
-global pygame, math, random
+global pygame, math, random, correct_sound, wrong_sound
 import pygame, math, random
 
+pygame.mixer.pre_init(frequency=22050, size=-16, channels=1, buffer=512)
+pygame.mixer.init()
+correct_sound = pygame.mixer.Sound("assets/sounds/correct.wav")
+wrong_sound = pygame.mixer.Sound("assets/sounds/wrong.wav")
+correct_sound.set_volume(1.2)
 
 def init(settings, font):
     makeButtons(settings, font)
@@ -37,8 +42,10 @@ def removeCircle(pos, current):
         if math.dist(pos, (x, y)) < radius:
             circles.pop(i)
             if colour == "Green":
+                wrong_sound.play()
                 return -50
             else:
+                correct_sound.play()
                 time = current - tick if current - tick != 0 else 1
                 score = (
                     max_score
@@ -70,6 +77,7 @@ def splitText(font, max_width):
 
 
 def tutorial(screen, settings, font, getFps, exit):
+    never = True
     while True:
         screen.fill(settings["Background Colour"])
         pygame.draw.rect(
@@ -100,12 +108,14 @@ def tutorial(screen, settings, font, getFps, exit):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return "Game Menu"
-        getFps()
+        getFps(never)
+        never = False
         pygame.display.flip()
 
 
 def game1(settings, screen, font, getFps, exit):
     global radius, circles, despawn_time, max_score
+    never = True
     difficulty = settings["Adaptive Difficulty"][0]
     return_text = splitText(font, settings["Width"] // 4)
     circle_colour = {
@@ -226,12 +236,14 @@ def game1(settings, screen, font, getFps, exit):
                         green_count += 1
                     else:
                         score = max(0, score - max_score / 3)
+                        wrong_sound.play()
                     continue
                 else:
                     expired = False
             circle_number += 1
             pygame.draw.circle(screen, circle_colour[colour], (x, y), radius)
-        getFps()
+        getFps(never)
+        never = False
         pygame.display.flip()
         current_frame = pygame.time.get_ticks()
     green_count = max(1, green_count)

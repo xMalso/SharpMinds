@@ -257,12 +257,12 @@ def loadUpValues():
     game1Init(settings, font)
     game2Init(settings, font, title_font)
     gameOverInit(settings, font, title_font)
-    leaderboardInit()
+    leaderboardInit(settings)
 
 
-def getFps():
+def getFps(never):
     global frame, i, screen, text_surface, settings, font
-    if (pygame.time.get_ticks() - frame) > 1000:
+    if (pygame.time.get_ticks() - frame) > 1000 or never:
         fps = 1 / (pygame.time.get_ticks() - frame) * i * 1000
         if settings["Show FPS"] == True:
             text_surface = font.render(

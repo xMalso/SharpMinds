@@ -62,6 +62,7 @@ def makeButtons(settings, small_font):
 
 
 def displayPage(settings, screen, font, title_font, small_font, getFps, exit):
+    never = True
     back = buttons[-1]
     title_text = title_font.render(
         "Games Menu", settings["Antialiasing Text"], settings["Font Primary Colour"]
@@ -154,5 +155,6 @@ def displayPage(settings, screen, font, title_font, small_font, getFps, exit):
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 meta = "Main Menu"
                 return meta
-        getFps()
+        getFps(never)
+        never = False
         pygame.display.flip()

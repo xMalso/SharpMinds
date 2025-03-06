@@ -84,6 +84,7 @@ def makeButtons(settings, font):
 
 
 def displayPage(settings, screen, font, getFps, exit):
+    never = True
     choice = None
     while True:
         screen.fill(settings["Background Colour"])
@@ -126,5 +127,6 @@ def displayPage(settings, screen, font, getFps, exit):
                             del choice["Font Type"]
                             del choice["Adaptive Difficulty"]
                         return meta, choice
-        getFps()
+        getFps(never)
+        never = False
         pygame.display.flip()

@@ -49,6 +49,7 @@ def makeText(settings, title_font):
 
 
 def displayPage(screen, settings, font, game, score, getFps, exit):
+    never = True
     score_text = font.render(
         f"Score: {int(score)}", True, settings["Background Font Colour"]
     )
@@ -57,6 +58,42 @@ def displayPage(screen, settings, font, game, score, getFps, exit):
         settings["Width"] // 2,
         settings["Height"] // 20 + game_over_text.get_height(),
     )
+    current = start = pygame.time.get_ticks()
+    while current - start < 2000:
+        screen.fill(settings["Background Colour"])
+        screen.blit(game_over_text, game_over_text_rect)
+        screen.blit(score_text, score_text_rect)
+        for button in buttons:
+            pygame.draw.rect(
+                screen,
+                (button["Colour"]),
+                button["Pygame Button"],
+                border_radius=settings["Width"] // 40,
+            )
+            button_text = font.render(
+                button["Name"], settings["Antialiasing Text"], button["Font Colour"]
+            )
+            screen.blit(
+                button_text,
+                (
+                    button["Pygame Button"].x
+                    + button["Pygame Button"].width // 2
+                    - button_text.get_width() // 2,
+                    button["Pygame Button"].y
+                    + button["Pygame Button"].height // 2
+                    - button_text.get_height() // 2,
+                ),
+            )
+        getFps(never)
+        never = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return
+        pygame.display.flip()
+    
     while True:
         screen.fill(settings["Background Colour"])
         screen.blit(game_over_text, game_over_text_rect)
@@ -82,8 +119,8 @@ def displayPage(screen, settings, font, game, score, getFps, exit):
                     - button_text.get_height() // 2,
                 ),
             )
-
-        getFps()
+        getFps(never)
+        never = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()

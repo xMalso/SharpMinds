@@ -493,6 +493,7 @@ def game2(settings, screen, font, getFps, exit):
 
 def cycle(round_number, settings, getFps, screen, font, exit):
     global answer, pattern, picker_shape, picker_colour, remove, guess, max_score, all_positions
+    never = True
     round_text = font.render(
         f"Round {round_number + 1}",
         settings["Antialiasing Text"],
@@ -584,7 +585,8 @@ def cycle(round_number, settings, getFps, screen, font, exit):
                 ready_button["Pygame Button"].top,
             ),
         )
-        getFps()
+        getFps(never)
+        never = False
         pygame.display.flip()
     current = start = pygame.time.get_ticks()
     remaining_time = int((pause_duration - (current - start)) / 100) / 10
@@ -647,7 +649,8 @@ def cycle(round_number, settings, getFps, screen, font, exit):
                 settings["Height"] // 200 + round_text.get_height(),
             ),
         )
-        getFps()
+        getFps(never)
+        never = False
         pygame.display.flip()
     picker_shape = "Circle"
     picker_colour = settings["Game Primary Colour"]
@@ -736,7 +739,8 @@ def cycle(round_number, settings, getFps, screen, font, exit):
             ),
         )
 
-        getFps()
+        getFps(never)
+        never = False
         pygame.display.flip()
     next = False
     round_text = font.render(
@@ -801,6 +805,7 @@ def cycle(round_number, settings, getFps, screen, font, exit):
                 settings["Height"] // 200,
             ),
         )
-        getFps()
+        getFps(never)
+        never = False
         pygame.display.flip()
     return score, "Game Over"
