@@ -93,6 +93,7 @@ def displayPage(screen, settings, font, game, score, getFps, exit):
                 if event.key == pygame.K_ESCAPE:
                     return
         pygame.display.flip()
+        current = pygame.time.get_ticks()
     
     while True:
         screen.fill(settings["Background Colour"])

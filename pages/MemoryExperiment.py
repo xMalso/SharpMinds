@@ -1,5 +1,5 @@
-global random, pygame, math
-import random, pygame, math
+global random, pygame, math, np
+import random, pygame, math, numpy as np
 
 
 def init(settings, font, title_font):
@@ -436,22 +436,37 @@ def splitText(font, max_width, words):
 
 
 def calculateScore(score):
+    empty = 0
+    right = 0
+    wrong = 0
+    kinda = 0
     for r, c in all_positions:
         if (r, c) not in answer and (r, c) not in guess:
             score += max_score / 20
+            empty += 1
         elif (r, c) in answer and (r, c) in guess:
             if pattern[(r, c)] == guess[(r, c)]:
                 score += max_score
+                right += 1
             elif (
                 pattern[(r, c)]["Colour"] == guess[(r, c)]["Colour"]
                 or pattern[(r, c)]["Shape"] == guess[(r, c)]["Shape"]
             ):
                 score += max_score / 3
+                kinda += 1
+        else:
+            wrong += 1
+    lb["empty"] += empty
+    lb["right"] += right
+    lb["wrong"] += wrong
+    lb["kinda"] += kinda
     return score
 
 
-def game2(settings, screen, font, getFps, exit):
-    global difficulty, buttons, rows, cols, button_side, radius, margin_width, margin_height, return_text, multiplier, pause_duration, avg
+def game2(settings, screen, font, getFps, exit,  getID):
+    global difficulty, buttons, rows, cols, button_side, radius, margin_width, margin_height, return_text, multiplier, pause_duration, avg, lb
+    val = getID()
+    lb = {'empty': 0, 'right': 0, 'wrong': 0, 'kinda': 0, 'game': 2, 'id': val[0], 'username': val[1], 'score': 0, 'max': 0}
     score = 0
     difficulty = settings["Adaptive Difficulty"][1]
     multiplier = (difficulty - 1) / 10 + 1
@@ -486,8 +501,10 @@ def game2(settings, screen, font, getFps, exit):
         if round_score is None:
             return (round_score, None, meta)
         score += round_score
-    adjustment = ((score / rounds) - (540 * multiplier)) / 100
-    if adjustment < 0: adjustment /= 10
+    adjustment = ((score / rounds) - (540 * multiplier)) / 400
+    adjustment = float(np.piecewise(adjustment, [x < 0, x >= 0], [lambda x: (x**3 + x)/2, lambda x: x*8]))
+    print(adjustment)
+    lb["score"] = score
     return (score, adjustment, meta)
 
 
@@ -503,6 +520,7 @@ def cycle(round_number, settings, getFps, screen, font, exit):
     num_shapes = avg
     missing = rows * cols - num_shapes
     max_score = 600 * multiplier / (num_shapes + missing * 0.05)
+    lb["max"] = max_score
     random.shuffle(all_positions)
     answer = set(all_positions[:num_shapes])
     pattern = {}

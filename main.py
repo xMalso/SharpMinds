@@ -260,14 +260,21 @@ def loadUpValues():
 def getID():
     global id, username
     try:
-        with open("id.txt", "r") as file:
-            for line in file:
-                id, username = line.split(", ")
+        try:
+            return id, username
+        except NameError:
+            print("ID and username not loaded, loading ID and username.")
+            with open("id.txt", "r") as file:
+                for line in file:
+                    id, username = line.split(", ")
+            return id, username
     except FileNotFoundError:
+        print("ID and username not found, creating for new ID and username.")
         username = generateID(settings, font, getFps, exit)
         id = hashlib.sha256(f"{username}{random.randint(0,2**32)}".encode()).hexdigest()
         with open("id.txt", "w") as file:
             file.write(f"{id}, {username}")
+        return id, username
 
 def generateID(settings, font, getFps, exit):
     username = ""
@@ -431,12 +438,12 @@ while True:
     elif meta == "Expose the Criminal":
         meta = game1Tutorial(screen, settings, font, getFps, exit)
         if meta == "Ready":
-            score, adjustment, meta = game1(settings, screen, font, getFps, exit)
+            score, adjustment, meta = game1(settings, screen, font, getFps, exit, getID)
             if score != None:
                 game = "Expose the Criminal"
                 adjustDifficulty(adjustment)
     elif meta == "Memory Experiment":
-        score, adjustment, meta = game2(settings, screen, font, getFps, exit)
+        score, adjustment, meta = game2(settings, screen, font, getFps, exit, getID)
         if score != None:
             game = "Memory Experiment"
             adjustDifficulty(adjustment)

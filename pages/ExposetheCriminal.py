@@ -37,12 +37,13 @@ def overlap(new_x, new_y):
 
 
 def removeCircle(pos, current):
-    global circles, max_score
+    global circles, max_score, red_score, loss
     for i, (x, y, colour, tick) in enumerate(circles):
         if math.dist(pos, (x, y)) < radius:
             circles.pop(i)
             if colour == "Green":
                 wrong_sound.play()
+                loss += 50
                 return -50
             else:
                 correct_sound.play()
@@ -51,6 +52,7 @@ def removeCircle(pos, current):
                     max_score
                     * min((0.012 * (despawn_time * 5 / (time))) - 0.06, 1) ** 0.2
                 )
+                red_score += score
                 return score
     return 0
 
@@ -113,8 +115,11 @@ def tutorial(screen, settings, font, getFps, exit):
         pygame.display.flip()
 
 
-def game1(settings, screen, font, getFps, exit):
-    global radius, circles, despawn_time, max_score
+def game1(settings, screen, font, getFps, exit, getID):
+    global radius, circles, despawn_time, max_score, loss, red_score
+    red_score = 0
+    loss = 0
+    val = getID()
     never = True
     difficulty = settings["Adaptive Difficulty"][0]
     return_text = splitText(font, settings["Width"] // 4)
@@ -153,7 +158,10 @@ def game1(settings, screen, font, getFps, exit):
     while start + duration > current_frame:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                score = max(removeCircle(event.pos, current_frame) + score, 0)
+                score += removeCircle(event.pos, current_frame)
+                if score < 0:
+                    loss += score
+                    score = 0
             elif event.type == pygame.QUIT:
                 exit()
                 return None, None, "Quit"
@@ -235,7 +243,12 @@ def game1(settings, screen, font, getFps, exit):
                         score += max_score / 6
                         green_count += 1
                     else:
-                        score = max(0, score - max_score / 3)
+                        penalty = max_score / 3
+                        score -= penalty
+                        loss += penalty
+                        if score < 0:
+                            loss += score
+                            score = 0
                         wrong_sound.play()
                     continue
                 else:
@@ -246,8 +259,7 @@ def game1(settings, screen, font, getFps, exit):
         never = False
         pygame.display.flip()
         current_frame = pygame.time.get_ticks()
-    green_count = max(1, green_count)
-    red_count = max(1, red_count)
     adjustment = score - (0.8 * red_count + green_count / 6) * max_score
     adjustment /= 100
+    lb = {'loss': loss, 'green': green_count, 'red': red_score, 'game': 2, 'id': val[0], 'username': val[1], 'score': score, 'max': max_score}
     return score, adjustment, "Game Over"
