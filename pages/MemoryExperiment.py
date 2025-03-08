@@ -199,8 +199,7 @@ def drawGrid(screen, settings, buffer_width, patterns, shift):
     for r, c in patterns:
         details = patterns[(r, c)]
         button = buttons[r][c]
-        if shift:
-            button["Pygame Button"].left += margin_width
+        button["Pygame Button"].left += margin_width * shift
         if details["Shape"] == "Circle":
             pygame.draw.circle(
                 screen, details["Colour"], button["Pygame Button"].center, radius
@@ -233,8 +232,7 @@ def drawGrid(screen, settings, buffer_width, patterns, shift):
                 ),
             ]
             pygame.draw.polygon(screen, details["Colour"], points)
-        if shift:
-            button["Pygame Button"].left -= margin_width
+        button["Pygame Button"].left -= margin_width * shift
 
 
 def drawPicker(screen, settings, font):
@@ -538,7 +536,7 @@ def cycle(round_number, settings, getFps, screen, font, exit):
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if ready_button["Pygame Button"].collidepoint(event.pos):
                     ready = True
-        drawGrid(screen, settings, margin_width * 2, pattern, True)
+        drawGrid(screen, settings, margin_width * 2, pattern, 1)
         height = settings["Height"] // 200
         pygame.draw.rect(
             screen,
@@ -708,7 +706,7 @@ def cycle(round_number, settings, getFps, screen, font, exit):
                                 "Shape": picker_shape,
                             }
         screen.fill(settings["Background Colour"])
-        drawGrid(screen, settings, margin_width, guess, False)
+        drawGrid(screen, settings, margin_width, guess, 0)
         drawPicker(screen, settings, font)
         height = settings["Height"] // 200
         for line in return_text:
@@ -767,7 +765,8 @@ def cycle(round_number, settings, getFps, screen, font, exit):
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if next_button["Pygame Button"].collidepoint(event.pos):
                     return score, "Game Over"
-        drawGrid(screen, settings, margin_width * 2, pattern, True)
+        drawGrid(screen, settings, margin_width, pattern, 0)
+        drawGrid(screen,settings, margin_width * 3, guess, 2)
         height = settings["Height"] // 200
         pygame.draw.rect(
             screen,
