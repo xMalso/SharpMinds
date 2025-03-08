@@ -463,7 +463,7 @@ def calculateScore(score):
     return score
 
 
-def game2(settings, screen, font, getFps, exit,  getID):
+def game2(settings, screen, font, getFps, exit,  getID, updateLB):
     global difficulty, buttons, rows, cols, button_side, radius, margin_width, margin_height, return_text, multiplier, pause_duration, avg, lb
     val = getID()
     lb = {'empty': 0, 'right': 0, 'wrong': 0, 'kinda': 0, 'game': 2, 'id': val[0], 'username': val[1], 'score': 0, 'max': 0}
@@ -501,10 +501,11 @@ def game2(settings, screen, font, getFps, exit,  getID):
         if round_score is None:
             return (round_score, None, meta)
         score += round_score
-    adjustment = ((score / rounds) - (540 * multiplier)) / 400
-    adjustment = float(np.piecewise(adjustment, [x < 0, x >= 0], [lambda x: (x**3 + x)/2, lambda x: x*8]))
-    print(adjustment)
+    adjustment = ((score / rounds) - (540 * multiplier)) / 1600
+    adjustment = float(np.piecewise(adjustment, [x < 0, x >= 0], [lambda x: (x**3 + x)/2, lambda x: x*16]))
+    print(score, adjustment, 600*multiplier, 540*multiplier)
     lb["score"] = score
+    updateLB(2, lb)
     return (score, adjustment, meta)
 
 
@@ -762,7 +763,7 @@ def cycle(round_number, settings, getFps, screen, font, exit):
         pygame.display.flip()
     next = False
     round_text = font.render(
-        f"Round {round_number + 1}, Score: {int(score)}",
+        f"Round {round_number + 1}, Score: {int(score)}/{int(600*multiplier)}",
         settings["Antialiasing Text"],
         settings["Background Font Colour"],
     )

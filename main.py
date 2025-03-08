@@ -1,4 +1,4 @@
-import pygame, sys, os, random, hashlib
+import pygame, sys, os, random, hashlib, requests
 from pages import *
 
 # import firebase_admin
@@ -25,7 +25,7 @@ from pages import *
 
 # leaderboard_ref = db.collection('leaderboard')
 
-
+lb = r"https://firestore.googleapis.com/v1/projects/sharpminds-37b05/databases/(default)/documents"
 class Settings:
 
     def __init__(self):
@@ -276,6 +276,37 @@ def getID():
             file.write(f"{id}, {username}")
         return id, username
 
+def format_firestore_data(data):
+    return {"fields": {k: 
+        {"integerValue": v} if isinstance(v, int) else
+        {"doubleValue": v} if isinstance(v, float) else
+        {"stringValue": v} if isinstance(v, str) else None
+        for k, v in data.items()
+    }}
+
+def updateLB(game, data):
+    game_url = f"{lb}/game{game}/{id}"
+    response = requests.get(game_url)
+    if response.status_code == 404: # First time
+        firestore_data = format_firestore_data(data)
+        response = requests.post(game_url, json=firestore_data, headers={ 'Content-Type': 'application/json', })
+        if response.status_code == 200: # Success
+            print("New entry created.")
+        else: # Error
+            print(f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}")
+    elif response.status_code == 200: # Update
+        old_data = response.json()
+        print(old_data)
+        if float(old_data["fields"]["score"]["doubleValue"]) < data["score"]: # If new highscore
+            firestore_data = format_firestore_data(data)
+            response = requests.put(game_url, json=firestore_data, headers={ 'Content-Type': 'application/json', })
+            if response.status_code == 200: # Success
+                print("Entry updated.")
+            else: # Error
+                print(f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}")
+    else: # Error
+        print(f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}")
+
 def generateID(settings, font, getFps, exit):
     username = ""
     never = True
@@ -327,7 +358,7 @@ def generateID(settings, font, getFps, exit):
 
 def getFps(never):
     global frame, i, screen, text_surface, settings, font
-    if (pygame.time.get_ticks() - frame) > 1000 or never:
+    if (pygame.time.get_ticks() - frame) > 100 or never:
         fps = 1 / (pygame.time.get_ticks() - frame) * i * 1000
         if settings["Show FPS"] == True:
             text_surface = font.render(
@@ -438,12 +469,12 @@ while True:
     elif meta == "Expose the Criminal":
         meta = game1Tutorial(screen, settings, font, getFps, exit)
         if meta == "Ready":
-            score, adjustment, meta = game1(settings, screen, font, getFps, exit, getID)
+            score, adjustment, meta = game1(settings, screen, font, getFps, exit, getID, updateLB)
             if score != None:
                 game = "Expose the Criminal"
                 adjustDifficulty(adjustment)
     elif meta == "Memory Experiment":
-        score, adjustment, meta = game2(settings, screen, font, getFps, exit, getID)
+        score, adjustment, meta = game2(settings, screen, font, getFps, exit, getID, updateLB)
         if score != None:
             game = "Memory Experiment"
             adjustDifficulty(adjustment)

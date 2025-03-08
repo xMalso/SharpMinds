@@ -115,7 +115,7 @@ def tutorial(screen, settings, font, getFps, exit):
         pygame.display.flip()
 
 
-def game1(settings, screen, font, getFps, exit, getID):
+def game1(settings, screen, font, getFps, exit, getID, updateLB):
     global radius, circles, despawn_time, max_score, loss, red_score
     red_score = 0
     loss = 0
@@ -262,4 +262,5 @@ def game1(settings, screen, font, getFps, exit, getID):
     adjustment = score - (0.8 * red_count + green_count / 6) * max_score
     adjustment /= 100
     lb = {'loss': loss, 'green': green_count, 'red': red_score, 'game': 2, 'id': val[0], 'username': val[1], 'score': score, 'max': max_score}
+    updateLB(1, lb)
     return score, adjustment, "Game Over"
