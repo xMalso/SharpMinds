@@ -3,18 +3,13 @@ import random, pygame, math, numpy as np
 
 
 def init(settings, font, title_font):
-    global buffer, return_text, pause_duration, answer_text
+    global return_text, pause_duration, answer_text
     answer_text = title_font.render(
         f"Answer: ",
         settings["Antialiasing Text"],
         settings["Background Font Colour"],
     )
     ready_text = makeButtons(settings, font)
-    buffer = (
-        settings["Width"] * 0.4,
-        max(ready_text[1] * 2, ready_text[1] + settings["Height"] // 50)
-        + settings["Height"] * 0.2,
-    )
     return_text = splitText(
         font, settings["Width"] // 4, "Press ESC to return to games menu"
     )
@@ -436,38 +431,33 @@ def splitText(font, max_width, words):
 
 
 def calculateScore(score):
-    empty = 0
-    right = 0
-    wrong = 0
-    kinda = 0
     for r, c in all_positions:
         if (r, c) not in answer and (r, c) not in guess:
             score += max_score / 20
-            empty += 1
+            lb['empty']  += 1
         elif (r, c) in answer and (r, c) in guess:
             if pattern[(r, c)] == guess[(r, c)]:
                 score += max_score
-                right += 1
+                lb["right"] += 1
             elif (
                 pattern[(r, c)]["Colour"] == guess[(r, c)]["Colour"]
                 or pattern[(r, c)]["Shape"] == guess[(r, c)]["Shape"]
             ):
                 score += max_score / 3
-                kinda += 1
-        else:
-            wrong += 1
-    lb["empty"] += empty
-    lb["right"] += right
-    lb["wrong"] += wrong
-    lb["kinda"] += kinda
+                lb["kinda"] += 1
     return score
 
 
 def game2(settings, screen, font, getFps, exit,  getID):
-    global difficulty, buttons, rows, cols, button_side, radius, margin_width, margin_height, return_text, multiplier, pause_duration, avg, lb
+    global difficulty, buffer, buttons, rows, cols, button_side, radius, margin_width, margin_height, return_text, multiplier, pause_duration, avg, lb
     val = getID()
-    lb = {'empty': 0, 'right': 0, 'wrong': 0, 'kinda': 0, 'game': 2, 'id': val[0], 'username': val[1], 'score': 0, 'max': 0}
+    lb = {'empty': 0, 'right': 0, 'kinda': 0, 'game': 2, 'id': val[0], 'username': val[1], 'score': 0, 'max': 0}
     score = 0
+    buffer = (
+        settings["Width"] * 0.4,
+        max(ready_text[1] * 2, ready_text[1] + settings["Height"] // 50)
+        + settings["Height"] * 0.2,
+    )
     difficulty = settings["Adaptive Difficulty"][1]
     multiplier = (difficulty - 1) / 10 + 1
     avg = difficulty**0.5 * 10
