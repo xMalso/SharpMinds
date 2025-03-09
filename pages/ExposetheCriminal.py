@@ -117,6 +117,7 @@ def tutorial(screen, settings, font, getFps, exit):
 
 def game1(settings, screen, font, getFps, exit, getID, updateLB):
     global radius, circles, despawn_time, max_score, loss, red_score
+    visual_text = []
     red_score = 0
     loss = 0
     val = getID()
@@ -158,7 +159,10 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
     while start + duration > current_frame:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                score += removeCircle(event.pos, current_frame)
+                result = removeCircle(event.pos, current_frame)
+                if result != 0:
+                    visual_text.append((result, event.pos, current_frame))
+                score += result
                 if score < 0:
                     loss += score
                     score = 0
@@ -253,8 +257,29 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
                     continue
                 else:
                     expired = False
-            circle_number += 1
-            pygame.draw.circle(screen, circle_colour[colour], (x, y), radius)
+            else:
+                circle_number += 1
+                pygame.draw.circle(screen, circle_colour[colour], (x, y), radius)
+        for visual_text_score, pos, tick in visual_text:
+            if current_frame - tick > 1000:
+                visual_text.pop(0)
+            else:
+                # visual_text_score = int(visual_text_score*10)/10
+                visual_text_score = int(visual_text_score)
+                if visual_text_score > 0:
+                    visual_text_score = f"+{visual_text_score}"
+                text = font.render(
+                    str(visual_text_score),
+                    settings["Antialiasing Text"],
+                    settings["Background Font Colour"],
+                )
+                screen.blit(
+                    text,
+                    (
+                        pos[0] - text.get_width() // 2,
+                        pos[1] - text.get_height() // 2,
+                    ),
+                )
         getFps(never)
         never = False
         pygame.display.flip()

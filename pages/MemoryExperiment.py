@@ -3,13 +3,18 @@ import random, pygame, math, numpy as np
 
 
 def init(settings, font, title_font):
-    global return_text, pause_duration, answer_text
+    global return_text, pause_duration, answer_text, guess_text
     answer_text = title_font.render(
-        f"Answer: ",
+        "Answer: ",
         settings["Antialiasing Text"],
         settings["Background Font Colour"],
     )
-    ready_text = makeButtons(settings, font)
+    guess_text = title_font.render(
+        "Guess: ",
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+    )
+    makeButtons(settings, font)
     return_text = splitText(
         font, settings["Width"] // 4, "Press ESC to return to games menu"
     )
@@ -17,7 +22,7 @@ def init(settings, font, title_font):
 
 
 def makeButtons(settings, font):
-    global ready_button, next_button
+    global ready_button, next_button, ready_text
     ready_text = font.size("Ready")
     next_text = font.size("Next Page")
     ready_button = {
@@ -43,14 +48,13 @@ def makeButtons(settings, font):
         "Font Colour": settings["Font Primary Colour"],
         "Meta": "Next Page",
     }
-    return ready_text
 
 
 def makePickerButtons(settings, font):
     global picker_buttons, height, picker_text, width
     erase_text = font.size("Remove Guess")
-    width = min(settings["Width"] // 5, margin_width // 1.3)
-    height = erase_text[1] * 1.3
+    width = min(settings["Width"] // 5, margin_width // 2.6)
+    height = min(erase_text[1] * 1.3, settings["Height"] * .8)
     side = min(width, height)
     width_diff = width - side
     height_diff = height - side
@@ -162,7 +166,8 @@ def makePickerButtons(settings, font):
     ]
 
 
-def drawGrid(screen, settings, buffer_width, patterns, shift):
+def drawGrid(screen, settings, patterns, shift=0):
+    buffer_width = margin_width // 2 + shift
     pygame.draw.rect(
         screen,
         settings["Grid Background Colour"],
@@ -182,7 +187,7 @@ def drawGrid(screen, settings, buffer_width, patterns, shift):
                 buffer_width + (cols) * (button_side + 2),
                 row * (button_side + 2) + margin_height,
             ),
-            2
+            2,
         )
     for col in range(cols + 1):
         pygame.draw.line(
@@ -193,13 +198,13 @@ def drawGrid(screen, settings, buffer_width, patterns, shift):
                 col * (button_side + 2) + buffer_width,
                 (rows) * (button_side + 2) + margin_height,
             ),
-            2
+            2,
         )
 
     for r, c in patterns:
         details = patterns[(r, c)]
         button = buttons[r][c]
-        button["Pygame Button"].left += margin_width * shift
+        button["Pygame Button"].left += shift
         if details["Shape"] == "Circle":
             pygame.draw.circle(
                 screen, details["Colour"], button["Pygame Button"].center, radius
@@ -232,7 +237,7 @@ def drawGrid(screen, settings, buffer_width, patterns, shift):
                 ),
             ]
             pygame.draw.polygon(screen, details["Colour"], points)
-        button["Pygame Button"].left -= margin_width * shift
+        button["Pygame Button"].left -= shift
 
 
 def drawPicker(screen, settings, font):
@@ -432,7 +437,7 @@ def calculateScore(score):
     for r, c in all_positions:
         if (r, c) not in answer and (r, c) not in guess:
             score += max_score / 20
-            lb['empty']  += 1
+            lb["empty"] += 1
         elif (r, c) in answer and (r, c) in guess:
             if pattern[(r, c)] == guess[(r, c)]:
                 score += max_score
@@ -446,13 +451,22 @@ def calculateScore(score):
     return score
 
 
-def game2(settings, screen, font, getFps, exit,  getID, updateLB):
+def game2(settings, screen, font, getFps, exit, getID, updateLB):
     global difficulty, buffer, buttons, rows, cols, button_side, radius, margin_width, margin_height, return_text, multiplier, pause_duration, avg, lb
     val = getID()
-    lb = {'empty': 0, 'right': 0, 'kinda': 0, 'game': 2, 'id': val[0], 'username': val[1], 'score': 0, 'max': 0}
+    lb = {
+        "empty": 0,
+        "right": 0,
+        "kinda": 0,
+        "game": 2,
+        "id": val[0],
+        "username": val[1],
+        "score": 0,
+        "max": 0,
+    }
     score = 0
     buffer = (
-        settings["Width"] * 0.4,
+        settings["Width"] * 0.6,
         max(ready_text[1] * 2, ready_text[1] + settings["Height"] // 50)
         + settings["Height"] * 0.2,
     )
@@ -466,14 +480,14 @@ def game2(settings, screen, font, getFps, exit,  getID, updateLB):
     button_side = int(min(button_width, button_height))
     radius = int(button_side * 0.3)
     margin_width, margin_height = (
-        (settings["Width"] - (button_side * cols)) // 4,
+        (settings["Width"] - (button_side * cols)) // 2,
         (settings["Height"] - (button_side * rows)) // 2,
     )
     makePickerButtons(settings, font)
     buttons = []
     y = margin_height + 2
     for row in range(rows):
-        x = margin_width + 2
+        x = margin_width // 2 + 2
         button_row = []
         for col in range(cols):
             button = {
@@ -484,14 +498,23 @@ def game2(settings, screen, font, getFps, exit,  getID, updateLB):
         y += button_side + 2
         buttons.append(button_row)
     rounds = 1
+    rounds_played = None
     for i in range(rounds):
         round_score, meta = cycle(i, settings, getFps, screen, font, exit)
         if round_score is None:
             return (round_score, None, meta)
         score += round_score
-    adjustment = ((score / rounds) - (540 * multiplier)) / 1600
-    adjustment = float(np.piecewise(adjustment, [x < 0, x >= 0], [lambda x: (x**3 + x)/2, lambda x: x*16]))
-    print(score, adjustment, 600*multiplier, 540*multiplier)
+        if meta != "Game Over":
+            rounds_played = i + 1
+            break
+    if not rounds_played:
+        rounds_played = rounds
+    adjustment = ((score / rounds_played) - (540 * multiplier)) / 1600
+    adjustment = float(
+        np.piecewise(
+            adjustment, [x < 0, x >= 0], [lambda x: (x**3 + x) / 2, lambda x: x * 16]
+        )
+    )
     lb["score"] = score
     updateLB(2, lb)
     return (score, adjustment, meta)
@@ -537,7 +560,12 @@ def cycle(round_number, settings, getFps, screen, font, exit):
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if ready_button["Pygame Button"].collidepoint(event.pos):
                     ready = True
-        drawGrid(screen, settings, margin_width * 2, pattern, 1)
+        drawGrid(
+            screen,
+            settings,
+            pattern,
+            margin_width // 2,
+        )
         height = settings["Height"] // 200
         pygame.draw.rect(
             screen,
@@ -707,7 +735,7 @@ def cycle(round_number, settings, getFps, screen, font, exit):
                                 "Shape": picker_shape,
                             }
         screen.fill(settings["Background Colour"])
-        drawGrid(screen, settings, margin_width, guess, 0)
+        drawGrid(screen, settings, guess)
         drawPicker(screen, settings, font)
         height = settings["Height"] // 200
         for line in return_text:
@@ -766,8 +794,18 @@ def cycle(round_number, settings, getFps, screen, font, exit):
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if next_button["Pygame Button"].collidepoint(event.pos):
                     return score, "Game Over"
-        drawGrid(screen, settings, margin_width, pattern, 0)
-        drawGrid(screen,settings, margin_width * 3, guess, 2)
+        drawGrid(
+            screen,
+            settings,
+            pattern,
+            -(settings["Width"] // 4) + margin_width // 2,
+        )
+        drawGrid(
+            screen,
+            settings,
+            guess,
+            (settings["Width"] // 4) + margin_width // 2,
+        )
         height = settings["Height"] // 200
         pygame.draw.rect(
             screen,
@@ -809,7 +847,14 @@ def cycle(round_number, settings, getFps, screen, font, exit):
         screen.blit(
             answer_text,
             (
-                (settings["Width"] - answer_text.get_width()) // 2,
+                (settings["Width"] // 2 - answer_text.get_width()) // 2,
+                settings["Height"] // 200,
+            ),
+        )
+        screen.blit(
+            guess_text,
+            (
+                (settings["Width"] * 1.5 - guess_text.get_width()) // 2,
                 settings["Height"] // 200,
             ),
         )
