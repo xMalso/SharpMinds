@@ -1,9 +1,10 @@
 import pygame, sys, os, random, hashlib, requests
 from pages import *
 
-# import firebase_admin
-# from dotenv import load_dotenv
-# from firebase_admin import credentials, firestore
+import firebase_admin
+from dotenv import load_dotenv
+from firebase_admin import credentials, firestore
+
 # import steam
 # steamworks = steam.SteamWorks()
 
@@ -20,12 +21,21 @@ from pages import *
 # print(private_key_path)
 # cred = credentials.Certificate(private_key_path)
 # firebase_admin.initialize_app(cred)
+# # firebase_admin.initialize_app()
 
 # db = firestore.client()
 
-# leaderboard_ref = db.collection('leaderboard')
+# leaderboard = (
+#     db.collection("game1").document(
+#         "a7038e995fc7acbb230cb00d145884df718a6e161b2c6adee7c6b33469429ce5"
+#     ).get().to_dict(),
+#     db.collection("game2"),
+#     db.collection("game3"),
+# )
+# print(f"lb {leaderboard[0]}\n\n\n")
+lb = r"https://sharpminds-37b05-default-rtdb.europe-west1.firebasedatabase.app"
 
-lb = r"https://firestore.googleapis.com/v1/projects/sharpminds-37b05/databases/(default)/documents"
+
 class Settings:
 
     def __init__(self):
@@ -176,7 +186,7 @@ def loadUp():
     info = pygame.display.Info()
     pygame.display.set_caption("Sharp Minds")
     screen = pygame.display.set_mode((info.current_w, info.current_h), pygame.NOFRAME)
-    os.environ['SDL_VIDEO_CENTERED'] = '1'
+    os.environ["SDL_VIDEO_CENTERED"] = "1"
     screen.fill((31, 31, 31))
     default_font = pygame.font.Font(
         "assets\\fonts\\fonts\\OpenDyslexic-Regular.otf", 30
@@ -245,7 +255,7 @@ def loadUpValues():
     global meta, choice, settings, text_surface, i, frame
     settings = settingsClass.getSettings()
     settingsClass.applySettings()
-    os.environ['SDL_VIDEO_CENTERED'] = '1'
+    os.environ["SDL_VIDEO_CENTERED"] = "1"
     frame = pygame.time.get_ticks()
     i = 1
     text_surface = None
@@ -257,55 +267,93 @@ def loadUpValues():
     gameOverInit(settings, font, title_font)
     leaderboardInit(settings)
 
+
 def getID():
-    global id, username
+    global user_id, username
     try:
         try:
-            return id, username
+            return user_id, username
         except NameError:
             print("ID and username not loaded, loading ID and username.")
             with open("id.txt", "r") as file:
                 for line in file:
-                    id, username = line.split(", ")
-            return id, username
+                    user_id, username = line.split(", ")
+            return user_id, username
     except FileNotFoundError:
         print("ID and username not found, creating for new ID and username.")
         username = generateID(settings, font, getFps, exit)
-        id = hashlib.sha256(f"{username}{random.randint(0,2**32)}".encode()).hexdigest()
+        user_id = hashlib.sha256(f"{username}{random.randint(0,2**32)}".encode()).hexdigest()
         with open("id.txt", "w") as file:
-            file.write(f"{id}, {username}")
-        return id, username
+            file.write(f"{user_id}, {username}")
+        return user_id, username
+
 
 def format_firestore_data(data):
-    return {"fields": {k: 
-        {"integerValue": v} if isinstance(v, int) else
-        {"doubleValue": v} if isinstance(v, float) else
-        {"stringValue": v} if isinstance(v, str) else None
-        for k, v in data.items()
-    }}
+    return {
+        "fields": {
+            k: (
+                {"integerValue": v}
+                if isinstance(v, int)
+                else (
+                    {"doubleValue": v}
+                    if isinstance(v, float)
+                    else {"stringValue": v} if isinstance(v, str) else None
+                )
+            )
+            for k, v in data.items()
+        }
+    }
+
 
 def updateLB(game, data):
-    game_url = f"{lb}/game{game}/{id}"
-    response = requests.get(game_url)
-    if response.status_code == 404: # First time
+    print(user_id)
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    game = 2
+    data = {
+        "empty": 20,
+        "right": 5,
+        "kinda": 0,
+        "game": 2,
+        "id": "a7038e995fc7acbb230cb00d145884df718a6e161b2c6adee7c6b33469429ce4",
+        "username": "malso",
+        "score": 699.5999999999999,
+        "max": 116.59999999999998,
+    }
+    game_url = f"{lb}/game{game}/{user_id}.json"
+    # get = db.collection("game{game}").document(
+    #     user_id
+    # ).get().to_dict()
+    response = requests.get(game_url, headers=headers)
+    print(response)
+    print(game_url)
+    if response.status_code == 404:  # First time
+    # if get == None:
         firestore_data = format_firestore_data(data)
-        response = requests.post(game_url, json=firestore_data, headers={ 'Content-Type': 'application/json', })
-        if response.status_code == 200: # Success
+        response = requests.post(game_url, json=firestore_data, headers=headers)
+        if response.status_code == 200:  # Success
             print("New entry created.")
-        else: # Error
-            print(f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}")
+        else:  # Error
+            print(
+                f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
+            )
     elif response.status_code == 200: # Update
-        old_data = response.json()
-        print(old_data)
-        if float(old_data["fields"]["score"]["doubleValue"]) < data["score"]: # If new highscore
+        old_score = float(response.json()["score"])
+        print(old_score)
+    # elif float(get["score"]) < data["score"]:
+        if old_score < data["score"]: # If new highscore
             firestore_data = format_firestore_data(data)
-            response = requests.put(game_url, json=firestore_data, headers={ 'Content-Type': 'application/json', })
-            if response.status_code == 200: # Success
+            response = requests.put(game_url, json=firestore_data, headers=headers)
+            if response.status_code == 200:  # Success
                 print("Entry updated.")
-            else: # Error
-                print(f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}")
-    else: # Error
-        print(f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}")
+            else:  # Error
+                print(
+                    f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
+                )
+    else:  # Error
+        print(
+            f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
+        )
+
 
 def generateID(settings, font, getFps, exit):
     username = ""
@@ -313,7 +361,9 @@ def generateID(settings, font, getFps, exit):
     while True:
         screen.fill(settings["Background Colour"])
         text_surface = font.render(
-            "Welcome to Sharp Minds!", settings["Antialiasing Text"], settings["Background Font Colour"]
+            "Welcome to Sharp Minds!",
+            settings["Antialiasing Text"],
+            settings["Background Font Colour"],
         )
         screen.blit(
             text_surface,
@@ -323,7 +373,9 @@ def generateID(settings, font, getFps, exit):
             ),
         )
         text_surface = font.render(
-            "Please enter a username:", settings["Antialiasing Text"], settings["Background Font Colour"]
+            "Please enter a username:",
+            settings["Antialiasing Text"],
+            settings["Background Font Colour"],
         )
         screen.blit(
             text_surface,
@@ -443,6 +495,9 @@ def adjustDifficulty(adjustment):
     del choice["Adaptive Difficulty"]
     print("Adaptive Difficulty saved.")
 
+getID()
+updateLB(1, {})
+exit()
 
 loadUp()
 meta = "Main Menu"
@@ -469,12 +524,16 @@ while True:
     elif meta == "Expose the Criminal":
         meta = game1Tutorial(screen, settings, font, getFps, exit)
         if meta == "Ready":
-            score, adjustment, meta = game1(settings, screen, font, getFps, exit, getID, updateLB)
+            score, adjustment, meta = game1(
+                settings, screen, font, getFps, exit, getID, updateLB
+            )
             if score != None:
                 game = "Expose the Criminal"
                 adjustDifficulty(adjustment)
     elif meta == "Memory Experiment":
-        score, adjustment, meta = game2(settings, screen, font, getFps, exit, getID, updateLB)
+        score, adjustment, meta = game2(
+            settings, screen, font, getFps, exit, getID, updateLB
+        )
         if score != None:
             game = "Memory Experiment"
             adjustDifficulty(adjustment)

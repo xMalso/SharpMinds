@@ -59,7 +59,7 @@ def displayPage(screen, settings, font, game, score, getFps, exit):
         settings["Height"] // 20 + game_over_text.get_height(),
     )
     current = start = pygame.time.get_ticks()
-    while current - start < 2000:
+    while current - start < 400:
         screen.fill(settings["Background Colour"])
         screen.blit(game_over_text, game_over_text_rect)
         screen.blit(score_text, score_text_rect)

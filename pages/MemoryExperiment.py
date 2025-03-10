@@ -54,7 +54,7 @@ def makePickerButtons(settings, font):
     global picker_buttons, height, picker_text, width
     erase_text = font.size("Remove Guess")
     width = min(settings["Width"] // 5, margin_width // 2.6)
-    height = min(erase_text[1] * 1.3, settings["Height"] * .8)
+    height = min(erase_text[1] * 1.3, settings["Height"] * 0.8)
     side = min(width, height)
     width_diff = width - side
     height_diff = height - side
@@ -778,6 +778,8 @@ def cycle(round_number, settings, getFps, screen, font, exit):
         never = False
         pygame.display.flip()
     next = False
+    print(score)
+    score = min(score + 0.000001, 600 * multiplier)
     round_text = font.render(
         f"Round {round_number + 1}, Score: {int(score)}/{int(600*multiplier)}",
         settings["Antialiasing Text"],
@@ -861,4 +863,3 @@ def cycle(round_number, settings, getFps, screen, font, exit):
         getFps(never)
         never = False
         pygame.display.flip()
-    return score, "Game Over"

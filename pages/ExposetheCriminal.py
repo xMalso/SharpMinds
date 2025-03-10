@@ -7,6 +7,7 @@ correct_sound = pygame.mixer.Sound("assets/sounds/correct.wav")
 wrong_sound = pygame.mixer.Sound("assets/sounds/wrong.wav")
 correct_sound.set_volume(1.2)
 
+
 def init(settings, font):
     makeButtons(settings, font)
 
@@ -44,7 +45,7 @@ def removeCircle(pos, current):
             if colour == "Green":
                 wrong_sound.play()
                 loss += 50
-                return -50
+                return (-50, (x + radius, y - radius))
             else:
                 correct_sound.play()
                 time = current - tick if current - tick != 0 else 1
@@ -53,8 +54,8 @@ def removeCircle(pos, current):
                     * min((0.012 * (despawn_time * 5 / (time))) - 0.06, 1) ** 0.2
                 )
                 red_score += score
-                return score
-    return 0
+                return (score, (x + radius, y - radius))
+    return (0, (0, 0))
 
 
 def splitText(font, max_width):
@@ -159,9 +160,11 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
     while start + duration > current_frame:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                result = removeCircle(event.pos, current_frame)
+                result, edge = removeCircle(event.pos, current_frame)
                 if result != 0:
-                    visual_text.append((result, event.pos, current_frame))
+                    print(edge)
+                    print(event.pos)
+                    visual_text.append((result, edge, current_frame))
                 score += result
                 if score < 0:
                     loss += score
@@ -276,7 +279,7 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
                 screen.blit(
                     text,
                     (
-                        pos[0] - text.get_width() // 2,
+                        pos[0],
                         pos[1] - text.get_height() // 2,
                     ),
                 )
@@ -286,6 +289,15 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
         current_frame = pygame.time.get_ticks()
     adjustment = score - (0.8 * red_count + green_count / 6) * max_score
     adjustment /= 100
-    lb = {'loss': loss, 'green': green_count, 'red': red_score, 'game': 2, 'id': val[0], 'username': val[1], 'score': score, 'max': max_score}
+    lb = {
+        "loss": loss,
+        "green": green_count,
+        "red": red_score,
+        "game": 2,
+        "id": val[0],
+        "username": val[1],
+        "score": score,
+        "max": max_score,
+    }
     updateLB(1, lb)
     return score, adjustment, "Game Over"
