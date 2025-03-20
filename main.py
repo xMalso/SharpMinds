@@ -36,7 +36,7 @@ from pages import *
 # print(f"lb {leaderboard[0]}\n\n\n")
 lb = r"https://sharpminds-37b05-default-rtdb.europe-west1.firebasedatabase.app"
 
-logging.basicConfig(level=logging.ERROR, filename=f"errors/errorlog{datetime.now().strftime('%d-%m_%H-%M-%S')}.txt", format="%(asctime)s - %(message)s")
+logging.basicConfig(level=logging.ERROR, filename=f"logs/errorlog{datetime.now().strftime('%d-%m_%H-%M-%S')}.txt", format="%(asctime)s - %(message)s")
 
 class Settings:
 
