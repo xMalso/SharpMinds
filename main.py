@@ -1,3 +1,4 @@
+import json
 import pygame, sys, os, random, hashlib, requests, logging, traceback
 from datetime import datetime
 from pages import *
@@ -36,7 +37,12 @@ from pages import *
 # print(f"lb {leaderboard[0]}\n\n\n")
 lb = r"https://sharpminds-37b05-default-rtdb.europe-west1.firebasedatabase.app"
 
-logging.basicConfig(level=logging.ERROR, filename=f"logs/errorlog{datetime.now().strftime('%d-%m_%H-%M-%S')}.txt", format="%(asctime)s - %(message)s")
+logging.basicConfig(
+    level=logging.ERROR,
+    filename=f"logs/errorlog{datetime.now().strftime('%d-%m_%H-%M-%S')}.txt",
+    format="%(asctime)s - %(message)s",
+)
+
 
 class Settings:
 
@@ -205,8 +211,8 @@ def loadUp():
     )
     pygame.display.flip()
     global settingsClass, default_settings
-    print(info.current_w, info.current_h)
-    print(info)
+    # print(info.current_w, info.current_h)
+    # print(info)
     default_settings = {
         "Width": info.current_w,
         "Height": info.current_h,
@@ -282,25 +288,12 @@ def getID():
                     user_id, _, username = line.split(", ")
                     del _
                     return user_id, username
-        username = generateUsername(settings, font, getFps, exit)
-        key = random.randint(0,2**32)
-        user_id = hashlib.sha256(
-            f"{username}{key}".encode()
-        ).hexdigest()
-        with open("id.txt", "w") as file:
-            file.write(f"{user_id}, {key}, {username}")
-        del key
+        print("id.txt found but empty, creating new ID and username.")
+        user_id, username = generateUsername(settings, font, getFps, exit)
         return user_id, username
     except FileNotFoundError:
-        print("ID and username not found, creating for new ID and username.")
-        username = generateUsername(settings, font, getFps, exit)
-        key = random.randint(0,2**32)
-        user_id = hashlib.sha256(
-            f"{username}{key}".encode()
-        ).hexdigest()
-        with open("id.txt", "w") as file:
-            file.write(f"{user_id}, {key}, {username}")
-        del key
+        print("id.txt not found, creating new ID and username.")
+        user_id, username = generateUsername(settings, font, getFps, exit)
         return user_id, username
     except ValueError:
         with open("id.txt", "r") as file:
@@ -326,28 +319,45 @@ def format_firestore_data(data):
     }
 
 
-def updateLB(game, data):
-    old_score = None
-    print(user_id)
+def createLB(game, data, user_id):
+    print(data)
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
-    game = 2
-    data = {
-        "empty": 20,
-        "right": 5,
-        "kinda": 0,
-        "game": 2,
-        "id": "a7038e995fc7acbb230cb00d145884df718a6e161b2c6adee7c6b33469429ce4",
-        "username": "malso",
-        "score": 699.5999999999999,
-        "max": 116.59999999999998,
-    }
+    game_url = f"{lb}/game{game}/{user_id}.json"
+    firestore_data = format_firestore_data(data)
+    print(json.dumps(firestore_data, indent=2))
+    response = requests.put(game_url, json=firestore_data, headers=headers)
+    if response.status_code == 200:  # Success
+        print("New entry created.")
+    else:  # Error
+        print(
+            f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n"
+        )
+        logging.error(
+            f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
+        )
+
+
+def updateLB(game, data):
+    # print(user_id)
+    print(data)
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    # game = 2
+    # data = {
+    #     "empty": 20,
+    #     "right": 5,
+    #     "kinda": 0,
+    #     "game": 2,
+    #     "id": "a7038e995fc7acbb230cb00d145884df718a6e161b2c6adee7c6b33469429ce4",
+    #     "username": "malso",
+    #     "score": 699.5999999999999,
+    #     "max": 116.59999999999998,
+    # }
     game_url = f"{lb}/game{game}/{user_id}.json"
     # get = db.collection("game{game}").document(
     #     user_id
     # ).get().to_dict()
     response = requests.get(game_url, headers=headers)
     print(response)
-    print(game_url)
     if response.status_code == 404:  # First time
         # if get == None:
         firestore_data = format_firestore_data(data)
@@ -358,12 +368,20 @@ def updateLB(game, data):
             print(
                 f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
             )
+            logging.error(
+                f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
+            )
     elif response.status_code == 200:  # Update
-        old_score = float(response.json()["fields"]["score"]["doubleValue"])
-        print(old_score)
+        try:
+            old_score = float(response.json()["fields"]["score"]["doubleValue"])
+        except:
+            print(response.json())
+            old_score = 0
+        print(f"old_score: {old_score}")
+        print(f"new_score: {data['score']}")
         # elif float(get["score"]) < data["score"]:
-        if True:
-            # if old_score < data["score"]: # If new highscore
+        # if True:
+        if old_score < data["score"]:  # If new highscore
             firestore_data = format_firestore_data(data)
             response = requests.put(game_url, json=firestore_data, headers=headers)
             if response.status_code == 200:  # Success
@@ -372,22 +390,26 @@ def updateLB(game, data):
                 print(
                     f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
                 )
+                logging.error(
+                    f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
+                )
+        else:
+            print("No new highscore.")
     else:  # Error
         print(
             f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
         )
-
-    print(
-        data["score"]
-        - (((data["empty"] * 0.05) + (data["kinda"] / 3) + data["right"]) * data["max"])
-    )
+        logging.error(
+            f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
+        )
     return old_score
 
 
 def generateUsername(settings, font, getFps, exit):
     username = ""
     never = True
-    while True:
+    loop = True
+    while loop:
         screen.fill(settings["Background Colour"])
         text_surface = font.render(
             "Welcome to Sharp Minds!",
@@ -430,12 +452,47 @@ def generateUsername(settings, font, getFps, exit):
                 if event.key == pygame.K_BACKSPACE:
                     username = username[:-1]
                 elif event.key == pygame.K_RETURN:
-                    return username
+                    if username == "":
+                        username = f"Player-{hashlib.sha256(str(random.randint(0, 2 ** 32)).encode()).hexdigest()[:20]}"
+                    loop = False
                 else:
                     username += event.unicode
         getFps(never)
         never = False
         pygame.display.flip()
+    key = random.randint(0, 2**32)
+    user_id = hashlib.sha256(f"{username}{key}".encode()).hexdigest()
+    with open("id.txt", "w") as file:
+        file.write(f"{user_id}, {key}, {username}")
+    del key
+    createLB(
+            1,
+            {
+                "loss": float(0),
+                "green": 0,
+                "red": float(0),
+                "game": 1,
+                "id": user_id,
+                "username": username,
+                "score": float(0),
+                "max": float(1),
+            }, user_id
+        )
+    createLB(
+        2,
+        {
+            "empty": 0,
+            "right": 0,
+            "kinda": 0,
+            "game": 2,
+            "id": user_id,
+            "username": username,
+            "score": float(0),
+            "max": float(0),
+        }, user_id
+    )
+    # createLB(3, {}, user_id)
+    return user_id, username
 
 
 def getFps(never):
@@ -525,10 +582,11 @@ def adjustDifficulty(adjustment):
     del choice["Adaptive Difficulty"]
     print("Adaptive Difficulty saved.")
 
+
 try:
-# getID()
-# updateLB(1, {})
-# exit()
+    # getID()
+    # updateLB(1, {})
+    # exit()
 
     loadUp()
     meta = "Main Menu"
@@ -569,7 +627,9 @@ try:
                 game = "Memory Experiment"
                 adjustDifficulty(adjustment)
         elif meta == "Pattern Rush":
-            print(f"Page '{meta}' is currently in development, sending back to main menu.")
+            print(
+                f"Page '{meta}' is currently in development, sending back to main menu."
+            )
             score, adjustment, meta, pb = game3(settings, screen, font, getFps, exit)
             if score != None:
                 game = "Pattern Rush"
@@ -582,7 +642,9 @@ try:
             meta == leaderboardsDisplay(settings, screen, font, getFps, exit)
             meta = "Main Menu"
         else:
-            print(f"Page '{meta}' is currently in development, sending back to main menu.")
+            print(
+                f"Page '{meta}' is currently in development, sending back to main menu."
+            )
             meta = "Main Menu"
         # if settings["FPS Limit"] > 0:
         # limiter = (1/settings["FPS Limit"]) - (pygame.time.get_ticks() - frame) / i
@@ -591,6 +653,6 @@ try:
         # pygame.time.Clock().tick(limiter)
         # print(pygame.time.get_ticks())
         pygame.display.flip()
-except Exception as e:
+except:
     logging.error(traceback.format_exc())
     exit()

@@ -162,8 +162,6 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 result, edge = removeCircle(event.pos, current_frame)
                 if result != 0:
-                    print(edge)
-                    print(event.pos)
                     visual_text.append((result, edge, current_frame))
                 score += result
                 if score < 0:
@@ -290,14 +288,14 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
     adjustment = score - (0.8 * red_count + green_count / 6) * max_score
     adjustment /= 100
     lb = {
-        "loss": loss,
-        "green": green_count,
-        "red": red_score,
-        "game": 2,
-        "id": val[0],
-        "username": val[1],
-        "score": score,
-        "max": max_score,
+        "loss": float(loss),
+        "green": int(green_count),
+        "red": float(red_score),
+        "game": int(1),
+        "id": str(val[0]),
+        "username": str(val[1]),
+        "score": float(score),
+        "max": float(max_score),
     }
     pb = updateLB(1, lb)
     return score, adjustment, "Game Over", pb

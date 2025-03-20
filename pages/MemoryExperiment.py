@@ -449,7 +449,7 @@ def calculateScore(score):
                 score += max_score / 3
                 lb["kinda"] += 1
     print(
-        score - (((lb["empty"] ** 0.05) + (lb["kinda"] / 3) + lb["right"]) * lb["max"])
+        "floating pres diff", score - (((lb["empty"] * 0.05) + (lb["kinda"] / 3) + lb["right"]) * lb["max"])
     )
     return score
 
@@ -461,9 +461,9 @@ def game2(settings, screen, font, getFps, exit, getID, updateLB):
         "empty": 0,
         "right": 0,
         "kinda": 0,
-        "game": 2,
-        "id": val[0],
-        "username": val[1],
+        "game": int(2),
+        "id": str(val[0]),
+        "username": str(val[1]),
         "score": 0,
         "max": 0,
     }
@@ -518,7 +518,11 @@ def game2(settings, screen, font, getFps, exit, getID, updateLB):
             adjustment, [x < 0, x >= 0], [lambda x: (x**3 + x) / 2, lambda x: x * 16]
         )
     )
-    lb["score"] = score
+    lb["max"] = float(lb["max"])
+    lb["score"] = float(score)
+    lb["empty"] = int(lb["empty"])
+    lb["right"] = int(lb["right"])
+    lb["kinda"] = int(lb["kinda"])
     pb = updateLB(2, lb)
     return score, adjustment, meta, pb
 
@@ -781,7 +785,6 @@ def cycle(round_number, settings, getFps, screen, font, exit):
         never = False
         pygame.display.flip()
     next = False
-    print(score)
     score = min(score + 0.000001, 600 * multiplier)
     round_text = font.render(
         f"Round {round_number + 1}, Score: {int(score)}/{int(600*multiplier)}",
