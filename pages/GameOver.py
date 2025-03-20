@@ -48,7 +48,7 @@ def makeText(settings, title_font):
     game_over_text_rect.midtop = (settings["Width"] // 2, settings["Height"] // 30)
 
 
-def displayPage(screen, settings, font, game, score, getFps, exit):
+def displayPage(screen, settings, font, game, score, pb, adjustment, getFps, exit):
     never = True
     score_text = font.render(
         f"Score: {int(score)}", True, settings["Background Font Colour"]
@@ -94,7 +94,7 @@ def displayPage(screen, settings, font, game, score, getFps, exit):
                     return
         pygame.display.flip()
         current = pygame.time.get_ticks()
-    
+
     while True:
         screen.fill(settings["Background Colour"])
         screen.blit(game_over_text, game_over_text_rect)

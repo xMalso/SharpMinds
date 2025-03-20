@@ -48,7 +48,7 @@ def makeButtons(settings, font):
         #     "Name": "Friends",
         #     "Pygame Button": pygame.Rect(
         #         (settings["Width"] - (text[0] + settings["Width"] // 19.2)) // 2,
-                # settings["Height"] // 3 + (text[1] + settings["Height"] // 18) * 2,
+        # settings["Height"] // 3 + (text[1] + settings["Height"] // 18) * 2,
         #         text[0] + settings["Width"] // 19.2,
         #         text[1] + settings["Height"] // 27,
         #     ),
@@ -94,12 +94,14 @@ def displayPage(settings, screen, font, getFps, exit):
                 settings["Width"] // 2 - title_text.get_width() // 2,
                 # (settings["Height"] * 17) // 100 - title_text.get_height() // 2,
                 (settings["Height"] * 25) // 100 - title_text.get_height() // 2,
-
             ),
         )
         for button in buttons:
             pygame.draw.rect(
-                screen, button["Colour"], button["Pygame Button"], border_radius=settings["Width"] // 40
+                screen,
+                button["Colour"],
+                button["Pygame Button"],
+                border_radius=settings["Width"] // 40,
             )
             button_text = font.render(
                 button["Name"], settings["Antialiasing Text"], button["Font Colour"]

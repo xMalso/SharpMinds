@@ -171,10 +171,10 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
                     score = 0
             elif event.type == pygame.QUIT:
                 exit()
-                return None, None, "Quit"
+                return None, None, "Quit", None
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    return None, None, "Game Menu"
+                    return None, None, "Game Menu", None
         screen.fill(settings["Background Colour"])
         height = settings["Height"] // 200
         for line in return_text:
@@ -299,5 +299,5 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
         "score": score,
         "max": max_score,
     }
-    updateLB(1, lb)
-    return score, adjustment, "Game Over"
+    pb = updateLB(1, lb)
+    return score, adjustment, "Game Over", pb

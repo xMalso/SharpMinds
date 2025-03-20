@@ -448,6 +448,9 @@ def calculateScore(score):
             ):
                 score += max_score / 3
                 lb["kinda"] += 1
+    print(
+        score - (((lb["empty"] ** 0.05) + (lb["kinda"] / 3) + lb["right"]) * lb["max"])
+    )
     return score
 
 
@@ -502,7 +505,7 @@ def game2(settings, screen, font, getFps, exit, getID, updateLB):
     for i in range(rounds):
         round_score, meta = cycle(i, settings, getFps, screen, font, exit)
         if round_score is None:
-            return (round_score, None, meta)
+            return None, None, meta, None
         score += round_score
         if meta != "Game Over":
             rounds_played = i + 1
@@ -516,8 +519,8 @@ def game2(settings, screen, font, getFps, exit, getID, updateLB):
         )
     )
     lb["score"] = score
-    updateLB(2, lb)
-    return (score, adjustment, meta)
+    pb = updateLB(2, lb)
+    return score, adjustment, meta, pb
 
 
 def cycle(round_number, settings, getFps, screen, font, exit):

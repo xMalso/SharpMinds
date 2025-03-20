@@ -1,9 +1,10 @@
-import pygame, sys, os, random, hashlib, requests
+import pygame, sys, os, random, hashlib, requests, logging, traceback
+from datetime import datetime
 from pages import *
 
-import firebase_admin
-from dotenv import load_dotenv
-from firebase_admin import credentials, firestore
+# import firebase_admin
+# from dotenv import load_dotenv
+# from firebase_admin import credentials, firestore
 
 # import steam
 # steamworks = steam.SteamWorks()
@@ -35,6 +36,7 @@ from firebase_admin import credentials, firestore
 # print(f"lb {leaderboard[0]}\n\n\n")
 lb = r"https://sharpminds-37b05-default-rtdb.europe-west1.firebasedatabase.app"
 
+logging.basicConfig(level=logging.ERROR, filename=f"errors/errorlog{datetime.now().strftime('%d-%m_%H-%M-%S')}.txt", format="%(asctime)s - %(message)s")
 
 class Settings:
 
@@ -277,15 +279,34 @@ def getID():
             print("ID and username not loaded, loading ID and username.")
             with open("id.txt", "r") as file:
                 for line in file:
-                    user_id, username = line.split(", ")
-            return user_id, username
+                    user_id, _, username = line.split(", ")
+                    del _
+                    return user_id, username
+        username = generateUsername(settings, font, getFps, exit)
+        key = random.randint(0,2**32)
+        user_id = hashlib.sha256(
+            f"{username}{key}".encode()
+        ).hexdigest()
+        with open("id.txt", "w") as file:
+            file.write(f"{user_id}, {key}, {username}")
+        del key
+        return user_id, username
     except FileNotFoundError:
         print("ID and username not found, creating for new ID and username.")
-        username = generateID(settings, font, getFps, exit)
-        user_id = hashlib.sha256(f"{username}{random.randint(0,2**32)}".encode()).hexdigest()
+        username = generateUsername(settings, font, getFps, exit)
+        key = random.randint(0,2**32)
+        user_id = hashlib.sha256(
+            f"{username}{key}".encode()
+        ).hexdigest()
         with open("id.txt", "w") as file:
-            file.write(f"{user_id}, {username}")
+            file.write(f"{user_id}, {key}, {username}")
+        del key
         return user_id, username
+    except ValueError:
+        with open("id.txt", "r") as file:
+            for line in file:
+                user_id, username = line.split(", ")
+                return user_id, username
 
 
 def format_firestore_data(data):
@@ -306,6 +327,7 @@ def format_firestore_data(data):
 
 
 def updateLB(game, data):
+    old_score = None
     print(user_id)
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     game = 2
@@ -327,7 +349,7 @@ def updateLB(game, data):
     print(response)
     print(game_url)
     if response.status_code == 404:  # First time
-    # if get == None:
+        # if get == None:
         firestore_data = format_firestore_data(data)
         response = requests.post(game_url, json=firestore_data, headers=headers)
         if response.status_code == 200:  # Success
@@ -336,11 +358,12 @@ def updateLB(game, data):
             print(
                 f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
             )
-    elif response.status_code == 200: # Update
-        old_score = float(response.json()["score"])
+    elif response.status_code == 200:  # Update
+        old_score = float(response.json()["fields"]["score"]["doubleValue"])
         print(old_score)
-    # elif float(get["score"]) < data["score"]:
-        if old_score < data["score"]: # If new highscore
+        # elif float(get["score"]) < data["score"]:
+        if True:
+            # if old_score < data["score"]: # If new highscore
             firestore_data = format_firestore_data(data)
             response = requests.put(game_url, json=firestore_data, headers=headers)
             if response.status_code == 200:  # Success
@@ -354,8 +377,14 @@ def updateLB(game, data):
             f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
         )
 
+    print(
+        data["score"]
+        - (((data["empty"] * 0.05) + (data["kinda"] / 3) + data["right"]) * data["max"])
+    )
+    return old_score
 
-def generateID(settings, font, getFps, exit):
+
+def generateUsername(settings, font, getFps, exit):
     username = ""
     never = True
     while True:
@@ -407,6 +436,7 @@ def generateID(settings, font, getFps, exit):
         getFps(never)
         never = False
         pygame.display.flip()
+
 
 def getFps(never):
     global frame, i, screen, text_surface, settings, font
@@ -495,66 +525,72 @@ def adjustDifficulty(adjustment):
     del choice["Adaptive Difficulty"]
     print("Adaptive Difficulty saved.")
 
-getID()
-updateLB(1, {})
-exit()
+try:
+# getID()
+# updateLB(1, {})
+# exit()
 
-loadUp()
-meta = "Main Menu"
-# meta = "Game Over"
-# game = "Expose the Criminal"
-# score = 530.7385
+    loadUp()
+    meta = "Main Menu"
+    # meta = "Game Over"
+    # game = "Expose the Criminal"
+    # score = 530.7385
 
-while True:
-    if meta == "Main Menu":
-        meta, choice = mainMenuDisplay(settings, screen, font, getFps, exit)
-    elif meta == "Game Menu":
-        meta = gameMenuDisplay(
-            settings, screen, font, title_font, small_font, getFps, exit
-        )
-    elif meta == "Settings":
-        scroll = 0
-        choice, val = settingsDisplay(
-            settings, screen, font, title_font, small_font, choice, getFps, exit
-        )
-        meta = executeSettingsResults(val)
-    elif meta == "Quit":
-        pygame.quit()
-        sys.exit()
-    elif meta == "Expose the Criminal":
-        meta = game1Tutorial(screen, settings, font, getFps, exit)
-        if meta == "Ready":
-            score, adjustment, meta = game1(
+    while True:
+        if meta == "Main Menu":
+            meta, choice = mainMenuDisplay(settings, screen, font, getFps, exit)
+        elif meta == "Game Menu":
+            meta = gameMenuDisplay(
+                settings, screen, font, title_font, small_font, getFps, exit
+            )
+        elif meta == "Settings":
+            scroll = 0
+            choice, val = settingsDisplay(
+                settings, screen, font, title_font, small_font, choice, getFps, exit
+            )
+            meta = executeSettingsResults(val)
+        elif meta == "Quit":
+            pygame.quit()
+            sys.exit()
+        elif meta == "Expose the Criminal":
+            meta = game1Tutorial(screen, settings, font, getFps, exit)
+            if meta == "Ready":
+                score, adjustment, meta, pb = game1(
+                    settings, screen, font, getFps, exit, getID, updateLB
+                )
+                if score != None:
+                    game = "Expose the Criminal"
+                    adjustDifficulty(adjustment)
+        elif meta == "Memory Experiment":
+            score, adjustment, meta, pb = game2(
                 settings, screen, font, getFps, exit, getID, updateLB
             )
             if score != None:
-                game = "Expose the Criminal"
+                game = "Memory Experiment"
                 adjustDifficulty(adjustment)
-    elif meta == "Memory Experiment":
-        score, adjustment, meta = game2(
-            settings, screen, font, getFps, exit, getID, updateLB
-        )
-        if score != None:
-            game = "Memory Experiment"
-            adjustDifficulty(adjustment)
-    elif meta == "Pattern Rush":
-        print(f"Page '{meta}' is currently in development, sending back to main menu.")
-        score, adjustment, meta = game3(settings, screen, font, getFps, exit)
-        if score != None:
-            game = "Pattern Rush"
-            adjustDifficulty(adjustment)
-    elif meta == "Game Over":
-        meta = gameOverDisplay(screen, settings, font, game, score, getFps, exit)
-    elif meta == "Leaderboards":
-        meta == leaderboardsDisplay(settings, screen, font, getFps, exit)
-        meta = "Main Menu"
-    else:
-        print(f"Page '{meta}' is currently in development, sending back to main menu.")
-        meta = "Main Menu"
-    # if settings["FPS Limit"] > 0:
-    # limiter = (1/settings["FPS Limit"]) - (pygame.time.get_ticks() - frame) / i
-    # print(f"FPS: {fps}, Limiter: {limiter}, pygame.time.get_ticks(): {pygame.time.get_ticks()}, frame: {frame}, i: {i}")
-    # if limiter > 0:
-    # pygame.time.Clock().tick(limiter)
-    # print(pygame.time.get_ticks())
-    pygame.display.flip()
+        elif meta == "Pattern Rush":
+            print(f"Page '{meta}' is currently in development, sending back to main menu.")
+            score, adjustment, meta, pb = game3(settings, screen, font, getFps, exit)
+            if score != None:
+                game = "Pattern Rush"
+                adjustDifficulty(adjustment)
+        elif meta == "Game Over":
+            meta = gameOverDisplay(
+                screen, settings, font, game, score, pb, adjustment, getFps, exit
+            )
+        elif meta == "Leaderboards":
+            meta == leaderboardsDisplay(settings, screen, font, getFps, exit)
+            meta = "Main Menu"
+        else:
+            print(f"Page '{meta}' is currently in development, sending back to main menu.")
+            meta = "Main Menu"
+        # if settings["FPS Limit"] > 0:
+        # limiter = (1/settings["FPS Limit"]) - (pygame.time.get_ticks() - frame) / i
+        # print(f"FPS: {fps}, Limiter: {limiter}, pygame.time.get_ticks(): {pygame.time.get_ticks()}, frame: {frame}, i: {i}")
+        # if limiter > 0:
+        # pygame.time.Clock().tick(limiter)
+        # print(pygame.time.get_ticks())
+        pygame.display.flip()
+except Exception as e:
+    logging.error(traceback.format_exc())
+    exit()

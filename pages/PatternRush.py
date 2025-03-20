@@ -39,7 +39,9 @@ def draw_rotated_rect(screen, x, y, width, height, angle, colour):
     ]
 
     for sx, sy, sw, sh in inner_shapes:
-        draw_inner_rotated_rect(cx + sx, cy + sy, sw, sh, angle + 45, (0, 255, 255))
+        draw_inner_rotated_rect(
+            screen, cx + sx, cy + sy, sw, sh, angle + 45, (0, 255, 255)
+        )
 
     # === Create invisible bounding rect ===
     bounding_rect = pygame.Rect(x, y, width, height)  # This is not drawn
@@ -47,7 +49,7 @@ def draw_rotated_rect(screen, x, y, width, height, angle, colour):
     return bounding_rect  # Can be used for collision detection
 
 
-def draw_inner_rotated_rect(x, y, width, height, angle, colour=(0, 255, 255)):
+def draw_inner_rotated_rect(screen, x, y, width, height, angle, colour=(0, 255, 255)):
     """Draws a smaller rotated rectangle inside another rotated rectangle."""
     angle_rad = math.radians(angle)
 
@@ -72,4 +74,4 @@ def draw_inner_rotated_rect(x, y, width, height, angle, colour=(0, 255, 255)):
 
 
 def game3(settings, screen, font, getFps, exit):
-    return None, None, "Game Menu"
+    return None, None, "Game Menu", None
