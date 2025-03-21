@@ -127,6 +127,9 @@ class Settings:
             print(
                 f"Error: Incorrect format in settings.txt ({e}). Using default values."
             )
+            logging.error(
+                f"Error: Incorrect format in settings.txt ({e}). Using default values."
+            )
         global choice
         choice = self.settings.copy()
         del choice["Font Type"]
@@ -320,89 +323,50 @@ def format_firestore_data(data):
 
 
 def createLB(game, data, user_id):
-    print(data)
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     game_url = f"{lb}/game{game}/{user_id}.json"
     firestore_data = format_firestore_data(data)
-    print(json.dumps(firestore_data, indent=2))
     response = requests.put(game_url, json=firestore_data, headers=headers)
     if response.status_code == 200:  # Success
         print("New entry created.")
-    else:  # Error
-        print(
-            f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n"
-        )
+    else:
         logging.error(
             f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
         )
 
 
 def updateLB(game, data):
-    # print(user_id)
-    print(data)
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
-    # game = 2
-    # data = {
-    #     "empty": 20,
-    #     "right": 5,
-    #     "kinda": 0,
-    #     "game": 2,
-    #     "id": "a7038e995fc7acbb230cb00d145884df718a6e161b2c6adee7c6b33469429ce4",
-    #     "username": "malso",
-    #     "score": 699.5999999999999,
-    #     "max": 116.59999999999998,
-    # }
     game_url = f"{lb}/game{game}/{user_id}.json"
-    # get = db.collection("game{game}").document(
-    #     user_id
-    # ).get().to_dict()
-    response = requests.get(game_url, headers=headers)
-    print(response)
-    if response.status_code == 404:  # First time
-        # if get == None:
+    try:
+        old_score = float(response.json()["fields"]["score"]["doubleValue"])
+    except:
+        old_score = 0
+    if old_score < data["score"]:
         firestore_data = format_firestore_data(data)
-        response = requests.post(game_url, json=firestore_data, headers=headers)
-        if response.status_code == 200:  # Success
-            print("New entry created.")
-        else:  # Error
-            print(
-                f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
-            )
+        response = requests.put(game_url, json=firestore_data, headers=headers)
+        if response.status_code == 200:
+            print("Entry updated.")
+        else:
             logging.error(
                 f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
             )
-    elif response.status_code == 200:  # Update
-        try:
-            old_score = float(response.json()["fields"]["score"]["doubleValue"])
-        except:
-            print(response.json())
-            old_score = 0
-        print(f"old_score: {old_score}")
-        print(f"new_score: {data['score']}")
-        # elif float(get["score"]) < data["score"]:
-        # if True:
-        if old_score < data["score"]:  # If new highscore
-            firestore_data = format_firestore_data(data)
-            response = requests.put(game_url, json=firestore_data, headers=headers)
-            if response.status_code == 200:  # Success
-                print("Entry updated.")
-            else:  # Error
-                print(
-                    f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
-                )
-                logging.error(
-                    f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
-                )
-        else:
-            print("No new highscore.")
-    else:  # Error
-        print(
-            f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
-        )
-        logging.error(
-            f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
-        )
+    else:
+        print("No new highscore.")
     return old_score
+
+
+def getLB(game):
+    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    game_url = f"{lb}/game{game}.json"
+    response = requests.get(game_url, headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        logging.error(
+            f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}"
+        )
+        return None
 
 
 def generateUsername(settings, font, getFps, exit):
@@ -466,18 +430,19 @@ def generateUsername(settings, font, getFps, exit):
         file.write(f"{user_id}, {key}, {username}")
     del key
     createLB(
-            1,
-            {
-                "loss": float(0),
-                "green": 0,
-                "red": float(0),
-                "game": 1,
-                "id": user_id,
-                "username": username,
-                "score": float(0),
-                "max": float(1),
-            }, user_id
-        )
+        1,
+        {
+            "loss": float(0),
+            "green": 0,
+            "red": float(0),
+            "game": 1,
+            "id": user_id,
+            "username": username,
+            "score": float(0),
+            "max": float(1),
+        },
+        user_id,
+    )
     createLB(
         2,
         {
@@ -489,7 +454,8 @@ def generateUsername(settings, font, getFps, exit):
             "username": username,
             "score": float(0),
             "max": float(0),
-        }, user_id
+        },
+        user_id,
     )
     # createLB(3, {}, user_id)
     return user_id, username
@@ -573,6 +539,9 @@ def adjustDifficulty(adjustment):
         )
     else:
         print("Error: Game not found, difficulty not adjusted and sending to main menu")
+        logging.error(
+            f"Error: Game not found, difficulty not adjusted and sending to main menu {traceback.format_exc()} Game: {game}, adjustment: {adjustment}, score: {score}, meta: {meta}"
+        )
         meta = "Main Menu"
     del adjustment
     del difficulty1, difficulty2, difficulty3
@@ -584,10 +553,6 @@ def adjustDifficulty(adjustment):
 
 
 try:
-    # getID()
-    # updateLB(1, {})
-    # exit()
-
     loadUp()
     meta = "Main Menu"
     # meta = "Game Over"
