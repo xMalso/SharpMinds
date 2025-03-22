@@ -1,15 +1,41 @@
-global pygame, math, random, correct_sound, wrong_sound
-import pygame, math, random
+global pygame, math, random, logging, threading, first_attempt, sounds
+from datetime import datetime
+import pygame, math, random, logging, threading
 
-pygame.mixer.pre_init(frequency=22050, size=-16, channels=1, buffer=512)
-pygame.mixer.init()
-correct_sound = pygame.mixer.Sound("assets/sounds/correct.wav")
-wrong_sound = pygame.mixer.Sound("assets/sounds/wrong.wav")
-correct_sound.set_volume(1.2)
+sounds = False
+first_attempt = True
+
+logging.basicConfig(
+    level=logging.WARNING,
+    filename=f"logs/log{datetime.now().strftime('%d-%m_%H-%M-%S')}.txt",
+    format="%(asctime)s - %(message)s",
+)
+
+def loadSounds():
+    global correct_sound, wrong_sound, sounds, attempting, first_attempt
+    attempting = True
+    try:
+        pygame.mixer.pre_init(frequency=22050, channels=1)
+        pygame.mixer.init()
+        correct_sound = pygame.mixer.Sound("assets/sounds/correct.wav")
+        wrong_sound = pygame.mixer.Sound("assets/sounds/wrong.wav")
+        sounds = True
+        correct_sound.set_volume(1.2)
+    except pygame.error as e:
+        if first_attempt:
+            logging.warning(f"Sounds failed to load, most likely due to lack of audio output: {e}")
+            first_attempt = False
+    attempting = False
 
 
 def init(settings, font):
     makeButtons(settings, font)
+    thread = threading.Thread(target=loadSounds, daemon=True)
+    thread.start()
+    # thread.join(0.2)
+    # if thread.is_alive():
+    #     # thread.kill()
+    #     pass
 
 
 def makeButtons(settings, font):
@@ -43,16 +69,21 @@ def removeCircle(pos, current):
         if math.dist(pos, (x, y)) < radius:
             circles.pop(i)
             if colour == "Green":
-                wrong_sound.play()
+                if sounds: wrong_sound.play()
                 loss += 50
                 return (-50, (x + radius, y - radius))
             else:
-                correct_sound.play()
-                time = current - tick if current - tick != 0 else 1
-                score = (
-                    max_score
-                    * min((0.012 * (despawn_time * 5 / (time))) - 0.06, 1) ** 0.2
-                )
+                if sounds: correct_sound.play()
+                time = current - tick
+                if time == 0:
+                    time = 1
+                if despawn_time < time:
+                    score = 0
+                else:
+                    score = (
+                        max_score
+                        * min((0.012 * (despawn_time * 5 / (time))) - 0.06, 1) ** 0.2
+                    )
                 red_score += score
                 return (score, (x + radius, y - radius))
     return (0, (0, 0))
@@ -82,6 +113,9 @@ def splitText(font, max_width):
 def tutorial(screen, settings, font, getFps, exit):
     never = True
     while True:
+        # if not sounds and not attempting:
+            # thread = threading.Thread(target=loadSounds, daemon=True)
+            # thread.start()
         screen.fill(settings["Background Colour"])
         pygame.draw.rect(
             screen,
@@ -158,6 +192,9 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
         last_tick = current_frame
     duration = 30000
     while start + duration > current_frame:
+        # if not sounds and not attempting:
+            # thread = threading.Thread(target=loadSounds, daemon=True)
+            # thread.start()
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 result, edge = removeCircle(event.pos, current_frame)
@@ -254,7 +291,7 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
                         if score < 0:
                             loss += score
                             score = 0
-                        wrong_sound.play()
+                        if sounds: wrong_sound.play()
                     continue
                 else:
                     expired = False

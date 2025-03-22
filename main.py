@@ -1,4 +1,3 @@
-import json
 import pygame, sys, os, random, hashlib, requests, logging, traceback
 from datetime import datetime
 from pages import *
@@ -38,8 +37,8 @@ from pages import *
 lb = r"https://sharpminds-37b05-default-rtdb.europe-west1.firebasedatabase.app"
 
 logging.basicConfig(
-    level=logging.ERROR,
-    filename=f"logs/errorlog{datetime.now().strftime('%d-%m_%H-%M-%S')}.txt",
+    level=logging.WARNING,
+    filename=f"logs/log{datetime.now().strftime('%d-%m_%H-%M-%S')}.txt",
     format="%(asctime)s - %(message)s",
 )
 
@@ -127,7 +126,7 @@ class Settings:
             print(
                 f"Error: Incorrect format in settings.txt ({e}). Using default values."
             )
-            logging.error(
+            logging.critical(
                 f"Error: Incorrect format in settings.txt ({e}). Using default values."
             )
         global choice
@@ -330,7 +329,7 @@ def createLB(game, data, user_id):
     if response.status_code == 200:  # Success
         print("New entry created.")
     else:
-        logging.error(
+        logging.critical(
             f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
         )
 
@@ -338,21 +337,22 @@ def createLB(game, data, user_id):
 def updateLB(game, data):
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     game_url = f"{lb}/game{game}/{user_id}.json"
+    response = requests.get(game_url, headers=headers)
     try:
         old_score = float(response.json()["fields"]["score"]["doubleValue"])
-    except:
-        old_score = 0
-    if old_score < data["score"]:
-        firestore_data = format_firestore_data(data)
-        response = requests.put(game_url, json=firestore_data, headers=headers)
-        if response.status_code == 200:
-            print("Entry updated.")
+        if old_score < data["score"]:
+            firestore_data = format_firestore_data(data)
+            response = requests.put(game_url, json=firestore_data, headers=headers)
+            if response.status_code == 200:
+                print("Entry updated.")
+            else:
+                logging.critical(
+                    f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
+                )
         else:
-            logging.error(
-                f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
-            )
-    else:
-        print("No new highscore.")
+            print("No new highscore.")
+    except:
+        logging.warning(f"No previous score found {traceback.format_exc()}")
     return old_score
 
 
@@ -363,7 +363,7 @@ def getLB(game):
     if response.status_code == 200:
         return response.json()
     else:
-        logging.error(
+        logging.critical(
             f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}"
         )
         return None
@@ -539,7 +539,7 @@ def adjustDifficulty(adjustment):
         )
     else:
         print("Error: Game not found, difficulty not adjusted and sending to main menu")
-        logging.error(
+        logging.critical(
             f"Error: Game not found, difficulty not adjusted and sending to main menu {traceback.format_exc()} Game: {game}, adjustment: {adjustment}, score: {score}, meta: {meta}"
         )
         meta = "Main Menu"
@@ -619,5 +619,6 @@ try:
         # print(pygame.time.get_ticks())
         pygame.display.flip()
 except:
-    logging.error(traceback.format_exc())
+    logging.critical(traceback.format_exc())
     exit()
+    print(traceback.format_exc())

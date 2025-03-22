@@ -3,7 +3,21 @@ import random, pygame, math, numpy as np
 
 
 def init(settings, font, title_font):
-    global return_text, pause_duration, answer_text, guess_text
+    global return_text, pause_duration, answer_text, guess_text, help_lines
+    return_lines = splitText(
+        font,
+        settings["Width"] // 5,
+        "Memorise the grid and replicate it on the next page",
+    )
+    help_lines = []
+    for line in return_lines:
+        help_lines.append(
+            font.render(
+                line,
+                settings["Antialiasing Text"],
+                settings["Background Font Colour"],
+            )
+        )
     answer_text = title_font.render(
         "Answer: ",
         settings["Antialiasing Text"],
@@ -15,27 +29,55 @@ def init(settings, font, title_font):
         settings["Background Font Colour"],
     )
     makeButtons(settings, font)
-    return_text = splitText(
-        font, settings["Width"] // 4, "Press ESC to return to games menu"
-    )
+    for i in range(2):
+        page1_buttons[i]["Text"] = font.render(
+            page1_buttons[i]["Meta"],
+            settings["Antialiasing Text"],
+            page1_buttons[i]["Font Colour"],
+        )
+    return_text = []
+    temp = splitText(font, settings["Width"] // 4, "Press ESC to return to games menu")
+    for text in temp:
+        return_text.append(
+            font.render(
+                text,
+                settings["Antialiasing Text"],
+                settings["Background Font Colour"],
+            )
+        )
     pause_duration = 0
 
 
 def makeButtons(settings, font):
-    global ready_button, next_button, ready_text
+    global page1_buttons, next_button
     ready_text = font.size("Ready")
+    help_text = font.size("Help")
     next_text = font.size("Next Page")
-    ready_button = {
-        "Pygame Button": pygame.Rect(
-            settings["Width"] // 2 - (ready_text[0] + settings["Width"] // 64) // 2,
-            settings["Height"] - (ready_text[1] + settings["Height"] // 50),
-            ready_text[0] + settings["Width"] // 64,
-            ready_text[1],
-        ),
-        "Colour": settings["Button Primary Colour"],
-        "Font Colour": settings["Font Primary Colour"],
-        "Meta": "Ready",
-    }
+    page1_buttons = [
+        {
+            "Pygame Button": pygame.Rect(
+                settings["Width"] // 3 - (ready_text[0] + settings["Width"] // 64) // 2,
+                settings["Height"] - (ready_text[1] + settings["Height"] // 50),
+                ready_text[0] + settings["Width"] // 64,
+                ready_text[1],
+            ),
+            "Colour": settings["Button Primary Colour"],
+            "Font Colour": settings["Font Primary Colour"],
+            "Meta": "Ready",
+        },
+        {
+            "Pygame Button": pygame.Rect(
+                settings["Width"] * 2 // 3
+                - (help_text[0] + settings["Width"] // 64) // 2,
+                settings["Height"] - (help_text[1] + settings["Height"] // 50),
+                help_text[0] + settings["Width"] // 64,
+                help_text[1],
+            ),
+            "Colour": settings["Button Secondary Colour"],
+            "Font Colour": settings["Font Secondary Colour"],
+            "Meta": "Help",
+        },
+    ]
     next_button = {
         "Text": "Next Page",
         "Pygame Button": pygame.Rect(
@@ -325,20 +367,12 @@ def drawPicker(screen, settings, font):
         )
     text_y = settings["Height"] * 0.89 - height * 7
     if remove:
-        return_text = splitText(
-            font, margin_width * 3 // 1.3, "Click a box to remove guess"
-        )
-        for line in return_text:
-            text = font.render(
-                line,
-                settings["Antialiasing Text"],
-                settings["Background Font Colour"],
-            )
-            text_y -= text.get_height()
+        for line in remove_text[::-1]:
+            text_y -= line.get_height()
             screen.blit(
-                text,
+                line,
                 (
-                    settings["Width"] - width * 1.95 - text.get_width() // 2,
+                    settings["Width"] - width * 1.95 - line.get_width() // 2,
                     text_y,
                 ),
             )
@@ -449,13 +483,14 @@ def calculateScore(score):
                 score += max_score / 3
                 lb["kinda"] += 1
     print(
-        "floating pres diff", score - (((lb["empty"] * 0.05) + (lb["kinda"] / 3) + lb["right"]) * lb["max"])
+        "floating pres diff",
+        score - (((lb["empty"] * 0.05) + (lb["kinda"] / 3) + lb["right"]) * lb["max"]),
     )
     return score
 
 
 def game2(settings, screen, font, getFps, exit, getID, updateLB):
-    global difficulty, buffer, buttons, rows, cols, button_side, radius, margin_width, margin_height, return_text, multiplier, pause_duration, avg, lb
+    global difficulty, buffer, buttons, rows, cols, button_side, radius, margin_width, margin_height, multiplier, pause_duration, avg, lb, remove_text
     val = getID()
     lb = {
         "empty": 0,
@@ -470,7 +505,10 @@ def game2(settings, screen, font, getFps, exit, getID, updateLB):
     score = 0
     buffer = (
         settings["Width"] * 0.6,
-        max(ready_text[1] * 2, ready_text[1] + settings["Height"] // 50)
+        max(
+            page1_buttons[0]["Text"].get_height() * 2,
+            page1_buttons[0]["Text"].get_height() + settings["Height"] // 50,
+        )
         + settings["Height"] * 0.2,
     )
     difficulty = settings["Adaptive Difficulty"][1]
@@ -486,6 +524,16 @@ def game2(settings, screen, font, getFps, exit, getID, updateLB):
         (settings["Width"] - (button_side * cols)) // 2,
         (settings["Height"] - (button_side * rows)) // 2,
     )
+    temp = splitText(font, margin_width * 3 // 2.6, "Click a box to remove guess")
+    remove_text = []
+    for text in temp:
+        remove_text.append(
+            font.render(
+                text,
+                settings["Antialiasing Text"],
+                settings["Background Font Colour"],
+            )
+        )
     makePickerButtons(settings, font)
     buttons = []
     y = margin_height + 2
@@ -554,8 +602,8 @@ def cycle(round_number, settings, getFps, screen, font, exit):
                 ]
             ),
         }
-    ready = False
-    while not ready:
+    meta = None
+    while meta != "Ready":
         screen.fill(settings["Background Colour"])
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -565,8 +613,10 @@ def cycle(round_number, settings, getFps, screen, font, exit):
                 if event.key == pygame.K_ESCAPE:
                     return None, "Game Menu"
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if ready_button["Pygame Button"].collidepoint(event.pos):
-                    ready = True
+                meta = None
+                for button in page1_buttons:
+                    if button["Pygame Button"].collidepoint(event.pos):
+                        meta = button["Meta"]
         drawGrid(
             screen,
             settings,
@@ -574,28 +624,31 @@ def cycle(round_number, settings, getFps, screen, font, exit):
             margin_width // 2,
         )
         height = settings["Height"] // 200
-        pygame.draw.rect(
-            screen,
-            ready_button["Colour"],
-            ready_button["Pygame Button"],
-            border_radius=settings["Width"] // 60,
-        )
-        for line in return_text:
-            text = font.render(
-                line,
-                settings["Antialiasing Text"],
-                settings["Background Font Colour"],
+        for button in page1_buttons:
+            pygame.draw.rect(
+                screen,
+                button["Colour"],
+                button["Pygame Button"],
+                border_radius=settings["Width"] // 60,
             )
             screen.blit(
-                text,
+                button["Text"],
+                (
+                    button["Pygame Button"].left + settings["Width"] // 128,
+                    button["Pygame Button"].top,
+                ),
+            )
+        for line in return_text:
+            screen.blit(
+                line,
                 (
                     settings["Width"] * 7 // 8
-                    - text.get_width() // 2
+                    - line.get_width() // 2
                     - settings["Width"] // 200,
                     height,
                 ),
             )
-            height += text.get_height()
+            height += line.get_height()
         screen.blit(
             round_text,
             (
@@ -603,6 +656,19 @@ def cycle(round_number, settings, getFps, screen, font, exit):
                 settings["Height"] // 200,
             ),
         )
+        if meta == "Help":
+            height = settings["Height"] - page1_buttons[1]["Pygame Button"].top
+            for line in help_lines[::-1]:
+                screen.blit(
+                    line,
+                    (
+                        settings["Width"] * 7 // 8
+                        - line.get_width() // 2
+                        - settings["Width"] // 200,
+                        height,
+                    ),
+                )
+                height -= line.get_height()
         # score_text = font.render(
         #     f"Score: {int(score)}",
         #     settings["Antialiasing Text"],
@@ -615,18 +681,6 @@ def cycle(round_number, settings, getFps, screen, font, exit):
         #         settings["Height"] // 200 + round_text.get_height(),
         #     ),
         # )
-        ready_text = font.render(
-            "Ready",
-            settings["Antialiasing Text"],
-            ready_button["Font Colour"],
-        )
-        screen.blit(
-            ready_text,
-            (
-                ready_button["Pygame Button"].left + settings["Width"] // 128,
-                ready_button["Pygame Button"].top,
-            ),
-        )
         getFps(never)
         never = False
         pygame.display.flip()
@@ -657,21 +711,16 @@ def cycle(round_number, settings, getFps, screen, font, exit):
         )
         height = settings["Height"] // 200
         for line in return_text:
-            text = font.render(
-                line,
-                settings["Antialiasing Text"],
-                settings["Background Font Colour"],
-            )
             screen.blit(
-                text,
+                line,
                 (
                     settings["Width"] * 7 // 8
-                    - text.get_width() // 2
+                    - line.get_width() // 2
                     - settings["Width"] // 200,
                     height,
                 ),
             )
-            height += text.get_height()
+            height += line.get_height()
         screen.blit(
             round_text,
             (
@@ -746,21 +795,16 @@ def cycle(round_number, settings, getFps, screen, font, exit):
         drawPicker(screen, settings, font)
         height = settings["Height"] // 200
         for line in return_text:
-            text = font.render(
-                line,
-                settings["Antialiasing Text"],
-                settings["Background Font Colour"],
-            )
             screen.blit(
-                text,
+                line,
                 (
                     settings["Width"] * 7 // 8
-                    - text.get_width() // 2
+                    - line.get_width() // 2
                     - settings["Width"] // 200,
                     height,
                 ),
             )
-            height += text.get_height()
+            height += line.get_height()
         # score_text = font.render(
         #     f"Score: {int(score)}",
         #     settings["Antialiasing Text"],
