@@ -11,6 +11,7 @@ logging.basicConfig(
     format="%(asctime)s - %(message)s",
 )
 
+
 def loadSounds():
     global correct_sound, wrong_sound, sounds, attempting, first_attempt
     attempting = True
@@ -23,19 +24,51 @@ def loadSounds():
         correct_sound.set_volume(1.2)
     except pygame.error as e:
         if first_attempt:
-            logging.warning(f"Sounds failed to load, most likely due to lack of audio output: {e}")
+            logging.warning(
+                f"Sounds failed to load, most likely due to lack of audio output: {e}"
+            )
             first_attempt = False
     attempting = False
 
 
 def init(settings, font):
+    global tutorial_text
     makeButtons(settings, font)
-    thread = threading.Thread(target=loadSounds, daemon=True)
-    thread.start()
+    tutorial_text = makeTutText(
+        font,
+        int(settings["Width"] * 0.85),
+        "Click the circles of this colour SECONDARY and avoid clicking circles of this colour PRIMARY, you gain more points from quicker reactions when clicking SECONDARY and you gain points when PRIMARY despawns",
+    )
+    # thread = threading.Thread(target=loadSounds, daemon=True)
+    # thread.start()
     # thread.join(0.2)
     # if thread.is_alive():
     #     # thread.kill()
     #     pass
+
+
+def makeTutText(font, max_width, text):
+    lines = []
+    current_line = ""
+    curr_width = 0
+    for word in text.split():
+        if word == "PRIMARY" or word == "SECONDARY":
+            word_width = font.size(" ")[0] + 100 if current_line else 100
+            test_line = current_line + " " + word if current_line else word
+        else:
+            test_line = current_line + " " + word if current_line else word
+            word_width = (
+                font.size(word + " ")[0] if current_line else font.size(word)[0]
+            )
+        if curr_width + word_width <= max_width:
+            current_line = test_line
+            curr_width += word_width
+        else:
+            lines.append(current_line)
+            current_line = word
+            curr_width = word_width
+    lines.append(current_line)
+    return lines
 
 
 def makeButtons(settings, font):
@@ -53,6 +86,7 @@ def makeButtons(settings, font):
         "Colour": settings["Button Primary Colour"],
         "Font Colour": settings["Font Primary Colour"],
     }
+
     # ]
 
 
@@ -69,11 +103,13 @@ def removeCircle(pos, current):
         if math.dist(pos, (x, y)) < radius:
             circles.pop(i)
             if colour == "Green":
-                if sounds: wrong_sound.play()
+                if sounds:
+                    wrong_sound.play()
                 loss += 50
                 return (-50, (x + radius, y - radius))
             else:
-                if sounds: correct_sound.play()
+                if sounds:
+                    correct_sound.play()
                 time = current - tick
                 if time == 0:
                     time = 1
@@ -96,7 +132,7 @@ def splitText(font, max_width):
 
     for word in words:
         test_line = current_line + " " + word if current_line else word
-        text_width, _ = font.size(test_line)
+        text_width = font.size(test_line)[0]
 
         if text_width <= max_width:
             current_line = test_line
@@ -104,8 +140,7 @@ def splitText(font, max_width):
             lines.append(current_line)
             current_line = word
 
-    if current_line:
-        lines.append(current_line)
+    lines.append(current_line)
 
     return lines
 
@@ -114,9 +149,78 @@ def tutorial(screen, settings, font, getFps, exit):
     never = True
     while True:
         # if not sounds and not attempting:
-            # thread = threading.Thread(target=loadSounds, daemon=True)
-            # thread.start()
+        # thread = threading.Thread(target=loadSounds, daemon=True)
+        # thread.start()
         screen.fill(settings["Background Colour"])
+        line_height = max(font.size(tutorial_text[0])[1], 100)
+        y = (settings["Height"] - (line_height * len(tutorial_text))) // 2
+        for line in tutorial_text:
+            parts = []
+            remaining = line
+            while remaining:
+                primary_pos = remaining.find("PRIMARY")
+                secondary_pos = remaining.find("SECONDARY")
+
+                if primary_pos == -1 and secondary_pos == -1:
+                    parts.append(("text", remaining))
+                    break
+
+                if primary_pos == -1 or (
+                    secondary_pos != -1 and secondary_pos < primary_pos
+                ):
+                    if secondary_pos != 0:
+                        parts.append(("text", remaining[:secondary_pos]))
+                    parts.append(("secondary", ""))
+                    remaining = remaining[secondary_pos + 9 :]
+                elif secondary_pos == -1 or (
+                    primary_pos != -1 and primary_pos < secondary_pos
+                ):
+                    if primary_pos != 0:
+                        parts.append(("text", remaining[:primary_pos]))
+                    parts.append(("primary", ""))
+                    remaining = remaining[primary_pos + 7 :]
+            line_width = 0
+            for type, text in parts:
+                if type == "primary" or type == "secondary":
+                    line_width += 100
+                else:
+                    line_width += font.size(text)[0]
+            x = settings["Width"] // 2 - line_width // 2
+            for type, line_text in parts:
+                if type == "text":
+                    text = font.render(
+                        line_text,
+                        settings["Antialiasing Text"],
+                        settings["Background Font Colour"],
+                    )
+                    screen.blit(
+                        text,
+                        (
+                            x,
+                            y + (line_height - text.get_height()) // 2,
+                        ),
+                    )
+                    x += text.get_width()
+                elif type == "primary":
+                    pygame.draw.circle(
+                        screen,
+                        settings["Game Primary Colour"],
+                        (x + 50, y + line_height // 2),
+                        50,
+                    )
+                    x += 100
+                elif type == "secondary":
+                    pygame.draw.circle(
+                        screen,
+                        settings["Game Secondary Colour"],
+                        (x + 50, y + line_height // 2),
+                        50,
+                    )
+                    x += 100
+                else:
+                    logging.warning(f"Unknown type: {type}, text: {text}")
+            y += line_height
+
         pygame.draw.rect(
             screen,
             tutorial_button["Colour"],
@@ -193,8 +297,8 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
     duration = 30000
     while start + duration > current_frame:
         # if not sounds and not attempting:
-            # thread = threading.Thread(target=loadSounds, daemon=True)
-            # thread.start()
+        # thread = threading.Thread(target=loadSounds, daemon=True)
+        # thread.start()
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 result, edge = removeCircle(event.pos, current_frame)
@@ -291,7 +395,8 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
                         if score < 0:
                             loss += score
                             score = 0
-                        if sounds: wrong_sound.play()
+                        if sounds:
+                            wrong_sound.play()
                     continue
                 else:
                     expired = False

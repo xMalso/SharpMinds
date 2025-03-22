@@ -91,7 +91,7 @@ def displayPage(screen, settings, font, game, score, pb, adjustment, getFps, exi
                 exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    return
+                    return "Main Menu"
         pygame.display.flip()
         current = pygame.time.get_ticks()
 
@@ -131,5 +131,5 @@ def displayPage(screen, settings, font, game, score, pb, adjustment, getFps, exi
                         return button["Meta"]
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    return
+                    return "Main Menu"
         pygame.display.flip()

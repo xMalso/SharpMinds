@@ -453,7 +453,7 @@ def splitText(font, max_width, words):
 
     for word in words:
         test_line = current_line + " " + word if current_line else word
-        text_width, _ = font.size(test_line)
+        text_width = font.size(test_line)[0]
 
         if text_width <= max_width:
             current_line = test_line
@@ -461,8 +461,7 @@ def splitText(font, max_width, words):
             lines.append(current_line)
             current_line = word
 
-    if current_line:
-        lines.append(current_line)
+    lines.append(current_line)
 
     return lines
 

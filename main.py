@@ -555,6 +555,7 @@ def adjustDifficulty(adjustment):
 try:
     loadUp()
     meta = "Main Menu"
+    game = 1
     # meta = "Game Over"
     # game = "Expose the Criminal"
     # score = 530.7385
@@ -604,10 +605,13 @@ try:
                 screen, settings, font, game, score, pb, adjustment, getFps, exit
             )
         elif meta == "Leaderboards":
-            meta == leaderboardsDisplay(settings, screen, font, getFps, exit)
+            meta == leaderboardsDisplay(settings, screen, font, game, getFps, exit, getLB)
             meta = "Main Menu"
         else:
             print(
+                f"Page '{meta}' is currently in development, sending back to main menu."
+            )
+            logging.warning(
                 f"Page '{meta}' is currently in development, sending back to main menu."
             )
             meta = "Main Menu"
