@@ -271,11 +271,11 @@ def loadUpValues():
     text_surface = None
     settingsInit(settings, font, small_font)
     mainMenuInit(settings, font, title_font)
-    gameMenuInit(settings, small_font)
+    gameMenuInit(settings, small_font, font, title_font)
     game1Init(settings, font)
     game2Init(settings, font, title_font)
     gameOverInit(settings, font, title_font)
-    leaderboardInit(settings)
+    leaderboardInit(settings, font, small_font)
 
 
 def getID():
@@ -373,27 +373,27 @@ def generateUsername(settings, font, getFps, exit):
     username = ""
     never = True
     loop = True
-    while loop:
-        screen.fill(settings["Background Colour"])
-        text_surface = font.render(
+    wlc = font.render(
             "Welcome to Sharp Minds!",
             settings["Antialiasing Text"],
             settings["Background Font Colour"],
         )
-        screen.blit(
-            text_surface,
-            (
-                settings["Width"] // 2 - text_surface.get_width() // 2,
-                settings["Height"] // 3 - text_surface.get_height() // 2,
-            ),
-        )
-        text_surface = font.render(
+    username_text = font.render(
             "Please enter a username:",
             settings["Antialiasing Text"],
             settings["Background Font Colour"],
         )
+    while loop:
+        screen.fill(settings["Background Colour"])
         screen.blit(
-            text_surface,
+            wlc,
+            (
+                settings["Width"] // 2 - text_surface.get_width() // 2,
+                settings["Height"] // 3 - text_surface.get_height() // 2,
+            ),
+        ) 
+        screen.blit(
+            username_text,
             (
                 settings["Width"] // 2 - text_surface.get_width() // 2,
                 settings["Height"] // 2 - text_surface.get_height() // 2,
@@ -551,7 +551,6 @@ def adjustDifficulty(adjustment):
     del choice["Adaptive Difficulty"]
     print("Adaptive Difficulty saved.")
 
-
 try:
     loadUp()
     meta = "Main Menu"
@@ -565,7 +564,7 @@ try:
             meta, choice = mainMenuDisplay(settings, screen, font, getFps, exit)
         elif meta == "Game Menu":
             meta = gameMenuDisplay(
-                settings, screen, font, title_font, small_font, getFps, exit
+                settings, screen, getFps, exit
             )
         elif meta == "Settings":
             scroll = 0

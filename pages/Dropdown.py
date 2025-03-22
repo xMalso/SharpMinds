@@ -36,7 +36,7 @@ def displayPage(settings, font, screen, button, options, scroll):
         dropdown_rect = pygame.Rect(
             (x, y + offset, width, height),
         )
-        updateButton({"Name": option, "Pygame Button": dropdown_rect})
+        updateButton({"Name": option, "Pygame Button": dropdown_rect, "Meta": option})
         if len(options["Options"]) == 1:
             pygame.draw.rect(
                 screen,

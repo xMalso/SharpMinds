@@ -31,30 +31,28 @@ def displayPage(
             option["Size"][0],
             option["Size"][1],
         )
-        updateButton({"Name": option["Name"], "Pygame Button": temp})
+        updateButton({"Name": option["Meta"], "Pygame Button": temp, "Meta": option["Meta"]})
         pygame.draw.rect(
             screen, option["Colour"], temp, border_radius=settings["Width"] // 40
         )
-        if option["Name"] == "Input":
-            text = f"#{input_text}"
+        if option["Meta"] == "Input":
+            text = font.render(
+            f"#{input_text}",
+            settings["Antialiasing Text"],
+            settings["Input Font Colour"],)
         else:
             text = option["Text"]
-        text_surface = font.render(
-            text,
-            settings["Antialiasing Text"],
-            option["Font Colour"],
-        )
         screen.blit(
-            text_surface,
+            text,
             (
-                temp.x + (temp.width - text_surface.get_width()) // 2,
-                temp.y + (temp.height - text_surface.get_height()) // 2,
+                temp.centerx - text.get_width() // 2,
+                temp.centery - text.get_height() // 2,
             ),
         )
-    screen.blit(
-        text_surface,
-        (
-            temp.x + (temp.width - text_surface.get_width()) // 2,
-            temp.y + (temp.height - text_surface.get_height()) // 2,
-        ),
-    )
+    # screen.blit(
+    #     text,
+    #     (
+    #         temp.centerx - text.get_width() // 2,
+    #         temp.centery - text.get_height() // 2,
+    #     ),
+    # )

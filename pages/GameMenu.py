@@ -2,52 +2,69 @@ global pygame
 import pygame
 
 
-def init(settings, small_font):
-    makeButtons(settings, small_font)
+def init(settings, small_font, font, title_font):
+    global title_text
+    title_text = title_font.render(
+        "Games Menu", settings["Antialiasing Text"], settings["Font Primary Colour"]
+    )
+    makeButtons(settings, font, small_font)
 
 
-def makeButtons(settings, small_font):
+def makeButtons(settings, font, small_font):
     global buttons
     text = small_font.size("Back to Main Menu")
     buttons = [
         {
-            "Name": "Expose the Criminal",
+            "Text": font.render(
+                "Expose the Criminal",
+                settings["Antialiasing Text"],
+                settings["Font Primary Colour"],
+            ),
             "Pygame Button": pygame.Rect(
                 settings["Width"] // 94,
                 (settings["Height"] * 4) // 16,
                 (settings["Width"] * 30) // 94,
                 (settings["Height"] * 10) // 16,
             ),
-            "Font Colour": settings["Font Primary Colour"],
             "Meta": "Expose the Criminal",
             "Image": pygame.image.load("assets/images/game1.jpg"),
         },
         {
-            "Name": "Memory Experiment",
+            "Text": font.render(
+                "Memory Experiment",
+                settings["Antialiasing Text"],
+                settings["Font Primary Colour"],
+            ),
             "Pygame Button": pygame.Rect(
                 (settings["Width"] * 32) // 94,
                 (settings["Height"] * 4) // 16,
                 (settings["Width"] * 30) // 94,
                 (settings["Height"] * 10) // 16,
             ),
-            "Font Colour": settings["Font Primary Colour"],
             "Meta": "Memory Experiment",
             "Image": pygame.image.load("assets/images/game2.jpg"),
         },
         {
-            "Name": "Pattern Rush",
+            "Text": font.render(
+                "Pattern Rush",
+                settings["Antialiasing Text"],
+                settings["Font Primary Colour"],
+            ),
             "Pygame Button": pygame.Rect(
                 (settings["Width"] * 63) // 94,
                 (settings["Height"] * 4) // 16,
                 (settings["Width"] * 30) // 94,
                 (settings["Height"] * 10) // 16,
             ),
-            "Font Colour": settings["Font Primary Colour"],
             "Meta": "Pattern Rush",
             "Image": pygame.image.load("assets/images/game3.jpg"),
         },
         {
-            "Name": "Back to Main Menu",
+            "Text": small_font.render(
+                "Back to Main Menu",
+                settings["Antialiasing Text"],
+                settings["Font Primary Colour"],
+            ),
             "Pygame Button": pygame.Rect(
                 settings["Width"] // 94,
                 settings["Height"] // 16,
@@ -55,18 +72,13 @@ def makeButtons(settings, small_font):
                 text[1] + settings["Height"] // 90,
             ),
             "Colour": settings["Button Quinary Colour"],
-            "Font Colour": settings["Font Quinary Colour"],
             "Meta": "Main Menu",
         },
     ]
 
 
-def displayPage(settings, screen, font, title_font, small_font, getFps, exit):
+def displayPage(settings, screen, getFps, exit):
     never = True
-    back = buttons[-1]
-    title_text = title_font.render(
-        "Games Menu", settings["Antialiasing Text"], settings["Font Primary Colour"]
-    )
     while True:
         screen.fill(settings["Background Colour"])
         screen.blit(
@@ -83,7 +95,7 @@ def displayPage(settings, screen, font, title_font, small_font, getFps, exit):
             )
             height = button["Image"].get_height()
             width = button["Image"].get_width()
-            if button["Name"] == "Expose the Criminal":
+            if button["Meta"] == "Expose the Criminal":
                 scale = max(button_width / width, button_height / height)
                 left = (width - button_width / scale) / 2
                 top = (height - button_height / scale) / 2
@@ -110,38 +122,24 @@ def displayPage(settings, screen, font, title_font, small_font, getFps, exit):
                     scaled_image,
                     (button["Pygame Button"].x - left, button["Pygame Button"].y - top),
                 )
-            button_text = font.render(
-                button["Name"], settings["Antialiasing Text"], button["Font Colour"]
-            )
             screen.blit(
-                button_text,
+                button["Text"],
                 (
-                    button["Pygame Button"].x
-                    + button["Pygame Button"].width // 2
-                    - button_text.get_width() // 2,
-                    button["Pygame Button"].y
-                    + button["Pygame Button"].height
-                    + button_text.get_height() // 2,
+                    button["Pygame Button"].centerx - button["Text"].get_width() // 2,
+                    button["Pygame Button"].bottom + button["Text"].get_height() // 2,
                 ),
             )
         pygame.draw.rect(
             screen,
-            back["Colour"],
-            back["Pygame Button"],
+            buttons[-1]["Colour"],
+            buttons[-1]["Pygame Button"],
             border_radius=settings["Width"] // 40,
         )
-        back_text = small_font.render(
-            back["Name"], settings["Antialiasing Text"], button["Font Colour"]
-        )
         screen.blit(
-            back_text,
+            buttons[-1]["Text"],
             (
-                back["Pygame Button"].x
-                + back["Pygame Button"].width // 2
-                - back_text.get_width() // 2,
-                back["Pygame Button"].y
-                + back["Pygame Button"].height // 2
-                - back_text.get_height() // 2,
+                buttons[-1]["Pygame Button"].centerx - buttons[-1]["Text"].get_width() // 2,
+                buttons[-1]["Pygame Button"].centery - buttons[-1]["Text"].get_height() // 2,
             ),
         )
         for event in pygame.event.get():

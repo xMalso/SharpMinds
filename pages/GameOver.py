@@ -12,7 +12,7 @@ def makeButtons(settings, font):
     buttons = [
         # Default
         {
-            "Name": "Leaderboards",
+            "Text": font.render("Leaderboards", settings["Antialiasing Text"], settings["Font Secondary Colour"]),
             "Pygame Button": pygame.Rect(
                 settings["Width"] // 2 - text_width - settings["Width"] // 16,
                 (settings["Height"] * 30) // 32 - text_height,
@@ -20,12 +20,11 @@ def makeButtons(settings, font):
                 text_height + settings["Height"] // 32,
             ),
             "Colour": settings["Button Secondary Colour"],
-            "Font Colour": settings["Font Secondary Colour"],
             "Meta": "Leaderboards",
         },
         # Main Menu
         {
-            "Name": "Main Menu",
+            "Text": font.render("Main Menu", settings["Antialiasing Text"], settings["Font Primary Colour"]),
             "Pygame Button": pygame.Rect(
                 settings["Width"] // 2 + text_width + settings["Width"] // 16,
                 (settings["Height"] * 30) // 32 - text_height,
@@ -33,7 +32,6 @@ def makeButtons(settings, font):
                 text_height + settings["Height"] // 32,
             ),
             "Colour": settings["Button Primary Colour"],
-            "Font Colour": settings["Font Primary Colour"],
             "Meta": "Main Menu",
         },
     ]
@@ -70,18 +68,13 @@ def displayPage(screen, settings, font, game, score, pb, adjustment, getFps, exi
                 button["Pygame Button"],
                 border_radius=settings["Width"] // 40,
             )
-            button_text = font.render(
-                button["Name"], settings["Antialiasing Text"], button["Font Colour"]
-            )
             screen.blit(
-                button_text,
+                button["Text"],
                 (
-                    button["Pygame Button"].x
-                    + button["Pygame Button"].width // 2
-                    - button_text.get_width() // 2,
-                    button["Pygame Button"].y
-                    + button["Pygame Button"].height // 2
-                    - button_text.get_height() // 2,
+                    button["Pygame Button"].centerx
+                    - button["Text"].get_width() // 2,
+                    button["Pygame Button"].centery
+                    - button["Text"].get_height() // 2,
                 ),
             )
         getFps(never)
@@ -106,18 +99,13 @@ def displayPage(screen, settings, font, game, score, pb, adjustment, getFps, exi
                 button["Pygame Button"],
                 border_radius=settings["Width"] // 40,
             )
-            button_text = font.render(
-                button["Name"], settings["Antialiasing Text"], button["Font Colour"]
-            )
             screen.blit(
-                button_text,
+                button["Text"],
                 (
-                    button["Pygame Button"].x
-                    + button["Pygame Button"].width // 2
-                    - button_text.get_width() // 2,
-                    button["Pygame Button"].y
-                    + button["Pygame Button"].height // 2
-                    - button_text.get_height() // 2,
+                    button["Pygame Button"].centerx
+                    - button["Text"].get_width() // 2,
+                    button["Pygame Button"].centery
+                    - button["Text"].get_height() // 2,
                 ),
             )
         getFps(never)

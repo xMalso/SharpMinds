@@ -72,19 +72,20 @@ def makeTutText(font, max_width, text):
 
 
 def makeButtons(settings, font):
-    global tutorial_button
-    text = font.size("Start")
+    global tutorial_button, tut_text_size
+    tut_text_size = font.size("Start")
     # tutorial_button = [{
     tutorial_button = {
-        "Text": "Start",
+        "Text": font.render(
+            "Start", settings["Antialiasing Text"], settings["Font Primary Colour"]
+        ),
         "Pygame Button": pygame.Rect(
-            (settings["Width"] - text[0]) // 2,
-            (settings["Height"] * 95) // 100 - text[1],
-            text[0] + settings["Width"] // 100,
-            text[1] + settings["Height"] // 100,
+            (settings["Width"] - tut_text_size[0]) // 2,
+            (settings["Height"] * 95) // 100 - tut_text_size[1],
+            tut_text_size[0] + settings["Width"] // 100,
+            tut_text_size[1] + settings["Height"] // 100,
         ),
         "Colour": settings["Button Primary Colour"],
-        "Font Colour": settings["Font Primary Colour"],
     }
 
     # ]
@@ -153,7 +154,11 @@ def tutorial(screen, settings, font, getFps, exit):
         # thread.start()
         screen.fill(settings["Background Colour"])
         line_height = max(font.size(tutorial_text[0])[1], 100)
-        y = (settings["Height"] - (line_height * len(tutorial_text))) // 2
+        y = (
+            settings["Height"] * 0.95
+            - tut_text_size[1]
+            - (line_height * len(tutorial_text))
+        ) // 2
         for line in tutorial_text:
             parts = []
             remaining = line
@@ -227,16 +232,11 @@ def tutorial(screen, settings, font, getFps, exit):
             tutorial_button["Pygame Button"],
             border_radius=settings["Width"] // 60,
         )
-        text = font.render(
-            tutorial_button["Text"],
-            settings["Antialiasing Text"],
-            tutorial_button["Font Colour"],
-        )
         screen.blit(
-            text,
+            tutorial_button["Text"],
             (
-                tutorial_button["Pygame Button"].centerx - text.get_width() // 2,
-                tutorial_button["Pygame Button"].centery - text.get_height() // 2,
+                tutorial_button["Pygame Button"].centerx - tutorial_button["Text"].get_width() // 2,
+                tutorial_button["Pygame Button"].centery - tutorial_button["Text"].get_height() // 2,
             ),
         )
         for event in pygame.event.get():
@@ -303,8 +303,21 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 result, edge = removeCircle(event.pos, current_frame)
                 if result != 0:
-                    visual_text.append((result, edge, current_frame))
-                score += result
+                    score += result
+                    result = int(result)
+                    if result > 0:
+                        result = f"+{result}"
+                    visual_text.append(
+                        (
+                            font.render(
+                                str(result),
+                                settings["Antialiasing Text"],
+                                settings["Background Font Colour"],
+                            ),
+                            edge,
+                            current_frame,
+                        )
+                    )
                 if score < 0:
                     loss += score
                     score = 0
@@ -408,16 +421,8 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
                 visual_text.pop(0)
             else:
                 # visual_text_score = int(visual_text_score*10)/10
-                visual_text_score = int(visual_text_score)
-                if visual_text_score > 0:
-                    visual_text_score = f"+{visual_text_score}"
-                text = font.render(
-                    str(visual_text_score),
-                    settings["Antialiasing Text"],
-                    settings["Background Font Colour"],
-                )
                 screen.blit(
-                    text,
+                    visual_text_score,
                     (
                         pos[0],
                         pos[1] - text.get_height() // 2,

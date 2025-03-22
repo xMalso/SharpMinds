@@ -3,7 +3,12 @@ import random, pygame, math, numpy as np
 
 
 def init(settings, font, title_font):
-    global return_text, pause_duration, answer_text, guess_text, help_lines
+    global return_text, pause_duration, answer_text, guess_text, help_lines, curr_text
+    curr_text = font.render(
+        "Current Guess:",
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+    )
     return_lines = splitText(
         font,
         settings["Width"] // 5,
@@ -29,12 +34,6 @@ def init(settings, font, title_font):
         settings["Background Font Colour"],
     )
     makeButtons(settings, font)
-    for i in range(2):
-        page1_buttons[i]["Text"] = font.render(
-            page1_buttons[i]["Meta"],
-            settings["Antialiasing Text"],
-            page1_buttons[i]["Font Colour"],
-        )
     return_text = []
     temp = splitText(font, settings["Width"] // 4, "Press ESC to return to games menu")
     for text in temp:
@@ -49,12 +48,13 @@ def init(settings, font, title_font):
 
 
 def makeButtons(settings, font):
-    global page1_buttons, next_button
+    global page1_buttons, next_button, help_text
     ready_text = font.size("Ready")
     help_text = font.size("Help")
     next_text = font.size("Next Page")
     page1_buttons = [
         {
+            "Text": font.render("Ready", settings["Antialiasing Text"], settings["Font Primary Colour"]),
             "Pygame Button": pygame.Rect(
                 settings["Width"] // 3 - (ready_text[0] + settings["Width"] // 64) // 2,
                 settings["Height"] - (ready_text[1] + settings["Height"] // 50),
@@ -62,10 +62,10 @@ def makeButtons(settings, font):
                 ready_text[1],
             ),
             "Colour": settings["Button Primary Colour"],
-            "Font Colour": settings["Font Primary Colour"],
             "Meta": "Ready",
         },
         {
+            "Text": font.render("Help", settings["Antialiasing Text"], settings["Font Secondary Colour"]),
             "Pygame Button": pygame.Rect(
                 settings["Width"] * 2 // 3
                 - (help_text[0] + settings["Width"] // 64) // 2,
@@ -74,12 +74,11 @@ def makeButtons(settings, font):
                 help_text[1],
             ),
             "Colour": settings["Button Secondary Colour"],
-            "Font Colour": settings["Font Secondary Colour"],
             "Meta": "Help",
         },
     ]
     next_button = {
-        "Text": "Next Page",
+        "Text": font.render("Next Page", settings["Antialiasing Text"], settings["Font Primary Colour"]),
         "Pygame Button": pygame.Rect(
             settings["Width"] // 2 - (next_text[0] + settings["Width"] // 64) // 2,
             settings["Height"] - (next_text[1] + settings["Height"] // 50),
@@ -87,7 +86,6 @@ def makeButtons(settings, font):
             next_text[1],
         ),
         "Colour": settings["Button Primary Colour"],
-        "Font Colour": settings["Font Primary Colour"],
         "Meta": "Next Page",
     }
 
@@ -102,12 +100,20 @@ def makePickerButtons(settings, font):
     height_diff = height - side
     picker_text = [
         {
-            "Text": "Shape",
+            "Text": font.render(
+                "Shape",
+                settings["Antialiasing Text"],
+                settings["Background Font Colour"],
+            ),
             "x": settings["Width"] - width * 1.95,
             "y": settings["Height"] * 0.95 - height * 2.7,
         },
         {
-            "Text": "Colour",
+            "Text": font.render(
+                "Text",
+                settings["Antialiasing Text"],
+                settings["Background Font Colour"],
+            ),
             "x": settings["Width"] - width * 1.95,
             "y": settings["Height"] * 0.93 - height * 4.7,
         },
@@ -152,8 +158,11 @@ def makePickerButtons(settings, font):
                 height,
             ),
             "Type": "Colour",
-            "Text": "Colour 1",
-            "Font Colour": settings["Game Primary Font Colour"],
+            "Text": font.render(
+                "Colour 1",
+                settings["Antialiasing Text"],
+                settings["Game Primary Font Colour"],
+            ),
         },
         {
             "Meta": "Game Secondary Colour",
@@ -164,8 +173,11 @@ def makePickerButtons(settings, font):
                 height,
             ),
             "Type": "Colour",
-            "Text": "Colour 2",
-            "Font Colour": settings["Game Secondary Font Colour"],
+            "Text": font.render(
+                "Colour 2",
+                settings["Antialiasing Text"],
+                settings["Game Secondary Font Colour"],
+            ),
         },
         {
             "Meta": "Game Tertiary Colour",
@@ -176,8 +188,11 @@ def makePickerButtons(settings, font):
                 height,
             ),
             "Type": "Colour",
-            "Text": "Colour 3",
-            "Font Colour": settings["Game Tertiary Font Colour"],
+            "Text": font.render(
+                "Colour 3",
+                settings["Antialiasing Text"],
+                settings["Game Tertiary Font Colour"],
+            ),
         },
         {
             "Meta": "Erase",
@@ -188,8 +203,11 @@ def makePickerButtons(settings, font):
                 height,
             ),
             "Colour": settings["Button Quinary Colour"],
-            "Font Colour": settings["Font Quinary Colour"],
-            "Text": "Remove Guess",
+            "Text": font.render(
+                "Remove Guess",
+                settings["Antialiasing Text"],
+                settings["Font Quinary Colour"],
+            ),
             "Type": "Button",
         },
         {
@@ -201,8 +219,9 @@ def makePickerButtons(settings, font):
                 height,
             ),
             "Colour": settings["Button Primary Colour"],
-            "Font Colour": settings["Font Primary Colour"],
-            "Text": "Ready",
+            "Text": font.render(
+                "Ready", settings["Antialiasing Text"], settings["Font Primary Colour"]
+            ),
             "Type": "Button",
         },
     ]
@@ -321,16 +340,11 @@ def drawPicker(screen, settings, font):
                 button["Pygame Button"],
                 border_radius=settings["Width"] // 60,
             )
-            text = font.render(
-                button["Text"],
-                settings["Antialiasing Text"],
-                button["Font Colour"],
-            )
             screen.blit(
-                text,
+                button["Text"],
                 (
-                    button["Pygame Button"].centerx - text.get_width() // 2,
-                    button["Pygame Button"].centery - text.get_height() // 2,
+                    button["Pygame Button"].centerx - button["Text"].get_width() // 2,
+                    button["Pygame Button"].centery - button["Text"].get_height() // 2,
                 ),
             )
         else:
@@ -340,32 +354,23 @@ def drawPicker(screen, settings, font):
                 button["Pygame Button"],
                 border_radius=settings["Width"] // 60,
             )
-            text = font.render(
-                button["Text"],
-                settings["Antialiasing Text"],
-                button["Font Colour"],
-            )
             screen.blit(
-                text,
+                button["Text"],
                 (
-                    button["Pygame Button"].centerx - text.get_width() // 2,
-                    button["Pygame Button"].centery - text.get_height() // 2,
+                    button["Pygame Button"].centerx - button["Text"].get_width() // 2,
+                    button["Pygame Button"].centery - button["Text"].get_height() // 2,
                 ),
             )
     for data in picker_text:
-        text = font.render(
-            data["Text"],
-            settings["Antialiasing Text"],
-            settings["Background Font Colour"],
-        )
         screen.blit(
-            text,
+            data["Text"],
             (
-                data["x"] - text.get_width() // 2,
-                data["y"] - text.get_height() // 2,
+                data["x"] - button["Text"].get_width() // 2,
+                data["y"] - button["Text"].get_height() // 2,
             ),
         )
     text_y = settings["Height"] * 0.89 - height * 7
+    text_height = curr_text.get_height()
     if remove:
         for line in remove_text[::-1]:
             text_y -= line.get_height()
@@ -376,34 +381,22 @@ def drawPicker(screen, settings, font):
                     text_y,
                 ),
             )
-        text = font.render(
-            "Current Guess:",
-            settings["Antialiasing Text"],
-            settings["Background Font Colour"],
-        )
-        text_height = text.get_height()
         text_y = min(
             settings["Height"] * 0.89 - height * 7 - text_height * 4.5,
             text_y - text_height * 1.5,
         )
         screen.blit(
-            text,
+            curr_text,
             (
-                settings["Width"] - width * 1.95 - text.get_width() // 2,
+                settings["Width"] - width * 1.95 - curr_text.get_width() // 2,
                 text_y,
             ),
         )
     else:
-        text = font.render(
-            "Current Guess:",
-            settings["Antialiasing Text"],
-            settings["Background Font Colour"],
-        )
-        text_height = text.get_height()
         screen.blit(
-            text,
+            curr_text,
             (
-                settings["Width"] - width * 1.95 - text.get_width() // 2,
+                settings["Width"] - width * 1.95 - curr_text.get_width() // 2,
                 text_y - text_height * 4.5,
             ),
         )
@@ -549,8 +542,9 @@ def game2(settings, screen, font, getFps, exit, getID, updateLB):
         buttons.append(button_row)
     rounds = 1
     rounds_played = None
+    round_score = 0
     for i in range(rounds):
-        round_score, meta = cycle(i, settings, getFps, screen, font, exit)
+        round_score, meta = cycle(i, settings, getFps, screen, round_score, font, exit)
         if round_score is None:
             return None, None, meta, None
         score += round_score
@@ -574,7 +568,7 @@ def game2(settings, screen, font, getFps, exit, getID, updateLB):
     return score, adjustment, meta, pb
 
 
-def cycle(round_number, settings, getFps, screen, font, exit):
+def cycle(round_number, settings, getFps, screen, score, font, exit):
     global answer, pattern, picker_shape, picker_colour, remove, guess, max_score, all_positions
     never = True
     round_text = font.render(
@@ -602,6 +596,11 @@ def cycle(round_number, settings, getFps, screen, font, exit):
             ),
         }
     meta = None
+    score_text = font.render(
+        f"Score: {int(score)}",
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+    )
     while meta != "Ready":
         screen.fill(settings["Background Colour"])
         for event in pygame.event.get():
@@ -656,14 +655,20 @@ def cycle(round_number, settings, getFps, screen, font, exit):
             ),
         )
         if meta == "Help":
-            height = settings["Height"] - page1_buttons[1]["Pygame Button"].top
+            height = page1_buttons[1]["Pygame Button"].top
+            x = (
+                max(
+                    settings["Width"] * 2 // 3
+                    + (help_text[0] + settings["Width"] // 64) // 2,
+                    settings["Width"] - margin_width,
+                )
+                + settings["Width"] // 33
+            )
             for line in help_lines[::-1]:
                 screen.blit(
                     line,
                     (
-                        settings["Width"] * 7 // 8
-                        - line.get_width() // 2
-                        - settings["Width"] // 200,
+                        x,
                         height,
                     ),
                 )
@@ -726,11 +731,6 @@ def cycle(round_number, settings, getFps, screen, font, exit):
                 (settings["Width"] - round_text.get_width()) // 2,
                 settings["Height"] // 200,
             ),
-        )
-        score_text = font.render(
-            f"Score: {int(score)}",
-            settings["Antialiasing Text"],
-            settings["Background Font Colour"],
         )
         screen.blit(
             score_text,
@@ -883,13 +883,8 @@ def cycle(round_number, settings, getFps, screen, font, exit):
         #         settings["Height"] // 200 + round_text.get_height(),
         #     ),
         # )
-        next_text = font.render(
-            "Next Page",
-            settings["Antialiasing Text"],
-            next_button["Font Colour"],
-        )
         screen.blit(
-            next_text,
+            next_button["Text"],
             (
                 next_button["Pygame Button"].left + settings["Width"] // 128,
                 next_button["Pygame Button"].top,

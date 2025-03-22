@@ -58,33 +58,41 @@ def makeColourPickerButtons(settings, font):
     )
     colour_picker_buttons = [
         {
-            "Name": "Input",
+            "Text": font.render(
+                "Input", settings["Antialiasing Text"], settings["Input Font Colour"]
+            ),
             "Size": text_size,
             "Buffer Size": (
                 settings["Width"] // 100,
                 (settings["Height"] * 3) // 128 + text_size[1] * 2,
             ),
             "Colour": settings["Input Background Colour"],
-            "Font Colour": settings["Input Font Colour"],
+            "Meta": "Input",
         },
         {
-            "Name": "Confirm",
+            "Text": font.render(
+                "Confirm",
+                settings["Antialiasing Text"],
+                settings["Font Primary Colour"],
+            ),
             "Size": text_size,
             "Buffer Size": (
                 settings["Width"] // 100,
                 settings["Height"] // 64 + text_size[1],
             ),
-            "Text": "Confirm",
             "Colour": settings["Button Primary Colour"],
-            "Font Colour": settings["Font Primary Colour"],
+            "Meta": "Confirm",
         },
         {
-            "Name": "Discard",
+            "Text": font.render(
+                "Discard",
+                settings["Antialiasing Text"],
+                settings["Font Quinary Colour"],
+            ),
             "Size": text_size,
             "Buffer Size": (settings["Width"] // 100, settings["Height"] // 128),
-            "Text": "Discard",
             "Colour": settings["Button Quinary Colour"],
-            "Font Colour": settings["Font Quinary Colour"],
+            "Meta": "Discard",
         },
     ]
 
@@ -150,9 +158,13 @@ def makeConfirmationButtons(settings, small_font):
                 text_size[0] + settings["Width"] // 96,
                 text_size[1] + settings["Height"] // 100,
             ),
-            "Name": "Confirm",
+            "Text": small_font.render(
+                "Confirm",
+                settings["Antialiasing Text"],
+                settings["Font Quinary Colour"],
+            ),
             "Colour": settings["Button Quinary Colour"],
-            "Font Colour": settings["Font Quinary Colour"],
+            "Meta": "Confirm",
         },
         {
             "Pygame Button": pygame.Rect(
@@ -161,9 +173,13 @@ def makeConfirmationButtons(settings, small_font):
                 text_size[0] + settings["Width"] // 96,
                 text_size[1] + settings["Height"] // 100,
             ),
-            "Name": "Decline",
+            "Text": small_font.render(
+                "Decline",
+                settings["Antialiasing Text"],
+                settings["Font Primary Colour"],
+            ),
             "Colour": settings["Button Primary Colour"],
-            "Font Colour": settings["Font Primary Colour"],
+            "Meta": "Decline",
         },
     ]
 
@@ -174,7 +190,11 @@ def makeButtons(settings, small_font):
     buttons = [
         # Save and Leave
         {
-            "Name": "Save and Leave",
+            "Text": small_font.render(
+                "Save and Leave",
+                settings["Antialiasing Text"],
+                settings["Font Primary Colour"],
+            ),
             "Pygame Button": pygame.Rect(
                 (settings["Width"] * 100) // 128 - (text_width * 5),
                 (settings["Height"] * 30) // 32 - text_height,
@@ -182,12 +202,13 @@ def makeButtons(settings, small_font):
                 text_height + settings["Height"] // 32,
             ),
             "Colour": settings["Button Primary Colour"],
-            "Font Colour": settings["Font Primary Colour"],
             "Meta": "Save and Leave",
         },
         # Save
         {
-            "Name": "Save",
+            "Text": small_font.render(
+                "Save", settings["Antialiasing Text"], settings["Font Secondary Colour"]
+            ),
             "Pygame Button": pygame.Rect(
                 (settings["Width"] * 105) // 128 - (text_width * 4),
                 (settings["Height"] * 30) // 32 - text_height,
@@ -195,12 +216,15 @@ def makeButtons(settings, small_font):
                 text_height + settings["Height"] // 32,
             ),
             "Colour": settings["Button Secondary Colour"],
-            "Font Colour": settings["Font Secondary Colour"],
             "Meta": "Save",
         },
         # Discard
         {
-            "Name": "Discard",
+            "Text": small_font.render(
+                "Discard",
+                settings["Antialiasing Text"],
+                settings["Font Quinary Colour"],
+            ),
             "Pygame Button": pygame.Rect(
                 (settings["Width"] * 110) // 128 - (text_width * 3),
                 (settings["Height"] * 30) // 32 - text_height,
@@ -208,14 +232,17 @@ def makeButtons(settings, small_font):
                 text_height + settings["Height"] // 32,
             ),
             "Colour": settings["Button Quinary Colour"],
-            "Font Colour": settings["Font Quinary Colour"],
             "Meta": "Discard",
         },
     ]
     last = [
         # Default
         {
-            "Name": "Default",
+            "Text": small_font.render(
+                "Default",
+                settings["Antialiasing Text"],
+                settings["Font Quaternary Colour"],
+            ),
             "Pygame Button": pygame.Rect(
                 (settings["Width"] * 115) // 128 - (text_width * 2),
                 (settings["Height"] * 30) // 32 - text_height,
@@ -223,12 +250,15 @@ def makeButtons(settings, small_font):
                 text_height + settings["Height"] // 32,
             ),
             "Colour": settings["Button Quaternary Colour"],
-            "Font Colour": settings["Font Quaternary Colour"],
             "Meta": "Default",
         },
         # Main Menu
         {
-            "Name": "Main Menu",
+            "Text": small_font.render(
+                "Main Menu",
+                settings["Antialiasing Text"],
+                settings["Font Tertiary Colour"],
+            ),
             "Pygame Button": pygame.Rect(
                 (settings["Width"] * 120) // 128 - text_width,
                 (settings["Height"] * 30) // 32 - text_height,
@@ -236,7 +266,6 @@ def makeButtons(settings, small_font):
                 text_height + settings["Height"] // 32,
             ),
             "Colour": settings["Button Tertiary Colour"],
-            "Font Colour": settings["Font Tertiary Colour"],
             "Meta": "Main Menu",
         },
     ]
@@ -255,7 +284,7 @@ def checkCollide(loc):
     else:
         for button in colour_buttons.values():
             if button["Pygame Button"].collidepoint(loc):
-                if button["Name"] == "Confirm":
+                if button["Meta"] == "Confirm":
                     input_text = input_text.ljust(6, "0")
                     hex = tuple(int(input_text[i : i + 2], 16) for i in (0, 2, 4))
                     choice[current_colour_picker["Name"]] = hex
@@ -265,14 +294,14 @@ def checkCollide(loc):
                     backspace_held = False
                     resetColourButtons()
                     return
-                elif button["Name"] == "Discard":
+                elif button["Meta"] == "Discard":
                     current_colour_picker = None
                     input_text = ""
                     input_selected = False
                     backspace_held = False
                     resetColourButtons()
                     return
-                elif button["Name"] == "Input":
+                elif button["Meta"] == "Input":
                     input_selected = True
                     return
                 else:
@@ -298,18 +327,13 @@ def pasteButton(button, settings, screen):
         button["Pygame Button"],
         border_radius=settings["Width"] // 40,
     )
-    button_text = small_font.render(
-        button["Name"], settings["Antialiasing Text"], button["Font Colour"]
-    )
     screen.blit(
-        button_text,
+        button["Text"],
         (
-            button["Pygame Button"].x
-            + button["Pygame Button"].width // 2
-            - button_text.get_width() // 2,
-            button["Pygame Button"].y
-            + button["Pygame Button"].height // 2
-            - button_text.get_height() // 2,
+            button["Pygame Button"].centerx
+            - button["Text"].get_width() // 2,
+            button["Pygame Button"].centery
+            - button["Text"].get_height() // 2,
         ),
     )
 
@@ -557,7 +581,7 @@ def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps
                 if confirmation != None:
                     for button in confirmation_buttons:
                         if button["Pygame Button"].collidepoint(event.pos):
-                            if button["Name"] == "Confirm":
+                            if button["Meta"] == "Confirm":
                                 if confirmation == "Default":
                                     return None, "Default"
                                 elif confirmation == "Discard":
@@ -569,10 +593,10 @@ def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps
                                     return None, "Main Menu"
                                 else:
                                     print(
-                                        f"Error: Unknown request. {confirmation}, {button["Name"]}"
+                                        f"Error: Unknown request. {confirmation}, {button["Meta"]}"
                                     )
                                 confirmation = None
-                            elif button["Name"] == "Decline":
+                            elif button["Meta"] == "Decline":
                                 confirmation = None
                             else:
                                 print(f"Error: Unknown confirmation button. {button}")
