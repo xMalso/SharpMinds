@@ -38,7 +38,7 @@ lb = r"https://sharpminds-37b05-default-rtdb.europe-west1.firebasedatabase.app"
 
 logging.basicConfig(
     level=logging.WARNING,
-    filename=f"logs/log{datetime.now().strftime('%d-%m_%H-%M-%S')}.txt",
+    filename=f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt",
     format="%(asctime)s - %(message)s",
 )
 
@@ -138,7 +138,7 @@ class Settings:
 
     def applySettings(self):
         global screen
-        global font, title_font, small_font
+        global font, title_font, small_font, bold_font
         window_flags = {
             "Fullscreen": pygame.FULLSCREEN,
             "Borderless": pygame.NOFRAME,
@@ -157,6 +157,11 @@ class Settings:
                 size * 3,
                 bold=True,
             )
+            bold_font = pygame.font.SysFont(
+                self.settings["Bold Font"],
+                size,
+                bold=True,
+            )
             small_font = pygame.font.SysFont(
                 self.settings["Font"],
                 size // 2,
@@ -169,6 +174,10 @@ class Settings:
             title_font = pygame.font.Font(
                 os.path.join(r"assets/fonts/fonts", self.settings["Bold Font"]),
                 size * 3,
+            )
+            bold_font = pygame.font.Font(
+                os.path.join(r"assets/fonts/fonts", self.settings["Bold Font"]),
+                size,
             )
             small_font = pygame.font.Font(
                 os.path.join(r"assets/fonts/fonts", self.settings["Font"]),
@@ -239,6 +248,7 @@ def loadUp():
         "Font Quaternary Colour": (217, 217, 217),
         "Button Quinary Colour": (255, 102, 68),
         "Font Quinary Colour": (217, 217, 217),
+        "Leaderboard User Font Colour": (255, 215, 0),
         "Font": "OpenDyslexic-Regular.otf",
         "Bold Font": "OpenDyslexic-Bold.otf",
         "Italic Font": "OpenDyslexic-Italic.otf",
@@ -275,7 +285,7 @@ def loadUpValues():
     game1Init(settings, font)
     game2Init(settings, font, title_font)
     gameOverInit(settings, font, title_font)
-    leaderboardInit(settings, font, small_font)
+    leaderboardInit(settings, small_font, font, title_font)
 
 
 def getID():
@@ -356,9 +366,12 @@ def updateLB(game, data):
     return old_score
 
 
-def getLB(game):
+def getLB(game, user_id=None):
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
-    game_url = f"{lb}/game{game}.json"
+    if user_id == None:
+        game_url = f"{lb}/game{game}.json"
+    else:
+        game_url = f"{lb}/game{game}/{user_id}.json"
     response = requests.get(game_url, headers=headers)
     if response.status_code == 200:
         return response.json()
@@ -374,29 +387,29 @@ def generateUsername(settings, font, getFps, exit):
     never = True
     loop = True
     wlc = font.render(
-            "Welcome to Sharp Minds!",
-            settings["Antialiasing Text"],
-            settings["Background Font Colour"],
-        )
+        "Welcome to Sharp Minds!",
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+    )
     username_text = font.render(
-            "Please enter a username:",
-            settings["Antialiasing Text"],
-            settings["Background Font Colour"],
-        )
+        "Please enter a username:",
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+    )
     while loop:
         screen.fill(settings["Background Colour"])
         screen.blit(
             wlc,
             (
-                settings["Width"] // 2 - text_surface.get_width() // 2,
-                settings["Height"] // 3 - text_surface.get_height() // 2,
+                settings["Width"] // 2 - wlc.get_width() // 2,
+                settings["Height"] // 3 - wlc.get_height() // 2,
             ),
-        ) 
+        )
         screen.blit(
             username_text,
             (
-                settings["Width"] // 2 - text_surface.get_width() // 2,
-                settings["Height"] // 2 - text_surface.get_height() // 2,
+                settings["Width"] // 2 - username_text.get_width() // 2,
+                settings["Height"] // 2 - username_text.get_height() // 2,
             ),
         )
         text_surface = font.render(
@@ -421,6 +434,7 @@ def generateUsername(settings, font, getFps, exit):
                     loop = False
                 else:
                     username += event.unicode
+                    username = username[:32]
         getFps(never)
         never = False
         pygame.display.flip()
@@ -457,7 +471,18 @@ def generateUsername(settings, font, getFps, exit):
         },
         user_id,
     )
-    # createLB(3, {}, user_id)
+    createLB(
+        3,
+        {
+            "time": 800,
+            "game": 3,
+            "id": user_id,
+            "username": username,
+            "score": float(0),
+            "max": float(200),
+        },
+        user_id,
+    )
     return user_id, username
 
 
@@ -551,6 +576,7 @@ def adjustDifficulty(adjustment):
     del choice["Adaptive Difficulty"]
     print("Adaptive Difficulty saved.")
 
+
 try:
     loadUp()
     meta = "Main Menu"
@@ -563,9 +589,7 @@ try:
         if meta == "Main Menu":
             meta, choice = mainMenuDisplay(settings, screen, font, getFps, exit)
         elif meta == "Game Menu":
-            meta = gameMenuDisplay(
-                settings, screen, getFps, exit
-            )
+            meta = gameMenuDisplay(settings, screen, getFps, exit)
         elif meta == "Settings":
             scroll = 0
             choice, val = settingsDisplay(
@@ -604,7 +628,18 @@ try:
                 screen, settings, font, game, score, pb, adjustment, getFps, exit
             )
         elif meta == "Leaderboards":
-            meta == leaderboardsDisplay(settings, screen, font, game, getFps, exit, getLB)
+            meta == leaderboardsDisplay(
+                settings,
+                screen,
+                font,
+                bold_font,
+                small_font,
+                game,
+                user_id,
+                getFps,
+                exit,
+                getLB,
+            )
             meta = "Main Menu"
         else:
             print(

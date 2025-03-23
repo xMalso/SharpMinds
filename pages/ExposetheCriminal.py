@@ -7,7 +7,7 @@ first_attempt = True
 
 logging.basicConfig(
     level=logging.WARNING,
-    filename=f"logs/log{datetime.now().strftime('%d-%m_%H-%M-%S')}.txt",
+    filename=f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt",
     format="%(asctime)s - %(message)s",
 )
 
