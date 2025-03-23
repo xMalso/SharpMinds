@@ -1,9 +1,9 @@
+global pygame, rating
 import pygame
+rating = ["poorly...", "mediocre.", "good.", "great!", "excellent!!!"]
 
-
-def init(settings, font, title_font):
+def init(settings, font):
     makeButtons(settings, font)
-    makeText(settings, title_font)
 
 
 def makeButtons(settings, font):
@@ -12,7 +12,11 @@ def makeButtons(settings, font):
     buttons = [
         # Default
         {
-            "Text": font.render("Leaderboards", settings["Antialiasing Text"], settings["Font Secondary Colour"]),
+            "Text": font.render(
+                "Leaderboards",
+                settings["Antialiasing Text"],
+                settings["Font Secondary Colour"],
+            ),
             "Pygame Button": pygame.Rect(
                 settings["Width"] // 2 - text_width - settings["Width"] // 16,
                 (settings["Height"] * 30) // 32 - text_height,
@@ -24,7 +28,11 @@ def makeButtons(settings, font):
         },
         # Main Menu
         {
-            "Text": font.render("Main Menu", settings["Antialiasing Text"], settings["Font Primary Colour"]),
+            "Text": font.render(
+                "Main Menu",
+                settings["Antialiasing Text"],
+                settings["Font Primary Colour"],
+            ),
             "Pygame Button": pygame.Rect(
                 settings["Width"] // 2 + text_width + settings["Width"] // 16,
                 (settings["Height"] * 30) // 32 - text_height,
@@ -37,30 +45,62 @@ def makeButtons(settings, font):
     ]
 
 
-def makeText(settings, title_font):
-    global game_over_text, game_over_text_rect
-    game_over_text = title_font.render(
-        "Game Over", True, settings["Background Font Colour"]
+def displayPage(
+    screen, settings, font, small_title_font, game, new_score, old_score, adjustment, getFps, exit
+):
+    game_over_text = small_title_font.render(
+        f"{game}: Game Over", True, settings["Background Font Colour"]
     )
-    game_over_text_rect = game_over_text.get_rect()
-    game_over_text_rect.midtop = (settings["Width"] // 2, settings["Height"] // 30)
-
-
-def displayPage(screen, settings, font, game, score, pb, adjustment, getFps, exit):
+    game_over_coords = (
+        (settings["Width"] - game_over_text.get_width()) // 2,
+        settings["Height"] // 30,
+    )
     never = True
     score_text = font.render(
-        f"Score: {int(score)}", True, settings["Background Font Colour"]
+        f"Score: {int(new_score):.2f}",
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
     )
-    score_text_rect = score_text.get_rect()
-    score_text_rect.midtop = (
-        settings["Width"] // 2,
+    score_coords = (
+        (settings["Width"] - score_text.get_width()) // 2,
         settings["Height"] // 20 + game_over_text.get_height(),
     )
+    old_score_text = font.render(
+        f"Previous best: {int(old_score):.2f}",
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+    )
+    old_score_coords = (
+        (settings["Width"] - old_score_text.get_width()) // 2,
+        settings["Height"] // 20
+        + game_over_text.get_height()
+        + score_text.get_height(),
+    )
+    adjustment = min(4, max(0, round(adjustment * 10) + 2))
+    you_did = font.render(
+        f"You did {rating[adjustment]}",
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+    )
+    you_did_coords = (
+        (settings["Width"] - you_did.get_width()) // 2,
+        settings["Height"] // 20
+        + game_over_text.get_height()
+        + score_text.get_height()
+        + old_score_text.get_height(),
+    )
+    # score_text_coords = score_text.get_coords()
+    # score_text_coords.midtop = (
+    #     settings["Width"] // 2,
+    #     settings["Height"] // 20 + game_over_text.get_height(),
+    # )
     current = start = pygame.time.get_ticks()
     while current - start < 400:
         screen.fill(settings["Background Colour"])
-        screen.blit(game_over_text, game_over_text_rect)
-        screen.blit(score_text, score_text_rect)
+        screen.blit(game_over_text, game_over_coords)
+        screen.blit(score_text, score_coords)
+        screen.blit(old_score_text, old_score_coords)
+        screen.blit(you_did, you_did_coords)
         for button in buttons:
             pygame.draw.rect(
                 screen,
@@ -71,10 +111,8 @@ def displayPage(screen, settings, font, game, score, pb, adjustment, getFps, exi
             screen.blit(
                 button["Text"],
                 (
-                    button["Pygame Button"].centerx
-                    - button["Text"].get_width() // 2,
-                    button["Pygame Button"].centery
-                    - button["Text"].get_height() // 2,
+                    button["Pygame Button"].centerx - button["Text"].get_width() // 2,
+                    button["Pygame Button"].centery - button["Text"].get_height() // 2,
                 ),
             )
         getFps(never)
@@ -90,8 +128,10 @@ def displayPage(screen, settings, font, game, score, pb, adjustment, getFps, exi
 
     while True:
         screen.fill(settings["Background Colour"])
-        screen.blit(game_over_text, game_over_text_rect)
-        screen.blit(score_text, score_text_rect)
+        screen.blit(game_over_text, game_over_coords)
+        screen.blit(score_text, score_coords)
+        screen.blit(old_score_text, old_score_coords)
+        screen.blit(you_did, you_did_coords)
         for button in buttons:
             pygame.draw.rect(
                 screen,
@@ -102,10 +142,8 @@ def displayPage(screen, settings, font, game, score, pb, adjustment, getFps, exi
             screen.blit(
                 button["Text"],
                 (
-                    button["Pygame Button"].centerx
-                    - button["Text"].get_width() // 2,
-                    button["Pygame Button"].centery
-                    - button["Text"].get_height() // 2,
+                    button["Pygame Button"].centerx - button["Text"].get_width() // 2,
+                    button["Pygame Button"].centery - button["Text"].get_height() // 2,
                 ),
             )
         getFps(never)

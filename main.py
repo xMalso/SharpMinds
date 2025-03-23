@@ -138,7 +138,7 @@ class Settings:
 
     def applySettings(self):
         global screen
-        global font, title_font, small_font, bold_font
+        global font, title_font, small_font, bold_font, small_title_font
         window_flags = {
             "Fullscreen": pygame.FULLSCREEN,
             "Borderless": pygame.NOFRAME,
@@ -155,6 +155,11 @@ class Settings:
             title_font = pygame.font.SysFont(
                 self.settings["Font"],
                 size * 3,
+                bold=True,
+            )
+            small_title_font = pygame.font.SysFont(
+                self.settings["Font"],
+                size * 2,
                 bold=True,
             )
             bold_font = pygame.font.SysFont(
@@ -174,6 +179,10 @@ class Settings:
             title_font = pygame.font.Font(
                 os.path.join(r"assets/fonts/fonts", self.settings["Bold Font"]),
                 size * 3,
+            )
+            small_title_font = pygame.font.Font(
+                os.path.join(r"assets/fonts/fonts", self.settings["Bold Font"]),
+                size * 2,
             )
             bold_font = pygame.font.Font(
                 os.path.join(r"assets/fonts/fonts", self.settings["Bold Font"]),
@@ -284,7 +293,7 @@ def loadUpValues():
     gameMenuInit(settings, small_font, font, title_font)
     game1Init(settings, font)
     game2Init(settings, font, title_font)
-    gameOverInit(settings, font, title_font)
+    gameOverInit(settings, font)
     leaderboardInit(settings, small_font, font, title_font)
 
 
@@ -474,12 +483,13 @@ def generateUsername(settings, font, getFps, exit):
     createLB(
         3,
         {
-            "time": 800,
+            "time": 20000,
+            "pairs": 0,
             "game": 3,
             "id": user_id,
             "username": username,
             "score": float(0),
-            "max": float(200),
+            "max": float(300),
         },
         user_id,
     )
@@ -543,20 +553,20 @@ def executeSettingsResults(val):
 def adjustDifficulty(adjustment):
     global settings, meta, choice
     difficulty1, difficulty2, difficulty3 = settings["Adaptive Difficulty"]
-    if game == "Expose the Criminal":
+    if game_name == "Expose the Criminal":
         settings["Adaptive Difficulty"] = (
             max(difficulty1 + adjustment, 0.2),
             difficulty2,
             difficulty3,
         )
 
-    elif game == "Memory Experiment":
+    elif game_name == "Memory Experiment":
         settings["Adaptive Difficulty"] = (
             difficulty1,
             max(difficulty2 + adjustment, 0.2),
             difficulty3,
         )
-    elif game == "Pattern Rush":
+    elif game_name == "Pattern Rush":
         settings["Adaptive Difficulty"] = (
             difficulty1,
             difficulty2,
@@ -565,7 +575,7 @@ def adjustDifficulty(adjustment):
     else:
         print("Error: Game not found, difficulty not adjusted and sending to main menu")
         logging.critical(
-            f"Error: Game not found, difficulty not adjusted and sending to main menu {traceback.format_exc()} Game: {game}, adjustment: {adjustment}, score: {score}, meta: {meta}"
+            f"Error: Game not found, difficulty not adjusted and sending to main menu {traceback.format_exc()} Game: {game_name}, adjustment: {adjustment}, score: {new_score}, meta: {meta}"
         )
         meta = "Main Menu"
     del adjustment
@@ -580,10 +590,12 @@ def adjustDifficulty(adjustment):
 try:
     loadUp()
     meta = "Main Menu"
-    game = 1
     # meta = "Game Over"
-    # game = "Expose the Criminal"
-    # score = 530.7385
+    # new_score = 530.7385
+    # old_score = getLB(1, user_id)["fields"]["score"]["doubleValue"]
+    # game_name = "Expose the Criminal"
+    # game = 1
+    # adjustment = 0.1
 
     while True:
         if meta == "Main Menu":
@@ -602,30 +614,44 @@ try:
         elif meta == "Expose the Criminal":
             meta = game1Tutorial(screen, settings, font, getFps, exit)
             if meta == "Ready":
-                score, adjustment, meta, pb = game1(
+                new_score, adjustment, meta, old_score = game1(
                     settings, screen, font, getFps, exit, getID, updateLB
                 )
-                if score != None:
-                    game = "Expose the Criminal"
+                if new_score != None:
+                    game_name = "Expose the Criminal"
+                    game = 1
                     adjustDifficulty(adjustment)
         elif meta == "Memory Experiment":
-            score, adjustment, meta, pb = game2(
+            new_score, adjustment, meta, old_score = game2(
                 settings, screen, font, getFps, exit, getID, updateLB
             )
-            if score != None:
-                game = "Memory Experiment"
+            if new_score != None:
+                game_name = "Memory Experiment"
+                game = 2
                 adjustDifficulty(adjustment)
         elif meta == "Pattern Rush":
             print(
                 f"Page '{meta}' is currently in development, sending back to main menu."
             )
-            score, adjustment, meta, pb = game3(settings, screen, font, getFps, exit)
-            if score != None:
-                game = "Pattern Rush"
+            new_score, adjustment, meta, old_score = game3(
+                settings, screen, font, getFps, exit
+            )
+            if new_score != None:
+                game_name = "Pattern Rush"
+                game = 3
                 adjustDifficulty(adjustment)
         elif meta == "Game Over":
             meta = gameOverDisplay(
-                screen, settings, font, game, score, pb, adjustment, getFps, exit
+                screen,
+                settings,
+                font,
+                small_title_font,
+                game_name,
+                new_score,
+                old_score,
+                adjustment,
+                getFps,
+                exit,
             )
         elif meta == "Leaderboards":
             meta == leaderboardsDisplay(
