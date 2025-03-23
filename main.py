@@ -257,7 +257,7 @@ def loadUp():
         "Font Quaternary Colour": (217, 217, 217),
         "Button Quinary Colour": (255, 102, 68),
         "Font Quinary Colour": (217, 217, 217),
-        "Leaderboard User Font Colour": (255, 215, 0),
+        "Bold Contrasting Font Colour": (255, 215, 0),
         "Font": "OpenDyslexic-Regular.otf",
         "Bold Font": "OpenDyslexic-Bold.otf",
         "Italic Font": "OpenDyslexic-Italic.otf",
@@ -590,12 +590,12 @@ def adjustDifficulty(adjustment):
 try:
     loadUp()
     meta = "Main Menu"
-    # meta = "Game Over"
-    # new_score = 530.7385
-    # old_score = getLB(1, user_id)["fields"]["score"]["doubleValue"]
-    # game_name = "Expose the Criminal"
-    # game = 1
-    # adjustment = 0.1
+    meta = "Game Over"
+    new_score = 530.7385
+    old_score = 200.34
+    game_name = "Expose the Criminal"
+    game = 1
+    adjustment = 0.1
 
     while True:
         if meta == "Main Menu":
@@ -646,6 +646,7 @@ try:
                 settings,
                 font,
                 small_title_font,
+                bold_font,
                 game_name,
                 new_score,
                 old_score,

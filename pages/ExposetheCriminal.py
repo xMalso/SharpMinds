@@ -39,6 +39,14 @@ def init(settings, font):
         int(settings["Width"] * 0.85),
         "Click the circles of this colour SECONDARY and avoid clicking circles of this colour PRIMARY, you gain more points from quicker reactions when clicking SECONDARY and you gain points when PRIMARY despawns",
     )
+    #
+    #
+    #
+    #
+    # TEMP WHILE I WORK ON SOUNDS
+    #
+    #
+    loadSounds()
     # thread = threading.Thread(target=loadSounds, daemon=True)
     # thread.start()
     # thread.join(0.2)

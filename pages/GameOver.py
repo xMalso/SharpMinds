@@ -1,13 +1,15 @@
 global pygame, rating
 import pygame
+
 rating = ["poorly...", "mediocre.", "good.", "great!", "excellent!!!"]
+
 
 def init(settings, font):
     makeButtons(settings, font)
 
 
 def makeButtons(settings, font):
-    global buttons
+    global buttons, text_height
     text_width, text_height = font.size("Leaderboards")
     buttons = [
         # Default
@@ -19,7 +21,7 @@ def makeButtons(settings, font):
             ),
             "Pygame Button": pygame.Rect(
                 settings["Width"] // 2 - text_width - settings["Width"] // 16,
-                (settings["Height"] * 30) // 32 - text_height,
+                (settings["Height"] * 15) // 16 - text_height,
                 text_width + settings["Width"] // 32,
                 text_height + settings["Height"] // 32,
             ),
@@ -35,7 +37,7 @@ def makeButtons(settings, font):
             ),
             "Pygame Button": pygame.Rect(
                 settings["Width"] // 2 + text_width + settings["Width"] // 16,
-                (settings["Height"] * 30) // 32 - text_height,
+                (settings["Height"] * 15) // 16 - text_height,
                 text_width + settings["Width"] // 32,
                 text_height + settings["Height"] // 32,
             ),
@@ -46,35 +48,38 @@ def makeButtons(settings, font):
 
 
 def displayPage(
-    screen, settings, font, small_title_font, game, new_score, old_score, adjustment, getFps, exit
+    screen,
+    settings,
+    font,
+    small_title_font,
+    bold_font,
+    game,
+    new_score,
+    old_score,
+    adjustment,
+    getFps,
+    exit,
 ):
     game_over_text = small_title_font.render(
         f"{game}: Game Over", True, settings["Background Font Colour"]
     )
-    game_over_coords = (
-        (settings["Width"] - game_over_text.get_width()) // 2,
-        settings["Height"] // 30,
-    )
     never = True
-    score_text = font.render(
-        f"Score: {int(new_score):.2f}",
-        settings["Antialiasing Text"],
-        settings["Background Font Colour"],
-    )
-    score_coords = (
-        (settings["Width"] - score_text.get_width()) // 2,
-        settings["Height"] // 20 + game_over_text.get_height(),
-    )
+    if new_score > old_score:
+        score_text = bold_font.render(
+            f"Score: {int(new_score):.2f} New Best!",
+            settings["Antialiasing Text"],
+            settings["Bold Contrasting Font Colour"],
+        )
+    else:
+        score_text = font.render(
+            f"Score: {int(new_score):.2f}",
+            settings["Antialiasing Text"],
+            settings["Background Font Colour"],
+        )
     old_score_text = font.render(
         f"Previous best: {int(old_score):.2f}",
         settings["Antialiasing Text"],
         settings["Background Font Colour"],
-    )
-    old_score_coords = (
-        (settings["Width"] - old_score_text.get_width()) // 2,
-        settings["Height"] // 20
-        + game_over_text.get_height()
-        + score_text.get_height(),
     )
     adjustment = min(4, max(0, round(adjustment * 10) + 2))
     you_did = font.render(
@@ -82,12 +87,39 @@ def displayPage(
         settings["Antialiasing Text"],
         settings["Background Font Colour"],
     )
+    y = (
+        settings["Height"] * 15 // 16
+        - text_height
+        + (
+            -game_over_text.get_height()
+            - score_text.get_height()
+            - old_score_text.get_height()
+            - you_did.get_height()
+        )
+        * 1.1
+    ) // 4
+    game_over_coords = (
+        (settings["Width"] - game_over_text.get_width()) // 2,
+        y + game_over_text.get_height() // 40,
+    )
+    score_coords = (
+        (settings["Width"] - score_text.get_width()) // 2,
+        y + game_over_text.get_height() * 1.1 + score_text.get_height() // 40,
+    )
+    old_score_coords = (
+        (settings["Width"] - old_score_text.get_width()) // 2,
+        y
+        + game_over_text.get_height() * 1.1
+        + score_text.get_height() * 1.1
+        + old_score_text.get_height() // 40,
+    )
     you_did_coords = (
         (settings["Width"] - you_did.get_width()) // 2,
-        settings["Height"] // 20
-        + game_over_text.get_height()
-        + score_text.get_height()
-        + old_score_text.get_height(),
+        y
+        + game_over_text.get_height() * 1.1
+        + score_text.get_height() * 1.1
+        + old_score_text.get_height() * 1.1
+        + you_did.get_height() // 40,
     )
     # score_text_coords = score_text.get_coords()
     # score_text_coords.midtop = (

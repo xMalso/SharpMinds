@@ -150,7 +150,7 @@ def loadLB(game, user_id, getLB, bold_font, settings):
     player_score = bold_font.render(
         f"Your PB: {getLB(game, user_id)["fields"]["score"]["doubleValue"]:.2f}",
         settings["Antialiasing Text"],
-        settings["Leaderboard User Font Colour"],
+        settings["Bold Contrasting Font Colour"],
     )
     lb.sort(key=lambda x: x["fields"]["score"]["doubleValue"], reverse=True)
     x = (width - for_text[game - 1].get_width()) // 2
@@ -213,7 +213,7 @@ def displayPage(
                 text = bold_font.render(
                     f"{entry['fields']['username']['stringValue']}: {entry['fields']['score']['doubleValue']:.2f}",
                     settings["Antialiasing Text"],
-                    settings["Leaderboard User Font Colour"],
+                    settings["Bold Contrasting Font Colour"],
                 )
             else:
                 text = font.render(
