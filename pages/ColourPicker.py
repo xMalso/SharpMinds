@@ -1,4 +1,4 @@
-global colour_buttons, pygame
+global colour_buttons
 import pygame
 
 colour_buttons = {}

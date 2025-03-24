@@ -1,6 +1,11 @@
-global random, pygame, math, np
-import random, pygame, math, numpy as np
+import random, pygame, math, logging, numpy as np
+from datetime import datetime
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    filename=f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt",
+    format="%(asctime)s - %(message)s",
+)
 
 def init(settings, font, title_font):
     global return_text, pause_duration, answer_text, guess_text, help_lines, curr_text
@@ -474,7 +479,7 @@ def calculateScore(score):
             ):
                 score += max_score / 3
                 lb["kinda"] += 1
-    print(
+    logging.debug(
         "floating pres diff",
         score - (((lb["empty"] * 0.05) + (lb["kinda"] / 3) + lb["right"]) * lb["max"]),
     )
@@ -482,15 +487,15 @@ def calculateScore(score):
 
 
 def game2(settings, screen, font, getFps, exit, getID, updateLB):
-    global difficulty, buffer, buttons, rows, cols, button_side, radius, margin_width, margin_height, multiplier, pause_duration, avg, lb, remove_text
-    val = getID()
+    global buttons, rows, cols, button_side, radius, margin_width, margin_height, multiplier, pause_duration, avg, lb, remove_text
+    user_id, username = getID()
     lb = {
         "empty": 0,
         "right": 0,
         "kinda": 0,
         "game": int(2),
-        "id": str(val[0]),
-        "username": str(val[1]),
+        "id": str(user_id),
+        "username": str(username),
         "score": 0,
         "max": 0,
     }
@@ -504,7 +509,7 @@ def game2(settings, screen, font, getFps, exit, getID, updateLB):
         + settings["Height"] * 0.2,
     )
     difficulty = settings["Adaptive Difficulty"][1]
-    multiplier = (difficulty - 1) / 10 + 1
+    multiplier = difficulty * .1 + .9
     avg = difficulty**0.5 * 10
     cols = rows = math.ceil(avg**0.5)
     avg = int(avg // 3)
@@ -775,7 +780,7 @@ def cycle(round_number, settings, getFps, screen, score, font, exit):
                             score = calculateScore(0)
                             finished = True
                         else:
-                            print(
+                            logging.error(
                                 f"Unknown meta: {meta}, \n\n\nButton: {button}, \n\n\n{picker_buttons} \n\n"
                             )
                 for r, c in all_positions:

@@ -1,77 +1,310 @@
-global math, pygame
-import math
-import pygame
+import math, pygame, random, logging
+from datetime import datetime
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    filename=f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt",
+    format="%(asctime)s - %(message)s",
+)
 
 
-def rotate_point(point_x, point_y, centre_x, centre_y, angle):
-    difference_x, difference_y = point_x - centre_x, point_y - centre_y
-    new_x = centre_x + difference_x * math.cos(angle) - difference_y * math.sin(angle)
-    new_y = centre_y + difference_x * math.sin(angle) + difference_y * math.cos(angle)
+def init(settings, font):
+    global return_lines, colours
+    colours = [
+        settings["Game Primary Colour"],
+        settings["Game Secondary Colour"],
+        settings["Game Tertiary Colour"],
+    ]
+    lines = splitText(font, settings["Width"] // 4)
+    return_lines = []
+    for line in lines:
+        return_lines.append(
+            font.render(
+                line, settings["Antialiasing Text"], settings["Background Font Colour"]
+            )
+        )
+
+
+def splitText(font, max_width):
+    words = ["Press", "ESC", "to", "return", "to", "games", "menu"]
+    lines = []
+    current_line = ""
+
+    for word in words:
+        test_line = current_line + " " + word if current_line else word
+        text_width = font.size(test_line)[0]
+
+        if text_width <= max_width:
+            current_line = test_line
+        else:
+            lines.append(current_line)
+            current_line = word
+
+    lines.append(current_line)
+
+    return lines
+
+
+def generateInnerObjects(loc, trim):
+    random.shuffle(loc)
+    shuffloc = loc[:]
+    for i in range(len(shuffloc)):
+        shuffloc[i] = [
+            shuffloc[i],
+            random.choice(["Square", "Circle", "Triangle"]),
+            random.choice([0, 1, 2]),
+        ]
+    shuffloc[0] = shuffloc[0][0], "Triangle", shuffloc[0][2]
+    return shuffloc
+
+
+def drawRect(screen, rotation, colour, big):
+    x = big[0]
+    y = big[1]
+    rect = pygame.draw.polygon(
+        screen,
+        colour,
+        [
+            rotate_point(x + move_x / 2, y + move_y / 2, x, y, rotation)
+            for move_x, move_y in [
+                (-square_size, -square_size),
+                (square_size, -square_size),
+                (square_size, square_size),
+                (-square_size, square_size),
+            ]
+        ],
+    )
+    logging.debug(f"returned big rect: {rect}")
+    return rect
+
+
+def generateObjects(settings, difficulty):
+    global objects, shape_size, buffer, square_size # buffer for moving the shapes too
+    sqrt2 = math.sqrt(2)
+    size = int((difficulty / 2) ** 2) + 1
+    loc = [(x, y) for x in range(size) for y in range(size)]
+    shape_size = (((settings["Width"] // 10.8) - 1) // size) - 1
+    square_size = (shape_size + 1) * size + 1
+    screen_size = (
+        settings["Width"] * 0.9 - (square_size * sqrt2),
+        settings["Height"] * 0.95
+        - len(return_lines) * return_lines[0].get_height()
+        - (square_size * sqrt2),
+    )
+    buffer = (
+        settings["Width"] * 0.05 + (square_size / sqrt2),
+        settings["Height"] * 0.025
+        + len(return_lines) * return_lines[0].get_height()
+        + (square_size / sqrt2),
+    )
+    spawn = []
+    for x in range(buffer[0], buffer[0] + screen_size[0], 120):
+        for y in range(buffer[1], buffer[1] + screen_size[1], 120):
+            spawn.append((x, y))
+    random.shuffle(spawn)
+    spawn = spawn[:7]
+    objects = []
+    trim = (size**2) // 2.4
+    for i in range(7):
+        shuffloc = generateInnerObjects(loc, trim)
+        duplicate = i % 2 == 1
+        while duplicate:
+            for obj in objects:
+                while obj["Inner Shapes"] == shuffloc:
+                    shuffloc = generateInnerObjects(loc, trim)
+            duplicate = False
+            for obj in objects:
+                if obj["Inner Shapes"] == shuffloc:
+                    duplicate = True
+                    break
+        objects.append(
+            {
+                "Number": i,
+                "Pair": i // 2,
+                "Centre": (
+                    spawn[i][0] + square_size / 2,
+                    spawn[i][1] + square_size / 2,
+                ),
+                "Inner Shapes": [],
+            }
+        )
+        if duplicate:
+            for location in shuffloc:
+                x, y = location[0]
+                objects[-1]["Inner Shapes"].append(
+                    [
+                        (x + 0.5) * (shape_size + 1) + 1 + spawn[i][0],
+                        (y + 0.5) * (shape_size + 1) + 1 + spawn[i][1],
+                    ],
+                    location[1],
+                    colours[location[2]],
+                )
+        else:
+            objects[-1]["Inner Shapes"] = objects[-2]["Inner Shapes"]
+
+
+def game3(settings, screen, font, getFps, exit, getID, updateLB):
+    user_id, username = getID()
+    score_text = (
+        font.render(
+            "Score: 0", settings["Antialiasing Text"], settings["Background Font Colour"]
+        ),
+        ((settings["Width"] - score_text.get_width()) // 2, settings["Height"] * 0.01),
+    )
+    score = 0
+    never = True
+    playing = True
+    current = start = pygame.time.get_ticks()
+    left = 3
+    selected = []
+    difficulty = settings["Adaptive Difficulty"][2]
+    rotation_multiplier = 0.1 * difficulty**1.7
+    duration = 20000 / difficulty**0.5
+    multiplier = difficulty * 0.1 + 0.9
+    generateObjects(settings, difficulty)
+    time_left = current - start
+    max = multiplier * 100
+    lb = (
+        {
+            "duration": duration,
+            "game": 3,
+            "id": user_id,
+            "username": username,
+            "max": float(max),
+        },
+    )
+    while time_left < duration and playing:
+        rects = []
+        rotation = math.radians(time_left * rotation_multiplier)
+        screen.fill(settings["Background Colour"])
+        for obj in objects:
+            centre = obj["Centre"]
+            rects.append(
+                [
+                    drawRect(
+                        screen,
+                        settings["Grid Background Colour"],
+                        rotation,
+                        centre,
+                    ),
+                    (obj["Number"], obj["Pair"]),
+                ]
+            )
+            for shape in obj["Inner Shapes"]:
+                drawSmallRect(screen, centre, rotation, shape[0], shape[1], shape[2])
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                for rect in rects:
+                    if rect.collidepoint(event.pos):
+                        if rect[1] in selected:
+                            selected.remove(rect[1])
+                        else:
+                            selected.append(rect[1])
+                            while len(selected) > 2:
+                                selected.pop(0)
+                            if len(selected) == 2:
+                                if selected[0][1] == selected[1][1]:
+                                    score += left * max
+                                    score_text = font.render(
+                                        f"Score: {score}",
+                                        settings["Antialiasing Text"],
+                                        settings["Background Font Colour"],
+                                    )
+                                    score_text_coords = (
+                                        (settings["Width"] - score_text.get_width())
+                                        // 2,
+                                        settings["Height"] * 0.01,
+                                    )
+                                    selected = []
+                                    left -= 1
+                                    if left == 0:
+                                        playing = False
+                                        score += (max(time_left, 0) / 100) * multiplier
+                                else:
+                                    result = left * max / 2
+                                    score -= result
+                                    loss += result
+                                    score_text = font.render(
+                                        f"Score: {score}",
+                                        settings["Antialiasing Text"],
+                                        settings["Background Font Colour"],
+                                    )
+                                    score_text_coords = (
+                                        (settings["Width"] - score_text.get_width())
+                                        // 2,
+                                        settings["Height"] * 0.01,
+                                    )
+                                    selected = []
+            elif event.type == pygame.QUIT:
+                exit()
+                return None, None, "Quit", None
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return None, None, "Game Menu", None
+        time_text = font.render(
+            f"Time: {(time_left/1000):.1f}",
+            settings["Antialiasing Text"],
+            settings["Background Font Colour"],
+        )
+        time_text_coords = (
+            (settings["Width"] - time_text.get_width()) // 2,
+            settings["Height"] * 0.01 + score_text[0].get_height(),
+        )
+        screen.blit(score_text, score_text_coords)
+        screen.blit(time_text, time_text_coords)
+        getFps(never)
+        never = False
+        pygame.display.flip()
+    lb["time"] = max(time_left, 0)
+    lb["pairs"] = 3 - left
+    lb["score"] = score
+    adjustment = (score - max * 6 + duration / 400) / 200
+    old_score = updateLB(3, lb)
+    return score, adjustment, "Game Over", old_score
+
+
+def rotate_point(x, y, centre_x, centre_y, rotation):
+    difference_x, difference_y = x - centre_x, y - centre_y
+    new_x = (
+        centre_x + difference_x * math.cos(rotation) - difference_y * math.sin(rotation)
+    )
+    new_y = (
+        centre_y + difference_x * math.sin(rotation) + difference_y * math.cos(rotation)
+    )
     return new_x, new_y
 
 
-def draw_rotated_rect(screen, x, y, width, height, angle, colour):
-    angle_rad = math.radians(angle)
-
-    # Centre of the rectangle (rotation point)
-    cx, cy = x + width / 2, y + height / 2
-
-    # Define original rectangle corners relative to the top-left
-    corners = [
-        (-width / 2, -height / 2),  # Top-left
-        (width / 2, -height / 2),  # Top-right
-        (width / 2, height / 2),  # Bottom-right
-        (-width / 2, height / 2),  # Bottom-left
-    ]
-
-    # Rotate the rectangle corners around its centre
-    rotated_corners = [
-        rotate_point(px + cx, py + cy, cx, cy, angle_rad) for px, py in corners
-    ]
-
-    # Draw the main rotated rectangle
-    pygame.draw.polygon(screen, colour, rotated_corners, 2)
-
-    # === Draw smaller rotated shapes inside ===
-    inner_shapes = [
-        (-width / 4, -height / 4, width / 4, height / 4),  # Top-left small box
-        (width / 8, height / 8, width / 3, height / 3),  # Bottom-right larger box
-    ]
-
-    for sx, sy, sw, sh in inner_shapes:
-        draw_inner_rotated_rect(
-            screen, cx + sx, cy + sy, sw, sh, angle + 45, (0, 255, 255)
+def drawSmallRect(screen, centre, rotation, coords, shape, colour):
+    x, y = coords
+    centre_x, centre_y = centre
+    if shape == "Square":
+        corners = [
+            (x - shape_size / 2, y - shape_size / 2),
+            (x + shape_size / 2, y - shape_size / 2),
+            (x - shape_size / 2, y + shape_size / 2),
+            (x + shape_size / 2, y + shape_size / 2),
+        ]
+    elif shape == "Circle":
+        pygame.draw.circle(
+            screen,
+            colour,
+            rotate_point(centre_x, centre_y, x, y, rotation),
+            shape_size / 2,
         )
+        return
+    elif shape == "Triangle":
+        half_height = (math.sqrt(3) / 2) * shape_size / 2
+        corners = [
+            (x, y - half_height),
+            (x - shape_size / 2, y + half_height),
+            (x + shape_size / 2, y + half_height),
+        ]
+    else:
+        logging.error(f"Invalid shape: {shape}")
 
-    # === Create invisible bounding rect ===
-    bounding_rect = pygame.Rect(x, y, width, height)  # This is not drawn
+    for cornerx, cornery in corners:
+        rotated_corners = [rotate_point(centre_x, centre_y, cornerx, cornery, rotation)]
 
-    return bounding_rect  # Can be used for collision detection
+    pygame.draw.polygon(screen, colour, rotated_corners)
 
-
-def draw_inner_rotated_rect(screen, x, y, width, height, angle, colour=(0, 255, 255)):
-    """Draws a smaller rotated rectangle inside another rotated rectangle."""
-    angle_rad = math.radians(angle)
-
-    # Centre of the small rectangle
-    cx, cy = x + width / 2, y + height / 2
-
-    # Define small rectangle corners relative to its centre
-    corners = [
-        (-width / 2, -height / 2),
-        (width / 2, -height / 2),
-        (width / 2, height / 2),
-        (-width / 2, height / 2),
-    ]
-
-    # Rotate and position the small rectangle
-    rotated_corners = [
-        rotate_point(px + cx, py + cy, cx, cy, angle_rad) for px, py in corners
-    ]
-
-    # Draw the rotated small rectangle
-    pygame.draw.polygon(screen, colour, rotated_corners, 2)
-
-
-def game3(settings, screen, font, getFps, exit):
-    return None, None, "Game Menu", None
+    return

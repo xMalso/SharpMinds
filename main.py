@@ -2,9 +2,15 @@ import pygame, sys, os, random, hashlib, requests, logging, traceback
 from datetime import datetime
 from pages import *
 
-# import firebase_admin
-# from dotenv import load_dotenv
-# from firebase_admin import credentials, firestore
+lb = r"https://sharpminds-37b05-default-rtdb.europe-west1.firebasedatabase.app"
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    filename=f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt",
+    format="%(asctime)s - %(message)s",
+)
+
+
 
 # import steam
 # steamworks = steam.SteamWorks()
@@ -12,41 +18,13 @@ from pages import *
 # if steamworks.is_running():
 #     user = steamworks.user
 #     steam_id = user.steam_id
-#     print(f"User Steam ID: {steam_id}")
+#     logging.debug(f"User Steam ID: {steam_id}")
 # else:
-#     print("Steam is not running.")
-
-# load_dotenv()
-# private_key_path = os.getenv("FIREBASE_PRIVATE_KEY_PATH")
-
-# print(private_key_path)
-# cred = credentials.Certificate(private_key_path)
-# firebase_admin.initialize_app(cred)
-# # firebase_admin.initialize_app()
-
-# db = firestore.client()
-
-# leaderboard = (
-#     db.collection("game1").document(
-#         "a7038e995fc7acbb230cb00d145884df718a6e161b2c6adee7c6b33469429ce5"
-#     ).get().to_dict(),
-#     db.collection("game2"),
-#     db.collection("game3"),
-# )
-# print(f"lb {leaderboard[0]}\n\n\n")
-lb = r"https://sharpminds-37b05-default-rtdb.europe-west1.firebasedatabase.app"
-
-logging.basicConfig(
-    level=logging.WARNING,
-    filename=f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt",
-    format="%(asctime)s - %(message)s",
-)
-
+#     logging.error("Error: Steam is not running.")
 
 class Settings:
 
     def __init__(self):
-        global screen, font, pygame
         self.settings = self.setSettings()
         self.applySettings()
         text_surface = font.render(
@@ -93,10 +71,6 @@ class Settings:
                                 self.settings[key] = tuple(
                                     map(int, value.strip("()").split(", "))
                                 )  # Convert to int tuple (for RGB values)
-                                # hex = "{:02X}{:02X}{:02X}".format(
-                                #     *self.settings[key]
-                                # )
-                                # print(hex)
                             except:
                                 self.settings[key] = tuple(
                                     map(float, value.strip("()").split(", "))
@@ -111,9 +85,7 @@ class Settings:
                         else:  # Otherwise assume to be a string
                             self.settings[key] = value.strip('"')
                     else:
-                        print(
-                            f"Warning: Unknown setting '{key}' found in settings.txt. Ignoring."
-                        )
+                        logging.warning(f"Warning: Unknown setting '{key}' found in settings.txt. Ignoring.")
             if os.path.isfile(
                 os.path.join(r"assets/fonts/fonts", self.settings["Font"])
             ):
@@ -121,9 +93,9 @@ class Settings:
             else:
                 self.settings["Font Type"] = "System"
         except FileNotFoundError:
-            print("Error: settings.txt not found. Using default values.")
+            logging.error("Error: settings.txt not found. Using default values.")
         except ValueError as e:
-            print(
+            logging.warning(
                 f"Error: Incorrect format in settings.txt ({e}). Using default values."
             )
             logging.critical(
@@ -137,8 +109,7 @@ class Settings:
         return self.settings
 
     def applySettings(self):
-        global screen
-        global font, title_font, small_font, bold_font, small_title_font
+        global font, title_font, small_font, bold_font, small_title_font, screen
         window_flags = {
             "Fullscreen": pygame.FULLSCREEN,
             "Borderless": pygame.NOFRAME,
@@ -209,7 +180,6 @@ class Settings:
 
 
 def loadUp():
-    global pygame
     pygame.init()
     info = pygame.display.Info()
     pygame.display.set_caption("Sharp Minds")
@@ -231,8 +201,6 @@ def loadUp():
     )
     pygame.display.flip()
     global settingsClass, default_settings
-    # print(info.current_w, info.current_h)
-    # print(info)
     default_settings = {
         "Width": info.current_w,
         "Height": info.current_h,
@@ -281,7 +249,7 @@ def loadUp():
 
 
 def loadUpValues():
-    global meta, choice, settings, text_surface, i, frame
+    global settings, text_surface, i, frame
     settings = settingsClass.getSettings()
     settingsClass.applySettings()
     os.environ["SDL_VIDEO_CENTERED"] = "1"
@@ -293,6 +261,7 @@ def loadUpValues():
     gameMenuInit(settings, small_font, font, title_font)
     game1Init(settings, font)
     game2Init(settings, font, title_font)
+    game3Init(settings, font)
     gameOverInit(settings, font)
     leaderboardInit(settings, small_font, font, title_font)
 
@@ -303,17 +272,17 @@ def getID():
         try:
             return user_id, username
         except NameError:
-            print("ID and username not loaded, loading ID and username.")
+            logging.info("ID and username not loaded, loading ID and username.")
             with open("id.txt", "r") as file:
                 for line in file:
                     user_id, _, username = line.split(", ")
                     del _
                     return user_id, username
-        print("id.txt found but empty, creating new ID and username.")
+        logging.warning("id.txt found but empty, creating new ID and username.")
         user_id, username = generateUsername(settings, font, getFps, exit)
         return user_id, username
     except FileNotFoundError:
-        print("id.txt not found, creating new ID and username.")
+        logging.warning("id.txt not found, creating new ID and username.")
         user_id, username = generateUsername(settings, font, getFps, exit)
         return user_id, username
     except ValueError:
@@ -346,7 +315,7 @@ def createLB(game, data, user_id):
     firestore_data = format_firestore_data(data)
     response = requests.put(game_url, json=firestore_data, headers=headers)
     if response.status_code == 200:  # Success
-        print("New entry created.")
+        logging.info("New entry created.")
     else:
         logging.critical(
             f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
@@ -363,13 +332,13 @@ def updateLB(game, data):
             firestore_data = format_firestore_data(data)
             response = requests.put(game_url, json=firestore_data, headers=headers)
             if response.status_code == 200:
-                print("Entry updated.")
+                logging.info("Entry updated.")
             else:
                 logging.critical(
                     f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
                 )
         else:
-            print("No new highscore.")
+            logging.info("No new highscore.")
     except:
         logging.warning(f"No previous score found {traceback.format_exc()}")
     return old_score
@@ -483,6 +452,7 @@ def generateUsername(settings, font, getFps, exit):
     createLB(
         3,
         {
+            "duration": 20000,
             "time": 20000,
             "pairs": 0,
             "game": 3,
@@ -497,7 +467,7 @@ def generateUsername(settings, font, getFps, exit):
 
 
 def getFps(never):
-    global frame, i, screen, text_surface, settings, font
+    global frame, i, text_surface
     if (pygame.time.get_ticks() - frame) > 100 or never:
         fps = 1 / (pygame.time.get_ticks() - frame) * i * 1000
         if settings["Show FPS"] == True:
@@ -528,14 +498,14 @@ def executeSettingsResults(val):
         choice["Adaptive Difficulty"] = settings["Adaptive Difficulty"]
         settingsClass.saveSettings()
         del choice["Adaptive Difficulty"]
-        print("Settings saved.")
+        logging.info(f"Settings saved. {datetime.now()}")
         loadUpValues()
         return "Main Menu"
     elif val == "Save":
         choice["Adaptive Difficulty"] = settings["Adaptive Difficulty"]
         settingsClass.saveSettings()
         del choice["Adaptive Difficulty"]
-        print("Settings saved.")
+        logging.info(f"Settings saved. {datetime.now()}")
         loadUpValues()
     elif val == "Default":
         difficulty = settings["Adaptive Difficulty"]
@@ -545,7 +515,7 @@ def executeSettingsResults(val):
         del choice["Font Type"]
         settingsClass.saveSettings()
         del choice["Adaptive Difficulty"]
-        print("Settings reset.")
+        logging.info(f"Settings reset. {datetime.now()}")
         loadUpValues()
     return "Settings"
 
@@ -573,7 +543,6 @@ def adjustDifficulty(adjustment):
             max(difficulty3 + adjustment, 0.2),
         )
     else:
-        print("Error: Game not found, difficulty not adjusted and sending to main menu")
         logging.critical(
             f"Error: Game not found, difficulty not adjusted and sending to main menu {traceback.format_exc()} Game: {game_name}, adjustment: {adjustment}, score: {new_score}, meta: {meta}"
         )
@@ -584,7 +553,7 @@ def adjustDifficulty(adjustment):
     del choice["Font Type"]
     settingsClass.saveSettings()
     del choice["Adaptive Difficulty"]
-    print("Adaptive Difficulty saved.")
+    logging.info(f"Adaptive Difficulty saved. {datetime.now()}")
 
 
 try:
@@ -630,16 +599,17 @@ try:
                 game = 2
                 adjustDifficulty(adjustment)
         elif meta == "Pattern Rush":
-            print(
+            logging.info(
                 f"Page '{meta}' is currently in development, sending back to main menu."
             )
-            new_score, adjustment, meta, old_score = game3(
-                settings, screen, font, getFps, exit
-            )
-            if new_score != None:
-                game_name = "Pattern Rush"
-                game = 3
-                adjustDifficulty(adjustment)
+            meta = "Main Menu"
+            # new_score, adjustment, meta, old_score = game3(
+            #     settings, screen, font, getFps, exit, getID, updateLB
+            # )
+            # if new_score != None:
+            #     game_name = "Pattern Rush"
+            #     game = 3
+            #     adjustDifficulty(adjustment)
         elif meta == "Game Over":
             meta = gameOverDisplay(
                 screen,
@@ -669,21 +639,17 @@ try:
             )
             meta = "Main Menu"
         else:
-            print(
-                f"Page '{meta}' is currently in development, sending back to main menu."
-            )
             logging.warning(
                 f"Page '{meta}' is currently in development, sending back to main menu."
             )
             meta = "Main Menu"
         # if settings["FPS Limit"] > 0:
         # limiter = (1/settings["FPS Limit"]) - (pygame.time.get_ticks() - frame) / i
-        # print(f"FPS: {fps}, Limiter: {limiter}, pygame.time.get_ticks(): {pygame.time.get_ticks()}, frame: {frame}, i: {i}")
+        # logging.debug(f"FPS: {fps}, Limiter: {limiter}, pygame.time.get_ticks(): {pygame.time.get_ticks()}, frame: {frame}, i: {i}")
         # if limiter > 0:
         # pygame.time.Clock().tick(limiter)
-        # print(pygame.time.get_ticks())
+        # logging.debug(pygame.time.get_ticks())
         pygame.display.flip()
 except:
     logging.critical(traceback.format_exc())
     exit()
-    print(traceback.format_exc())

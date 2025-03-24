@@ -9,8 +9,15 @@ from .ColourPicker import (
     getColourButtons,
 )
 
-global os, pygame, current_colour_picker, current_dropdown, options_buttons, backspace_held
-import os, pygame
+global current_colour_picker, current_dropdown, options_buttons, backspace_held
+import os, pygame, logging
+from datetime import datetime
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    filename=f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt",
+    format="%(asctime)s - %(message)s",
+)
 
 current_colour_picker = None
 current_dropdown = None
@@ -138,7 +145,7 @@ def makeOptions(settings, font):
                 else:
                     options["Font"]["Options"].append(file)
     else:
-        print(f"Directory, {dir}, does not exist")
+        logging.critical(f"Directory, {dir}, does not exist")
 
     for index, choice in enumerate(options["Font Size"]["Options"]):
         options["Font Size"]["Options"][index] = settings["Width"] // choice
@@ -305,7 +312,7 @@ def checkCollide(loc):
                     input_selected = True
                     return
                 else:
-                    print("Unknown colour picker button.")
+                    logging.error("Unknown colour picker button.")
         current_colour_picker = None
         input_text = ""
         input_selected = False
@@ -320,7 +327,6 @@ def updateButton(new_button):
 
 
 def pasteButton(button, settings, screen):
-    global small_font
     pygame.draw.rect(
         screen,
         button["Colour"],
@@ -338,10 +344,9 @@ def pasteButton(button, settings, screen):
     )
 
 
-def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps, exit):
-    global current_dropdown, current_colour_picker, input_selected, choice, input_text, small_font, backspace_held
+def displayPage(settings, screen, font, title_font, small_font, choices, getFps, exit):
+    global current_dropdown, current_colour_picker, input_selected, choice, input_text, backspace_held
     never = True
-    small_font = small_fonts
     font_height = font.size("Save and Leave")[1]
     content_height = (
         len(settings)
@@ -588,18 +593,18 @@ def displayPage(settings, screen, font, title_font, small_fonts, choices, getFps
                                     choice = settings.copy()
                                     del choice["Font Type"]
                                     del choice["Adaptive Difficulty"]
-                                    print("Settings discarded.")
+                                    logging.info(f"Settings discarded. {datetime.now()}")
                                 elif confirmation == "Main Menu":
                                     return None, "Main Menu"
                                 else:
-                                    print(
+                                    logging.error(
                                         f"Error: Unknown request. {confirmation}, {button["Meta"]}"
                                     )
                                 confirmation = None
                             elif button["Meta"] == "Decline":
                                 confirmation = None
                             else:
-                                print(f"Error: Unknown confirmation button. {button}")
+                                logging.error(f"Error: Unknown confirmation button. {button}")
                 for button in buttons + last:  # Check for each button
                     if button["Pygame Button"].collidepoint(event.pos):
                         if any(

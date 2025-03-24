@@ -1,4 +1,4 @@
-global pygame, rating
+global rating
 import pygame
 
 rating = ["poorly...", "mediocre.", "good.", "great!", "excellent!!!"]

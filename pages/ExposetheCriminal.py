@@ -1,4 +1,4 @@
-global pygame, math, random, logging, threading, first_attempt, sounds
+global first_attempt, sounds
 from datetime import datetime
 import pygame, math, random, logging, threading
 
@@ -6,7 +6,7 @@ sounds = False
 first_attempt = True
 
 logging.basicConfig(
-    level=logging.WARNING,
+    level=logging.DEBUG,
     filename=f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt",
     format="%(asctime)s - %(message)s",
 )
@@ -107,7 +107,7 @@ def overlap(new_x, new_y):
 
 
 def removeCircle(pos, current):
-    global circles, max_score, red_score, loss
+    global circles, red_score, loss
     for i, (x, y, colour, tick) in enumerate(circles):
         if math.dist(pos, (x, y)) < radius:
             circles.pop(i)
@@ -267,7 +267,7 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
     visual_text = []
     red_score = 0
     loss = 0
-    val = getID()
+    user_id, username = getID()
     never = True
     difficulty = settings["Adaptive Difficulty"][0]
     return_text = splitText(font, settings["Width"] // 4)
@@ -276,7 +276,7 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
         "Red": settings["Game Secondary Colour"],
     }
     radius = int(settings["Width"] // (40 * difficulty**0.15))
-    max_score = 30 / difficulty**0.65 * ((difficulty - 1) / 10 + 1)
+    max_score = 30 / difficulty**0.65 * (difficulty * .1 + .9)
     height = max(font.size(str(char))[1] for char in "0123456789")
     score = 0
     red_count = 0
@@ -447,8 +447,8 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
         "green": int(green_count),
         "red": float(red_score),
         "game": int(1),
-        "id": str(val[0]),
-        "username": str(val[1]),
+        "id": str(user_id),
+        "username": str(username),
         "score": float(score),
         "max": float(max_score),
     }

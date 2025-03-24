@@ -1,4 +1,4 @@
-global options_buttons, os, pygame
+global options_buttons
 import os, pygame
 
 options_buttons = {}

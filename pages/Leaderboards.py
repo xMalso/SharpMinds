@@ -1,9 +1,9 @@
-global pygame, logging, datetime
+global pygame, logging
 import pygame, logging
 from datetime import datetime
 
 logging.basicConfig(
-    level=logging.WARNING,
+    level=logging.DEBUG,
     filename=f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt",
     format="%(asctime)s - %(message)s",
 )
