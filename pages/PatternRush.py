@@ -79,7 +79,7 @@ def drawRect(screen, rotation, colour, big):
 
 
 def generateObjects(settings, difficulty):
-    global objects, shape_size, buffer, square_size # buffer for moving the shapes too
+    global objects, shape_size, buffer, square_size  # buffer for moving the shapes too
     sqrt2 = math.sqrt(2)
     size = int((difficulty / 2) ** 2) + 1
     loc = [(x, y) for x in range(size) for y in range(size)]
@@ -98,8 +98,8 @@ def generateObjects(settings, difficulty):
         + (square_size / sqrt2),
     )
     spawn = []
-    for x in range(buffer[0], buffer[0] + screen_size[0], 120):
-        for y in range(buffer[1], buffer[1] + screen_size[1], 120):
+    for x in range(int(buffer[0]), int(buffer[0] + screen_size[0]), 120):
+        for y in range(int(buffer[1]), int(buffer[1] + screen_size[1]), 120):
             spawn.append((x, y))
     random.shuffle(spawn)
     spawn = spawn[:7]
@@ -107,13 +107,13 @@ def generateObjects(settings, difficulty):
     trim = (size**2) // 2.4
     for i in range(7):
         shuffloc = generateInnerObjects(loc, trim)
-        duplicate = i % 2 == 1
+        duplicate = pair = i % 2 == 0
         while duplicate:
-            for obj in objects:
+            for obj in objects[::2]:
                 while obj["Inner Shapes"] == shuffloc:
                     shuffloc = generateInnerObjects(loc, trim)
             duplicate = False
-            for obj in objects:
+            for obj in objects[::2]:
                 if obj["Inner Shapes"] == shuffloc:
                     duplicate = True
                     break
@@ -128,16 +128,18 @@ def generateObjects(settings, difficulty):
                 "Inner Shapes": [],
             }
         )
-        if duplicate:
+        if pair:
             for location in shuffloc:
                 x, y = location[0]
                 objects[-1]["Inner Shapes"].append(
-                    [
-                        (x + 0.5) * (shape_size + 1) + 1 + spawn[i][0],
-                        (y + 0.5) * (shape_size + 1) + 1 + spawn[i][1],
-                    ],
-                    location[1],
-                    colours[location[2]],
+                    (
+                        [
+                            (x + 0.5) * (shape_size + 1) + 1 + spawn[i][0],
+                            (y + 0.5) * (shape_size + 1) + 1 + spawn[i][1],
+                        ],
+                        location[1],
+                        colours[location[2]],
+                    )
                 )
         else:
             objects[-1]["Inner Shapes"] = objects[-2]["Inner Shapes"]
@@ -145,11 +147,12 @@ def generateObjects(settings, difficulty):
 
 def game3(settings, screen, font, getFps, exit, getID, updateLB):
     user_id, username = getID()
-    score_text = (
-        font.render(
-            "Score: 0", settings["Antialiasing Text"], settings["Background Font Colour"]
-        ),
-        ((settings["Width"] - score_text.get_width()) // 2, settings["Height"] * 0.01),
+    score_text = font.render(
+        "Score: 0", settings["Antialiasing Text"], settings["Background Font Colour"]
+    )
+    score_text_coords = (
+        (settings["Width"] - score_text.get_width()) // 2,
+        settings["Height"] * 0.01,
     )
     score = 0
     never = True
@@ -184,8 +187,8 @@ def game3(settings, screen, font, getFps, exit, getID, updateLB):
                 [
                     drawRect(
                         screen,
-                        settings["Grid Background Colour"],
                         rotation,
+                        settings["Grid Background Colour"],
                         centre,
                     ),
                     (obj["Number"], obj["Pair"]),
@@ -250,7 +253,7 @@ def game3(settings, screen, font, getFps, exit, getID, updateLB):
         )
         time_text_coords = (
             (settings["Width"] - time_text.get_width()) // 2,
-            settings["Height"] * 0.01 + score_text[0].get_height(),
+            settings["Height"] * 0.01 + score_text.get_height(),
         )
         screen.blit(score_text, score_text_coords)
         screen.blit(time_text, time_text_coords)
@@ -303,10 +306,11 @@ def drawSmallRect(screen, centre, rotation, coords, shape, colour):
         ]
     else:
         logging.error(f"Invalid shape: {shape}")
-
+    rotated_corners = []
     for cornerx, cornery in corners:
-        rotated_corners = [rotate_point(centre_x, centre_y, cornerx, cornery, rotation)]
-
+        rotated_corners.append(
+            rotate_point(centre_x, centre_y, cornerx, cornery, rotation)
+        )
     pygame.draw.polygon(screen, colour, rotated_corners)
 
     return
