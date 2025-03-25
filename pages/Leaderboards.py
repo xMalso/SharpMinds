@@ -148,7 +148,7 @@ def loadLB(game, user_id, getLB, bold_font, settings):
     global lb, player_score, x, game_text
     lb = list(getLB(game).values())
     player_score = bold_font.render(
-        f"Your PB: {getLB(game, user_id)["fields"]["score"]["doubleValue"]:.2f}",
+        f"Your PB: {getLB(game, user_id)["fields"]["score"]["doubleValue"]:,.2f}",
         settings["Antialiasing Text"],
         settings["Bold Contrasting Font Colour"],
     )
@@ -161,9 +161,10 @@ def displayPage(
     settings, screen, font, bold_font, small_font, game, user_id, getFps, exit, getLB
 ):
     loadLB(game, user_id, getLB, bold_font, settings)
+    logging.error(lb)
     never = True
     friends = False
-    right_panel = pygame.Surface(
+    left_panel = pygame.Surface(
         (width, settings["Height"]),
     )
     y_for = settings["Height"] * 0.02 + lb_text.get_height()
@@ -183,15 +184,15 @@ def displayPage(
                     button["Pygame Button"].centery - button["Text"].get_height() // 2,
                 ),
             )
-        right_panel.fill(settings["Background Colour"])
-        right_panel.blit(
+        left_panel.fill(settings["Background Colour"])
+        left_panel.blit(
             lb_text,
             (
                 (width - lb_text.get_width()) // 2,
                 settings["Height"] * 0.02,
             ),
         )
-        right_panel.blit(
+        left_panel.blit(
             game_text,
             (
                 x,
@@ -201,7 +202,7 @@ def displayPage(
 
         y = settings["Height"] * 0.07 + lb_text.get_height() + settings["Height"] // 90
         height = font.size("A")[1]
-        right_panel.blit(
+        left_panel.blit(
             player_score,
             ((width - player_score.get_width()) // 2, y),
         )
@@ -211,19 +212,19 @@ def displayPage(
                 break
             if entry["fields"]["id"]["stringValue"] == user_id:
                 text = bold_font.render(
-                    f"{entry['fields']['username']['stringValue']}: {entry['fields']['score']['doubleValue']:.2f}",
+                    f"{entry['fields']['username']['stringValue']}: {entry['fields']['score']['doubleValue']:,.2f}",
                     settings["Antialiasing Text"],
                     settings["Bold Contrasting Font Colour"],
                 )
             else:
                 text = font.render(
-                    f"{entry['fields']['username']['stringValue']}: {entry['fields']['score']['doubleValue']:.2f}",
+                    f"{entry['fields']['username']['stringValue']}: {entry['fields']['score']['doubleValue']:,.2f}",
                     settings["Antialiasing Text"],
                     settings["Font Primary Colour"],
                 )
-            right_panel.blit(text, ((width - text.get_width()) // 2, y))
+            left_panel.blit(text, ((width - text.get_width()) // 2, y))
             y += height
-        screen.blit(right_panel, (0, 0))
+        screen.blit(left_panel, (0, 0))
         # screen.blit(game_over_text, game_over_text_rect)
         # screen.blit(score_text, score_text_rect)
         # for button in buttons:
@@ -269,10 +270,10 @@ def displayPage(
                                     settings["Font Primary Colour"],
                                 )
                         else:
-                                if meta == "1" or meta == "2":
+                                if meta in ["1", "2", "3"]:
                                     game = int(meta)
                                     loadLB(game, user_id, getLB, bold_font, settings)
-                                elif meta != "3":
+                                else:
                                     logging.error(f"Invalid game/meta: {meta}")
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:

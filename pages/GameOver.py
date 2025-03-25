@@ -66,18 +66,18 @@ def displayPage(
     never = True
     if new_score > old_score:
         score_text = bold_font.render(
-            f"Score: {int(new_score):.2f} New Best!",
+            f"Score: {int(new_score):,.2f} New Best!",
             settings["Antialiasing Text"],
             settings["Bold Contrasting Font Colour"],
         )
     else:
         score_text = font.render(
-            f"Score: {int(new_score):.2f}",
+            f"Score: {int(new_score):,.2f}",
             settings["Antialiasing Text"],
             settings["Background Font Colour"],
         )
     old_score_text = font.render(
-        f"Previous best: {int(old_score):.2f}",
+        f"Previous best: {int(old_score):,.2f}",
         settings["Antialiasing Text"],
         settings["Background Font Colour"],
     )

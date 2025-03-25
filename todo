@@ -1,8 +1,9 @@
 restart game required to fix audio (reenable audio)
-game 3 - timer and then 3 pairs to connect + 0.01 score per ms
 
-game 1 - recreate score text on clicks instead of per frame
-game1tut does not need to be exported
+test game 3
+game 3 tut
+
+
 
 game over screen
 

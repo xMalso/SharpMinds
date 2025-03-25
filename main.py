@@ -266,31 +266,6 @@ def loadUpValues():
     leaderboardInit(settings, small_font, font, title_font)
 
 
-def getID():
-    global user_id, username
-    try:
-        try:
-            return user_id, username
-        except NameError:
-            logging.info("ID and username not loaded, loading ID and username.")
-            with open("id.txt", "r") as file:
-                for line in file:
-                    user_id, _, username = line.split(", ")
-                    del _
-                    return user_id, username
-        logging.warning("id.txt found but empty, creating new ID and username.")
-        user_id, username = generateUsername(settings, font, getFps, exit)
-        return user_id, username
-    except FileNotFoundError:
-        logging.warning("id.txt not found, creating new ID and username.")
-        user_id, username = generateUsername(settings, font, getFps, exit)
-        return user_id, username
-    except ValueError:
-        with open("id.txt", "r") as file:
-            for line in file:
-                user_id, username = line.split(", ")
-                return user_id, username
-
 
 def format_firestore_data(data):
     return {
@@ -307,19 +282,6 @@ def format_firestore_data(data):
             for k, v in data.items()
         }
     }
-
-
-def createLB(game, data, user_id):
-    headers = {"Content-Type": "application/json", "Accept": "application/json"}
-    game_url = f"{lb}/game{game}/{user_id}.json"
-    firestore_data = format_firestore_data(data)
-    response = requests.put(game_url, json=firestore_data, headers=headers)
-    if response.status_code == 200:  # Success
-        logging.info("New entry created.")
-    else:
-        logging.critical(
-            f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
-        )
 
 
 def updateLB(game, data):
@@ -341,6 +303,15 @@ def updateLB(game, data):
             logging.info("No new highscore.")
     except:
         logging.warning(f"No previous score found {traceback.format_exc()}")
+        firestore_data = format_firestore_data(data)
+        response = requests.put(game_url, json=firestore_data, headers=headers)
+        if response.status_code == 200:  # Success
+            logging.info("New entry created.")
+        else:
+            logging.critical(
+                f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}\n\n\n data: {data}"
+            )
+        old_score = 0
     return old_score
 
 
@@ -360,7 +331,34 @@ def getLB(game, user_id=None):
         return None
 
 
+def getID():
+    global user_id, username
+    try:
+        try:
+            return user_id, username
+        except NameError:
+            logging.info("ID and username not loaded, loading ID and username.")
+            with open("id.txt", "r") as file:
+                for line in file:
+                    user_id, _, username = line.split(", ")
+                    del _
+                    return user_id, username
+        logging.warning("id.txt found but empty, creating new ID and username.")
+        generateUsername(settings, font, getFps, exit)
+        return user_id, username
+    except FileNotFoundError:
+        logging.warning("id.txt not found, creating new ID and username.")
+        generateUsername(settings, font, getFps, exit)
+        return user_id, username
+    except ValueError:
+        with open("id.txt", "r") as file:
+            for line in file:
+                user_id, username = line.split(", ")
+                return user_id, username
+
+
 def generateUsername(settings, font, getFps, exit):
+    global user_id, username
     username = ""
     never = True
     loop = True
@@ -421,7 +419,7 @@ def generateUsername(settings, font, getFps, exit):
     with open("id.txt", "w") as file:
         file.write(f"{user_id}, {key}, {username}")
     del key
-    createLB(
+    updateLB(
         1,
         {
             "loss": float(0),
@@ -433,9 +431,8 @@ def generateUsername(settings, font, getFps, exit):
             "score": float(0),
             "max": float(1),
         },
-        user_id,
     )
-    createLB(
+    updateLB(
         2,
         {
             "empty": 0,
@@ -447,9 +444,8 @@ def generateUsername(settings, font, getFps, exit):
             "score": float(0),
             "max": float(0),
         },
-        user_id,
     )
-    createLB(
+    updateLB(
         3,
         {
             "duration": 20000,
@@ -461,9 +457,8 @@ def generateUsername(settings, font, getFps, exit):
             "score": float(0),
             "max": float(300),
         },
-        user_id,
     )
-    return user_id, username
+    return
 
 
 def getFps(never):
@@ -581,15 +576,13 @@ try:
             pygame.quit()
             sys.exit()
         elif meta == "Expose the Criminal":
-            meta = game1Tutorial(screen, settings, font, getFps, exit)
-            if meta == "Ready":
-                new_score, adjustment, meta, old_score = game1(
-                    settings, screen, font, getFps, exit, getID, updateLB
-                )
-                if new_score != None:
-                    game_name = "Expose the Criminal"
-                    game = 1
-                    adjustDifficulty(adjustment)
+            new_score, adjustment, meta, old_score = game1(
+                settings, screen, font, getFps, exit, getID, updateLB
+            )
+            if new_score != None:
+                game_name = "Expose the Criminal"
+                game = 1
+                adjustDifficulty(adjustment)
         elif meta == "Memory Experiment":
             new_score, adjustment, meta, old_score = game2(
                 settings, screen, font, getFps, exit, getID, updateLB
@@ -602,7 +595,7 @@ try:
             logging.info(
                 f"Page '{meta}' is currently in development, sending back to main menu."
             )
-            meta = "Main Menu"
+            meta = "Game Menu"
             # new_score, adjustment, meta, old_score = game3(
             #     settings, screen, font, getFps, exit, getID, updateLB
             # )

@@ -156,6 +156,7 @@ def game3(settings, screen, font, getFps, exit, getID, updateLB):
     playing = True
     current = start = pygame.time.get_ticks()
     left = 3
+    pairs = 0
     selected = []
     difficulty = settings["Adaptive Difficulty"][2]
     rotation_multiplier = 0.1 * difficulty**1.7
@@ -206,7 +207,7 @@ def game3(settings, screen, font, getFps, exit, getID, updateLB):
                                 if selected[0][1] == selected[1][1]:
                                     score += left * max
                                     score_text = font.render(
-                                        f"Score: {score}",
+                                        f"Score: {score:,}",
                                         settings["Antialiasing Text"],
                                         settings["Background Font Colour"],
                                     )
@@ -216,6 +217,7 @@ def game3(settings, screen, font, getFps, exit, getID, updateLB):
                                         settings["Height"] * 0.01,
                                     )
                                     selected = []
+                                    pairs += left
                                     left -= 1
                                     if left == 0:
                                         playing = False
@@ -225,7 +227,7 @@ def game3(settings, screen, font, getFps, exit, getID, updateLB):
                                     score -= result
                                     loss += result
                                     score_text = font.render(
-                                        f"Score: {score}",
+                                        f"Score: {score:,}",
                                         settings["Antialiasing Text"],
                                         settings["Background Font Colour"],
                                     )
@@ -255,8 +257,8 @@ def game3(settings, screen, font, getFps, exit, getID, updateLB):
         getFps(never)
         never = False
         pygame.display.flip()
-    lb["time"] = max(time_left, 0)
-    lb["pairs"] = 3 - left
+    lb["time"] = duration - max(time_left, 0)
+    lb["pairs"] = pairs
     lb["score"] = score
     adjustment = (score - max * 6 + duration / 400) / 200
     old_score = updateLB(3, lb)

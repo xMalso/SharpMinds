@@ -493,13 +493,13 @@ def displayPage(settings, screen, font, title_font, small_font, choices, getFps,
         for button in last:
             pasteButton(button, settings, screen)
         if confirmation != None:
-            printed_text = splitText(
+            outputed_text = splitText(
                 font,
                 settings["Width"] // 3.1,
                 f"Are you sure you want to {confirmation_text[confirmation]}?",
             )
-            small_text = small_font.size(printed_text[0])[1]
-            buffer_height = small_text * (len(printed_text) - 1)
+            small_text = small_font.size(outputed_text[0])[1]
+            buffer_height = small_text * (len(outputed_text) - 1)
             confirmation_surface = pygame.Surface(
                 (
                     settings["Width"] // 3,
@@ -513,8 +513,8 @@ def displayPage(settings, screen, font, title_font, small_font, choices, getFps,
                 confirmation_surface.get_rect(),
                 border_radius=settings["Width"] // 40,
             )
-            height = small_text * (len(printed_text)) + settings["Height"] // 100
-            for line in printed_text[::-1]:
+            height = small_text * (len(outputed_text)) + settings["Height"] // 100
+            for line in outputed_text[::-1]:
                 text_surface = small_font.render(
                     line,
                     settings["Antialiasing Text"],

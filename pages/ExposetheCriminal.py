@@ -243,8 +243,10 @@ def tutorial(screen, settings, font, getFps, exit):
         screen.blit(
             tutorial_button["Text"],
             (
-                tutorial_button["Pygame Button"].centerx - tutorial_button["Text"].get_width() // 2,
-                tutorial_button["Pygame Button"].centery - tutorial_button["Text"].get_height() // 2,
+                tutorial_button["Pygame Button"].centerx
+                - tutorial_button["Text"].get_width() // 2,
+                tutorial_button["Pygame Button"].centery
+                - tutorial_button["Text"].get_height() // 2,
             ),
         )
         for event in pygame.event.get():
@@ -264,6 +266,10 @@ def tutorial(screen, settings, font, getFps, exit):
 
 def game1(settings, screen, font, getFps, exit, getID, updateLB):
     global radius, circles, despawn_time, max_score, loss, red_score
+    m = tutorial(screen, settings, font, getFps, exit)
+    if m == "Quit" or m == "Game Menu":
+        return None, None, m, None
+    del m
     visual_text = []
     red_score = 0
     loss = 0
@@ -276,7 +282,7 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
         "Red": settings["Game Secondary Colour"],
     }
     radius = int(settings["Width"] // (40 * difficulty**0.15))
-    max_score = 30 / difficulty**0.65 * (difficulty * .1 + .9)
+    max_score = 30 / difficulty**0.65 * (difficulty * 0.1 + 0.9)
     height = max(font.size(str(char))[1] for char in "0123456789")
     score = 0
     red_count = 0
@@ -303,6 +309,15 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
         circles.append(coords + (colour, current_frame))
         last_tick = current_frame
     duration = 30000
+    score_text = font.render(
+        "Score: 0",
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+    )
+    score_text_coords = (
+        (settings["Width"] - score_text.get_width()) // 2,
+        settings["Height"] // 200,
+    )
     while start + duration > current_frame:
         # if not sounds and not attempting:
         # thread = threading.Thread(target=loadSounds, daemon=True)
@@ -312,13 +327,10 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
                 result, edge = removeCircle(event.pos, current_frame)
                 if result != 0:
                     score += result
-                    result = int(result)
-                    if result > 0:
-                        result = f"+{result}"
                     visual_text.append(
                         (
                             font.render(
-                                str(result),
+                                f"{result:+,.1f}",
                                 settings["Antialiasing Text"],
                                 settings["Background Font Colour"],
                             ),
@@ -329,6 +341,15 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
                 if score < 0:
                     loss += score
                     score = 0
+                score_text = font.render(
+                    f"Score: {int(score):,}",
+                    settings["Antialiasing Text"],
+                    settings["Background Font Colour"],
+                )
+                score_text_coords = (
+                    (settings["Width"] - score_text.get_width()) // 2,
+                    settings["Height"] // 200,
+                )
             elif event.type == pygame.QUIT:
                 exit()
                 return None, None, "Quit", None
@@ -353,11 +374,7 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
                 ),
             )
             height += text.get_height()
-        score_text = font.render(
-            f"Score: {int(score)}",
-            settings["Antialiasing Text"],
-            settings["Background Font Colour"],
-        )
+
         remaining_time = (duration - (current_frame - start)) / 1000
         if remaining_time >= 10:
             remaining_time = int(remaining_time)
@@ -370,10 +387,7 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
         )
         screen.blit(
             score_text,
-            (
-                (settings["Width"] - score_text.get_width()) // 2,
-                settings["Height"] // 200,
-            ),
+            score_text_coords,
         )
         screen.blit(
             time_text,
@@ -418,7 +432,15 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
                             score = 0
                         if sounds:
                             wrong_sound.play()
-                    continue
+                    score_text = font.render(
+                        f"Score: {int(score):,}",
+                        settings["Antialiasing Text"],
+                        settings["Background Font Colour"],
+                    )
+                    score_text_coords = (
+                        (settings["Width"] - score_text.get_width()) // 2,
+                        settings["Height"] // 200,
+                    )
                 else:
                     expired = False
             else:

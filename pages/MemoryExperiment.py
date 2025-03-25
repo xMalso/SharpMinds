@@ -602,7 +602,7 @@ def cycle(round_number, settings, getFps, screen, score, font, exit):
         }
     meta = None
     score_text = font.render(
-        f"Score: {int(score)}",
+        f"Score: {int(score):,}",
         settings["Antialiasing Text"],
         settings["Background Font Colour"],
     )
@@ -679,7 +679,7 @@ def cycle(round_number, settings, getFps, screen, score, font, exit):
                 )
                 height -= line.get_height()
         # score_text = font.render(
-        #     f"Score: {int(score)}",
+        #     f"Score: {int(score):,}",
         #     settings["Antialiasing Text"],
         #     settings["Background Font Colour"],
         # )
@@ -810,7 +810,7 @@ def cycle(round_number, settings, getFps, screen, score, font, exit):
             )
             height += line.get_height()
         # score_text = font.render(
-        #     f"Score: {int(score)}",
+        #     f"Score: {int(score):,}",
         #     settings["Antialiasing Text"],
         #     settings["Background Font Colour"],
         # )
@@ -835,7 +835,7 @@ def cycle(round_number, settings, getFps, screen, score, font, exit):
     next = False
     score = min(score + 0.000001, 600 * multiplier)
     round_text = font.render(
-        f"Round {round_number + 1}, Score: {int(score)}/{int(600*multiplier)}",
+        f"Round {round_number + 1}, Score: {int(score):,}/{int(600*multiplier):,}",
         settings["Antialiasing Text"],
         settings["Background Font Colour"],
     )
@@ -877,7 +877,7 @@ def cycle(round_number, settings, getFps, screen, score, font, exit):
             ),
         )
         # score_text = font.render(
-        #     f"Score: {int(score)}",
+        #     f"Score: {int(score):,}",
         #     settings["Antialiasing Text"],
         #     settings["Background Font Colour"],
         # )
