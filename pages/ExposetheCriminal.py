@@ -8,8 +8,10 @@ first_attempt = True
 logging.basicConfig(
     level=logging.DEBUG,
     filename=f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt",
-    format="%(asctime)s - %(message)s",
+    format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
+# logging.getLogger("urllib3").setLevel(logging.DEBUG)
+# logging.getLogger("requests").setLevel(logging.DEBUG)
 
 
 def loadSounds():

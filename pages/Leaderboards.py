@@ -5,8 +5,10 @@ from datetime import datetime
 logging.basicConfig(
     level=logging.DEBUG,
     filename=f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt",
-    format="%(asctime)s - %(message)s",
+    format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
+# logging.getLogger("urllib3").setLevel(logging.DEBUG)
+# logging.getLogger("requests").setLevel(logging.DEBUG)
 
 
 def init(settings, small_font, font, title_font):
@@ -161,7 +163,6 @@ def displayPage(
     settings, screen, font, bold_font, small_font, game, user_id, getFps, exit, getLB
 ):
     loadLB(game, user_id, getLB, bold_font, settings)
-    logging.error(lb)
     never = True
     friends = False
     left_panel = pygame.Surface(

@@ -3,3 +3,6 @@ settings.txt
 id.txt
 /logs/
 id copy.txt
+pages/PatternRush.py
+pages/__pycache__/
+__pycache__/

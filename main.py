@@ -7,9 +7,10 @@ lb = r"https://sharpminds-37b05-default-rtdb.europe-west1.firebasedatabase.app"
 logging.basicConfig(
     level=logging.DEBUG,
     filename=f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt",
-    format="%(asctime)s - %(message)s",
+    format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
-
+logging.getLogger("urllib3").setLevel(logging.DEBUG)
+logging.getLogger("requests").setLevel(logging.DEBUG)
 
 
 # import steam
@@ -332,33 +333,27 @@ def getLB(game, user_id=None):
 
 
 def getID():
-    global user_id, username
+    global user_id, key, username
     try:
         try:
-            return user_id, username
+            return user_id, key, username
         except NameError:
             logging.info("ID and username not loaded, loading ID and username.")
             with open("id.txt", "r") as file:
                 for line in file:
-                    user_id, _, username = line.split(", ")
-                    del _
-                    return user_id, username
+                    user_id, key, username = line.split(", ")
+                    return user_id, key, username
         logging.warning("id.txt found but empty, creating new ID and username.")
         generateUsername(settings, font, getFps, exit)
-        return user_id, username
+        return user_id, key, username
     except FileNotFoundError:
         logging.warning("id.txt not found, creating new ID and username.")
         generateUsername(settings, font, getFps, exit)
-        return user_id, username
-    except ValueError:
-        with open("id.txt", "r") as file:
-            for line in file:
-                user_id, username = line.split(", ")
-                return user_id, username
+        return user_id, key, username
 
 
 def generateUsername(settings, font, getFps, exit):
-    global user_id, username
+    global user_id, key, username
     username = ""
     never = True
     loop = True
@@ -406,7 +401,7 @@ def generateUsername(settings, font, getFps, exit):
                     username = username[:-1]
                 elif event.key == pygame.K_RETURN:
                     if username == "":
-                        username = f"Player-{hashlib.sha256(str(random.randint(0, 2 ** 32)).encode()).hexdigest()[:20]}"
+                        username = f"Player-{hashlib.sha256(str(random.randint(0, 2 ** 32)).encode()).hexdigest()[:32]}"
                     loop = False
                 else:
                     username += event.unicode
@@ -592,17 +587,13 @@ try:
                 game = 2
                 adjustDifficulty(adjustment)
         elif meta == "Pattern Rush":
-            logging.info(
-                f"Page '{meta}' is currently in development, sending back to main menu."
+            new_score, adjustment, meta, old_score = game3(
+                settings, screen, font, getFps, exit, getID, updateLB
             )
-            meta = "Game Menu"
-            # new_score, adjustment, meta, old_score = game3(
-            #     settings, screen, font, getFps, exit, getID, updateLB
-            # )
-            # if new_score != None:
-            #     game_name = "Pattern Rush"
-            #     game = 3
-            #     adjustDifficulty(adjustment)
+            if new_score != None:
+                game_name = "Pattern Rush"
+                game = 3
+                adjustDifficulty(adjustment)
         elif meta == "Game Over":
             meta = gameOverDisplay(
                 screen,
