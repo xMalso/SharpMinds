@@ -2,7 +2,5 @@ settings.txt
 .env
 id.txt
 /logs/
-id copy.txt
-pages/PatternRush.py
-pages/__pycache__/
-__pycache__/
+/pages/__pycache__/
+/__pycache__/

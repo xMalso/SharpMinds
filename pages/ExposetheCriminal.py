@@ -1,13 +1,16 @@
 global first_attempt, sounds
 from datetime import datetime
+from logging.handlers import RotatingFileHandler
 import pygame, math, random, logging, threading
 
 sounds = False
 first_attempt = True
 
+log_filename = f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt"
+handler = RotatingFileHandler(log_filename, maxBytes=5*1024**2, backupCount=10)
 logging.basicConfig(
     level=logging.DEBUG,
-    filename=f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt",
+    handlers = [handler],
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
 # logging.getLogger("urllib3").setLevel(logging.DEBUG)

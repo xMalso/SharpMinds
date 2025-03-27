@@ -1,9 +1,12 @@
 import math, pygame, random, logging
 from datetime import datetime
+from logging.handlers import RotatingFileHandler
 
+log_filename = f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt"
+handler = RotatingFileHandler(log_filename, maxBytes=5*1024**2, backupCount=10)
 logging.basicConfig(
     level=logging.DEBUG,
-    filename=f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt",
+    handlers = [handler],
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
 # logging.getLogger("urllib3").setLevel(logging.DEBUG)
@@ -148,10 +151,10 @@ def generateObjects(settings, difficulty):
 
 
 def game3(settings, screen, font, getFps, exit, getID, updateLB):
-    logging.info(
-                "Page 'Pattern Rush' is currently in development, sending back to main menu."
-            )
-    return None, None, "Game Menu", None
+    # logging.info(
+    #             "Page 'Pattern Rush' is currently in development, sending back to main menu."
+    #         )
+    # return None, None, "Game Menu", None
 
     user_id, username = getID()
     score_text = font.render(
