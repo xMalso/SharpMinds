@@ -5,12 +5,12 @@ from logging.handlers import RotatingFileHandler
 log_filename = f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt"
 handler = RotatingFileHandler(log_filename, maxBytes=5*1024**2, backupCount=10)
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.WARNING,
     handlers = [handler],
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
-# logging.getLogger("urllib3").setLevel(logging.DEBUG)
-# logging.getLogger("requests").setLevel(logging.DEBUG)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 def init(settings, font, title_font):
     global return_text, pause_duration, answer_text, guess_text, help_lines, curr_text
@@ -493,7 +493,7 @@ def calculateScore(score):
 
 def game2(settings, screen, font, getFps, exit, getID, updateLB):
     global buttons, rows, cols, button_side, radius, margin_width, margin_height, multiplier, pause_duration, avg, lb, remove_text
-    user_id, username = getID()
+    user_id, user_key, username = getID()
     lb = {
         "empty": 0,
         "right": 0,

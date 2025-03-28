@@ -4,3 +4,6 @@ id.txt
 /logs/
 /pages/__pycache__/
 /__pycache__/
+/dist/
+/build/
+main.spec

@@ -4,14 +4,14 @@ from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
 log_filename = f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt"
-handler = RotatingFileHandler(log_filename, maxBytes=5*1024**2, backupCount=10)
+handler = RotatingFileHandler(log_filename, maxBytes=5 * 1024**2, backupCount=10)
 logging.basicConfig(
-    level=logging.DEBUG,
-    handlers = [handler],
+    level=logging.WARNING,
+    handlers=[handler],
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
-# logging.getLogger("urllib3").setLevel(logging.DEBUG)
-# logging.getLogger("requests").setLevel(logging.DEBUG)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 
 def init(settings, small_font, font, title_font):
@@ -274,11 +274,11 @@ def displayPage(
                                     settings["Font Primary Colour"],
                                 )
                         else:
-                                if meta in ["1", "2", "3"]:
-                                    game = int(meta)
-                                    loadLB(game, user_id, getLB, bold_font, settings)
-                                else:
-                                    logging.error(f"Invalid game/meta: {meta}")
+                            if meta in ["1", "2", "3"]:
+                                game = int(meta)
+                                loadLB(game, user_id, getLB, bold_font, settings)
+                            else:
+                                logging.error(f"Invalid game/meta: {meta}")
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return "Main Menu"

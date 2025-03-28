@@ -15,10 +15,15 @@ def makeText(title_font, settings):
 
 def makeButtons(settings, font):
     text = font.size("Leaderboards and Personal Bests")
+    # text = font.size(max(["Games Menu", "Leaderboards", "Friends", "Settings", "Quit"], key=lambda x: font.size(x)[0]))
     global buttons
     buttons = [
         {
-            "Text": font.render("Games Menu", settings["Antialiasing Text"], settings["Font Primary Colour"]),
+            "Text": font.render(
+                "Games Menu",
+                settings["Antialiasing Text"],
+                settings["Font Primary Colour"],
+            ),
             "Pygame Button": pygame.Rect(
                 (settings["Width"] - (text[0] + settings["Width"] // 19.2)) // 2,
                 # settings["Height"] // 3,
@@ -30,7 +35,11 @@ def makeButtons(settings, font):
             "Meta": "Game Menu",
         },
         {
-            "Text": font.render("Leaderboards and Personal Bests", settings["Antialiasing Text"], settings["Font Secondary Colour"]),
+            "Text": font.render(
+                "Leaderboards",
+                settings["Antialiasing Text"],
+                settings["Font Secondary Colour"],
+            ),
             "Pygame Button": pygame.Rect(
                 (settings["Width"] - (text[0] + settings["Width"] // 19.2)) // 2,
                 # settings["Height"] // 3 + (text[1] + settings["Height"] // 18),
@@ -53,7 +62,11 @@ def makeButtons(settings, font):
         #     "Meta": "Friends",
         # },
         {
-            "Text": font.render("Settings", settings["Antialiasing Text"], settings["Font Quaternary Colour"]),
+            "Text": font.render(
+                "Settings",
+                settings["Antialiasing Text"],
+                settings["Font Quaternary Colour"],
+            ),
             "Pygame Button": pygame.Rect(
                 (settings["Width"] - (text[0] + settings["Width"] // 19.2)) // 2,
                 settings["Height"] // 3 + (text[1] + settings["Height"] // 18) * 3,
@@ -64,7 +77,9 @@ def makeButtons(settings, font):
             "Meta": "Settings",
         },
         {
-            "Text": font.render("Quit", settings["Antialiasing Text"], settings["Font Quinary Colour"]),
+            "Text": font.render(
+                "Quit", settings["Antialiasing Text"], settings["Font Quinary Colour"]
+            ),
             "Pygame Button": pygame.Rect(
                 (settings["Width"] - (text[0] + settings["Width"] // 19.2)) // 2,
                 settings["Height"] // 3 + (text[1] + settings["Height"] // 18) * 4,
@@ -100,10 +115,8 @@ def displayPage(settings, screen, font, getFps, exit):
             screen.blit(
                 button["Text"],
                 (
-                    button["Pygame Button"].centerx
-                    - button["Text"].get_width() // 2,
-                    button["Pygame Button"].centery
-                    - button["Text"].get_height() // 2,
+                    button["Pygame Button"].centerx - button["Text"].get_width() // 2,
+                    button["Pygame Button"].centery - button["Text"].get_height() // 2,
                 ),
             )
         for event in pygame.event.get():

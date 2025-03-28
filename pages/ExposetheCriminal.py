@@ -7,14 +7,14 @@ sounds = False
 first_attempt = True
 
 log_filename = f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt"
-handler = RotatingFileHandler(log_filename, maxBytes=5*1024**2, backupCount=10)
+handler = RotatingFileHandler(log_filename, maxBytes=5 * 1024**2, backupCount=10)
 logging.basicConfig(
-    level=logging.DEBUG,
-    handlers = [handler],
+    level=logging.WARNING,
+    handlers=[handler],
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
-# logging.getLogger("urllib3").setLevel(logging.DEBUG)
-# logging.getLogger("requests").setLevel(logging.DEBUG)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 
 def loadSounds():
@@ -42,7 +42,7 @@ def init(settings, font):
     tutorial_text = makeTutText(
         font,
         int(settings["Width"] * 0.85),
-        "Click the circles of this colour SECONDARY and avoid clicking circles of this colour PRIMARY, you gain more points from quicker reactions when clicking SECONDARY and you gain points when PRIMARY despawns",
+        "Click these circles SECONDARY and avoid clicking these circles PRIMARY, you gain more points when clicking these circles SECONDARY in a shorter space of time and you gain points when these circles PRIMARY despawn",
     )
     #
     #
@@ -278,7 +278,7 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
     visual_text = []
     red_score = 0
     loss = 0
-    user_id, username = getID()
+    user_id, user_key, username = getID()
     never = True
     difficulty = settings["Adaptive Difficulty"][0]
     return_text = splitText(font, settings["Width"] // 4)

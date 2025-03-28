@@ -6,14 +6,14 @@ from pages import *
 lb = r"https://sharpminds-37b05-default-rtdb.europe-west1.firebasedatabase.app"
 
 log_filename = f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt"
-handler = RotatingFileHandler(log_filename, maxBytes=5*1024**2, backupCount=10)
+handler = RotatingFileHandler(log_filename, maxBytes=5 * 1024**2, backupCount=10)
 logging.basicConfig(
-    level=logging.DEBUG,
-    handlers = [handler],
+    level=logging.WARNING,
+    handlers=[handler],
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
-logging.getLogger("urllib3").setLevel(logging.DEBUG)
-logging.getLogger("requests").setLevel(logging.DEBUG)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 
 # import steam
@@ -25,6 +25,7 @@ logging.getLogger("requests").setLevel(logging.DEBUG)
 #     logging.debug(f"User Steam ID: {steam_id}")
 # else:
 #     logging.error("Error: Steam is not running.")
+
 
 class Settings:
 
@@ -89,7 +90,9 @@ class Settings:
                         else:  # Otherwise assume to be a string
                             self.settings[key] = value.strip('"')
                     else:
-                        logging.warning(f"Warning: Unknown setting '{key}' found in settings.txt. Ignoring.")
+                        logging.warning(
+                            f"Warning: Unknown setting '{key}' found in settings.txt. Ignoring."
+                        )
             if os.path.isfile(
                 os.path.join(r"assets/fonts/fonts", self.settings["Font"])
             ):
@@ -270,7 +273,6 @@ def loadUpValues():
     leaderboardInit(settings, small_font, font, title_font)
 
 
-
 def format_firestore_data(data):
     return {
         "fields": {
@@ -336,27 +338,30 @@ def getLB(game, user_id=None):
 
 
 def getID():
-    global user_id, key, username
+    global user_id, user_key, username
     try:
         try:
-            return user_id, key, username
+            return user_id, user_key, username
         except NameError:
             logging.info("ID and username not loaded, loading ID and username.")
+            user_id = None
             with open("id.txt", "r") as file:
                 for line in file:
-                    user_id, key, username = line.split(", ")
-                    return user_id, key, username
+                    user_id, user_key, username = line.split(", ")
+                    break
+            if user_id:
+                return user_id, user_key, username
         logging.warning("id.txt found but empty, creating new ID and username.")
         generateUsername(settings, font, getFps, exit)
-        return user_id, key, username
+        return user_id, user_key, username
     except FileNotFoundError:
         logging.warning("id.txt not found, creating new ID and username.")
         generateUsername(settings, font, getFps, exit)
-        return user_id, key, username
+        return user_id, user_key, username
 
 
 def generateUsername(settings, font, getFps, exit):
-    global user_id, key, username
+    global user_id, user_key, username
     username = ""
     never = True
     loop = True
@@ -404,19 +409,19 @@ def generateUsername(settings, font, getFps, exit):
                     username = username[:-1]
                 elif event.key == pygame.K_RETURN:
                     if username == "":
-                        username = f"Player-{hashlib.sha256(str(random.randint(0, 2 ** 32)).encode()).hexdigest()[:32]}"
+                        username = f"Player-{hashlib.sha256(str(random.randint(0, 2 ** 32)).encode()).hexdigest()[:16]}"
                     loop = False
+                    break
                 else:
                     username += event.unicode
-                    username = username[:32]
+                    username = username[:16]
         getFps(never)
         never = False
         pygame.display.flip()
-    key = random.randint(0, 2**32)
-    user_id = hashlib.sha256(f"{username}{key}".encode()).hexdigest()
+    user_key = random.randint(0, 2**32)
+    user_id = hashlib.sha256(f"{username}{user_key}".encode()).hexdigest()
     with open("id.txt", "w") as file:
-        file.write(f"{user_id}, {key}, {username}")
-    del key
+        file.write(f"{user_id}, {user_key}, {username}")
     updateLB(
         1,
         {
@@ -552,12 +557,13 @@ def adjustDifficulty(adjustment):
 try:
     loadUp()
     meta = "Main Menu"
-    meta = "Game Over"
-    new_score = 530.7385
-    old_score = 200.34
-    game_name = "Expose the Criminal"
     game = 1
-    adjustment = 0.1
+    # meta = "Game Over"
+    # new_score = 530.7385
+    # old_score = 200.34
+    # game_name = "Expose the Criminal"
+    # game = 1
+    # adjustment = 0.1
 
     while True:
         if meta == "Main Menu":

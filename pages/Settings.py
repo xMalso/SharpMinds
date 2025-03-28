@@ -17,12 +17,12 @@ from logging.handlers import RotatingFileHandler
 log_filename = f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt"
 handler = RotatingFileHandler(log_filename, maxBytes=5*1024**2, backupCount=10)
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.WARNING,
     handlers = [handler],
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
-# logging.getLogger("urllib3").setLevel(logging.DEBUG)
-# logging.getLogger("requests").setLevel(logging.DEBUG)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 current_colour_picker = None
 current_dropdown = None
