@@ -15,7 +15,8 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 
 
 def init(settings, small_font, font, title_font):
-    global lb_text, for_text, width
+    global lb_text, for_text, width, height
+    height = font.size("A")[1]
     makeButtons(settings, small_font)
     width = max(
         settings["Width"] * 7 // 10,
@@ -150,14 +151,15 @@ def makeButtons(settings, small_font):
 
 
 def loadLB(game, user_id, getLB, bold_font, settings):
-    global lb, player_score, x, game_text
+    global lb, player_score, x, game_text, played_score_x
     lb = list(getLB(game).values())
     player_score = bold_font.render(
-        f"Your PB: {getLB(game, user_id)["fields"]["score"]["doubleValue"]:,.2f}",
+        f"Your PB: {getLB(game, user_id)["score"]:,.2f}",
         settings["Antialiasing Text"],
         settings["Bold Contrasting Font Colour"],
     )
-    lb.sort(key=lambda x: x["fields"]["score"]["doubleValue"], reverse=True)
+    lb.sort(key=lambda x: x["score"], reverse=True)
+    played_score_x = (width - player_score.get_width()) // 2
     x = (width - for_text[game - 1].get_width()) // 2
     game_text = for_text[game - 1]
 
@@ -173,6 +175,7 @@ def displayPage(
     )
     y_for = settings["Height"] * 0.02 + lb_text.get_height()
     while True:
+        top = False
         screen.fill(settings["Background Colour"])
         for button in buttons:
             pygame.draw.rect(
@@ -204,29 +207,25 @@ def displayPage(
             ),
         )
 
-        y = settings["Height"] * 0.07 + lb_text.get_height() + settings["Height"] // 90
-        height = font.size("A")[1]
-        left_panel.blit(
-            player_score,
-            ((width - player_score.get_width()) // 2, y),
-        )
-        y += height * 1.2
+        y = settings["Height"] * 0.02 + lb_text.get_height() + height * 1.2
         for entry in lb:
-            if y >= settings["Height"] * 0.99 - height:
+            if y >= settings["Height"] * 0.99 - height - (height * (not top)):
+                if not top:
+                    left_panel.blit(
+                        player_score,
+                        (played_score_x, y),
+                    )
                 break
-            if entry["fields"]["id"]["stringValue"] == user_id:
-                text = bold_font.render(
-                    f"{entry['fields']['username']['stringValue']}: {entry['fields']['score']['doubleValue']:,.2f}",
-                    settings["Antialiasing Text"],
-                    settings["Bold Contrasting Font Colour"],
-                )
+            if entry["id"] == user_id:
+                left_panel.blit(player_score, (played_score_x, y))
+                top = True
             else:
                 text = font.render(
-                    f"{entry['fields']['username']['stringValue']}: {entry['fields']['score']['doubleValue']:,.2f}",
+                    f"{entry['username']}: {entry['score']:,.2f}",
                     settings["Antialiasing Text"],
                     settings["Font Primary Colour"],
                 )
-            left_panel.blit(text, ((width - text.get_width()) // 2, y))
+                left_panel.blit(text, ((width - text.get_width()) // 2, y))
             y += height
         screen.blit(left_panel, (0, 0))
         # screen.blit(game_over_text, game_over_text_rect)

@@ -273,32 +273,14 @@ def loadUpValues():
     leaderboardInit(settings, small_font, font, title_font)
 
 
-def format_firestore_data(data):
-    return {
-        "fields": {
-            k: (
-                {"integerValue": v}
-                if isinstance(v, int)
-                else (
-                    {"doubleValue": v}
-                    if isinstance(v, float)
-                    else {"stringValue": v} if isinstance(v, str) else None
-                )
-            )
-            for k, v in data.items()
-        }
-    }
-
-
 def updateLB(game, data):
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     game_url = f"{lb}/game{game}/{user_id}.json"
     response = requests.get(game_url, headers=headers)
     try:
-        old_score = float(response.json()["fields"]["score"]["doubleValue"])
+        old_score = float(response.json()["score"])
         if old_score < data["score"]:
-            firestore_data = format_firestore_data(data)
-            response = requests.put(game_url, json=firestore_data, headers=headers)
+            response = requests.put(game_url, json=data, headers=headers)
             if response.status_code == 200:
                 logging.info("Entry updated.")
             else:
@@ -309,8 +291,7 @@ def updateLB(game, data):
             logging.info("No new highscore.")
     except:
         logging.warning(f"No previous score found {traceback.format_exc()}")
-        firestore_data = format_firestore_data(data)
-        response = requests.put(game_url, json=firestore_data, headers=headers)
+        response = requests.put(game_url, json=data, headers=headers)
         if response.status_code == 200:  # Success
             logging.info("New entry created.")
         else:
