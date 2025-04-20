@@ -145,10 +145,6 @@ def makeButtons(settings, small_font):
             "Meta": "Main Menu",
         },
     ]
-    # friends?
-    # game 1/2/3 (their names)
-    # main menu
-
 
 def loadLB(game, user_id, getLB, bold_font, settings):
     global lb, player_score, x, game_text, played_score_x
@@ -169,7 +165,7 @@ def displayPage(
 ):
     loadLB(game, user_id, getLB, bold_font, settings)
     never = True
-    friends = False
+    friends_only = False
     left_panel = pygame.Surface(
         (width, settings["Height"]),
     )
@@ -258,15 +254,15 @@ def displayPage(
                         if meta == "Main Menu":
                             return "Main Menu"
                         elif meta == "Friends":
-                            if friends == False:
-                                friends = True
+                            if friends_only == False:
+                                friends_only = True
                                 buttons[3]["Text"] = small_font.render(
                                     "Global",
                                     settings["Antialiasing Text"],
                                     settings["Font Primary Colour"],
                                 )
                             else:
-                                friends = False
+                                friends_only = False
                                 buttons[3]["Text"] = small_font.render(
                                     "Friends only",
                                     settings["Antialiasing Text"],

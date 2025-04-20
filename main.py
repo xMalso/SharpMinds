@@ -2,7 +2,8 @@ import pygame, sys, os, random, hashlib, requests, logging, traceback
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from pages import *
-
+global game
+game_names = ["Expose the Criminal", "Memory Experiment", "Pattern Rush"]
 lb = r"https://sharpminds-37b05-default-rtdb.europe-west1.firebasedatabase.app"
 
 log_filename = f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt"
@@ -190,30 +191,14 @@ def loadUp():
     pygame.init()
     info = pygame.display.Info()
     pygame.display.set_caption("Sharp Minds")
-    screen = pygame.display.set_mode((info.current_w, info.current_h), pygame.NOFRAME)
     os.environ["SDL_VIDEO_CENTERED"] = "1"
-    screen.fill((31, 31, 31))
-    default_font = pygame.font.Font(
-        "assets\\fonts\\fonts\\OpenDyslexic-Regular.otf", 30
-    )
-    default_text_surface = default_font.render(
-        "Loading Settings...", True, (217, 217, 217)
-    )
-    screen.blit(
-        default_text_surface,
-        (
-            1920 // 2 - default_text_surface.get_width() // 2,
-            1080 // 2 - default_text_surface.get_height() // 2,
-        ),
-    )
-    pygame.display.flip()
-    global settingsClass, default_settings
+    global settingsClass, default_settings, meta, game
     default_settings = {
         "Width": info.current_w,
         "Height": info.current_h,
         "Window Type": "Borderless",
         "Show FPS": True,
-        "FPS Limit": 0,
+        # "FPS Limit": 0,
         "Background Colour": (31, 31, 31),
         "Background Font Colour": (217, 217, 217),
         "Grid Background Colour": (63, 63, 63),
@@ -241,17 +226,18 @@ def loadUp():
         "Font Size": 30,
         "Antialiasing Text": True,
         "Game Primary Colour": (0, 255, 127),
-        "Game Primary Font Colour": (0, 0, 0),
+        "Game Primary Font Colour": (63, 63, 63),
         "Game Secondary Colour": (255, 191, 191),
-        "Game Secondary Font Colour": (0, 0, 0),
+        "Game Secondary Font Colour": (63, 63, 63),
         "Game Tertiary Colour": (85, 85, 221),
-        "Game Tertiary Font Colour": (0, 0, 0),
+        "Game Tertiary Font Colour": (217, 217, 217),
         "Adaptive Difficulty": (2, 2, 2),
     }
     settingsClass = Settings()
     loadUpValues()
-    default_settings["Width"] = info.current_w
-    default_settings["Height"] = info.current_h
+    
+    meta = "Main Menu"
+    game = 1
     getID()
 
 
@@ -469,7 +455,7 @@ def exit():
     sys.exit()
 
 
-def executeSettingsResults(val):
+def changeSettings(val):
     global choice, settings
     if val == "Main Menu":
         return "Main Menu"
@@ -502,20 +488,19 @@ def executeSettingsResults(val):
 def adjustDifficulty(adjustment):
     global settings, meta, choice
     difficulty1, difficulty2, difficulty3 = settings["Adaptive Difficulty"]
-    if game_name == "Expose the Criminal":
+    if game == 1:
         settings["Adaptive Difficulty"] = (
             max(difficulty1 + adjustment, 0.2),
             difficulty2,
             difficulty3,
         )
-
-    elif game_name == "Memory Experiment":
+    elif game == 2:
         settings["Adaptive Difficulty"] = (
             difficulty1,
             max(difficulty2 + adjustment, 0.2),
             difficulty3,
         )
-    elif game_name == "Pattern Rush":
+    elif game == 3:
         settings["Adaptive Difficulty"] = (
             difficulty1,
             difficulty2,
@@ -523,11 +508,9 @@ def adjustDifficulty(adjustment):
         )
     else:
         logging.critical(
-            f"Error: Game not found, difficulty not adjusted and sending to main menu {traceback.format_exc()} Game: {game_name}, adjustment: {adjustment}, score: {new_score}, meta: {meta}"
+            f"Error: Game not found, difficulty not adjusted and sending to main menu {traceback.format_exc()} Game: {game}, adjustment: {adjustment}, score: {new_score}, meta: {meta}"
         )
         meta = "Main Menu"
-    del adjustment
-    del difficulty1, difficulty2, difficulty3
     choice = settings.copy()
     del choice["Font Type"]
     settingsClass.saveSettings()
@@ -537,8 +520,6 @@ def adjustDifficulty(adjustment):
 
 try:
     loadUp()
-    meta = "Main Menu"
-    game = 1
     # meta = "Game Over"
     # new_score = 530.7385
     # old_score = 200.34
@@ -556,7 +537,7 @@ try:
             choice, val = settingsDisplay(
                 settings, screen, font, title_font, small_font, choice, getFps, exit
             )
-            meta = executeSettingsResults(val)
+            meta = changeSettings(val)
         elif meta == "Quit":
             pygame.quit()
             sys.exit()
@@ -565,7 +546,6 @@ try:
                 settings, screen, font, getFps, exit, getID, updateLB
             )
             if new_score != None:
-                game_name = "Expose the Criminal"
                 game = 1
                 adjustDifficulty(adjustment)
         elif meta == "Memory Experiment":
@@ -573,7 +553,6 @@ try:
                 settings, screen, font, getFps, exit, getID, updateLB
             )
             if new_score != None:
-                game_name = "Memory Experiment"
                 game = 2
                 adjustDifficulty(adjustment)
         elif meta == "Pattern Rush":
@@ -581,7 +560,6 @@ try:
                 settings, screen, font, getFps, exit, getID, updateLB
             )
             if new_score != None:
-                game_name = "Pattern Rush"
                 game = 3
                 adjustDifficulty(adjustment)
         elif meta == "Game Over":
@@ -591,7 +569,7 @@ try:
                 font,
                 small_title_font,
                 bold_font,
-                game_name,
+                game_names[game - 1],
                 new_score,
                 old_score,
                 adjustment,

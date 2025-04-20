@@ -1,7 +1,7 @@
 import math, pygame, random, logging
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
-
+spawns = 1
 log_filename = f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt"
 handler = RotatingFileHandler(log_filename, maxBytes=5 * 1024**2, backupCount=10)
 logging.basicConfig(
@@ -86,10 +86,10 @@ def drawRect(screen, rotation, colour, big):
 def generateObjects(settings, difficulty):
     global objects, shape_size, buffer, square_size  # buffer for moving the shapes too
     sqrt2 = math.sqrt(2)
-    size = int((difficulty / 2) ** 2) + 1
-    loc = [(x, y) for x in range(size) for y in range(size)]
-    shape_size = (((settings["Width"] // 10.8) - 1) // size) - 1
-    square_size = (shape_size + 1) * size + 1
+    num_shapes = int((difficulty / 2) ** 2) + 1
+    loc = [(x, y) for x in range(num_shapes) for y in range(num_shapes)]
+    shape_size = (((settings["Width"] // 10.8) - 1) // num_shapes) - 1
+    square_size = (shape_size + 1) * num_shapes + 1
     screen_size = (
         settings["Width"] * 0.9 - (square_size * sqrt2),
         settings["Height"] * 0.95
@@ -107,10 +107,10 @@ def generateObjects(settings, difficulty):
         for y in range(int(buffer[1]), int(buffer[1] + screen_size[1]), 120):
             spawn.append((x, y))
     random.shuffle(spawn)
-    spawn = spawn[:7]
+    spawn = spawn[:spawns]
     objects = []
-    trim = (size**2) // 2.4
-    for i in range(7):
+    trim = (num_shapes**2) // 2.4
+    for i in range(spawns):
         shuffloc = generateInnerObjects(loc, trim)
         duplicate = pair = i % 2 == 0
         while duplicate:
@@ -209,7 +209,7 @@ def game3(settings, screen, font, getFps, exit, getID, updateLB):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for rect in rects:
-                    if rect.collidepoint(event.pos):
+                    if rect[0].collidepoint(event.pos):
                         if rect[1] in selected:
                             selected.remove(rect[1])
                         else:

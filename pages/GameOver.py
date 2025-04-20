@@ -121,11 +121,6 @@ def displayPage(
         + old_score_text.get_height() * 1.1
         + you_did.get_height() // 40,
     )
-    # score_text_coords = score_text.get_coords()
-    # score_text_coords.midtop = (
-    #     settings["Width"] // 2,
-    #     settings["Height"] // 20 + game_over_text.get_height(),
-    # )
     current = start = pygame.time.get_ticks()
     while current - start < 400:
         screen.fill(settings["Background Colour"])
@@ -178,8 +173,7 @@ def displayPage(
                     button["Pygame Button"].centery - button["Text"].get_height() // 2,
                 ),
             )
-        getFps(never)
-        never = False
+        getFps(False)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()

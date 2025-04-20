@@ -3,7 +3,8 @@ restart game required to fix audio (reenable audio)
 test game 3 - small objects dont spawn properly, no rotation, no movement (yet to be implemented) no retunr to game menu text
 game 3 tut
 
-game over screen
+confirm change within 15s for settings to prevent bad settings/wrong res etc
+screenshotting game 2 = shuffle
 
 show per team (what does this mean???) show lb per game?
 make window shift down if windowed mode

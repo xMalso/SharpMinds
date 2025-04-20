@@ -37,12 +37,13 @@ def loadSounds():
 
 
 def init(settings, font):
-    global tutorial_text
+    global tutorial_text, text_height
+    text_height = max(font.size(str(char))[1] for char in "0123456789")
     makeButtons(settings, font)
     tutorial_text = makeTutText(
         font,
         int(settings["Width"] * 0.85),
-        "Click these circles SECONDARY and avoid clicking these circles PRIMARY, you gain more points when clicking these circles SECONDARY in a shorter space of time and you gain points when these circles PRIMARY despawn",
+        "Click these circles SECONDARY and avoid clicking these circles PRIMARY or the background, you gain more points when clicking these circles SECONDARY in a shorter space of time and you gain points when these circles PRIMARY despawn",
     )
     #
     #
@@ -111,6 +112,20 @@ def overlap(new_x, new_y):
     return False
 
 
+def spawnCircle():
+    global last_tick, circles, red_count
+    coords = random.randint(*spawn_width), random.randint(*spawn_height)
+    while overlap(*coords):
+        coords = random.randint(*spawn_width), random.randint(*spawn_height)
+    colour = random.randint(0, 1)
+    if colour == 0:
+        colour = "Green"
+    else:
+        colour = "Red"
+        red_count += 1
+    circles.append(coords + (colour, current_frame))
+    last_tick = current_frame
+
 def removeCircle(pos, current):
     global circles, red_score, loss
     for i, (x, y, colour, tick) in enumerate(circles):
@@ -136,7 +151,8 @@ def removeCircle(pos, current):
                     )
                 red_score += score
                 return (score, (x + radius, y - radius))
-    return (0, (0, 0))
+    wrong_sound.play()
+    return (-max_score, pos)
 
 
 def splitText(font, max_width):
@@ -270,7 +286,7 @@ def tutorial(screen, settings, font, getFps, exit):
 
 
 def game1(settings, screen, font, getFps, exit, getID, updateLB):
-    global radius, circles, despawn_time, max_score, loss, red_score
+    global radius, circles, despawn_time, max_score, loss, red_score, current_frame, spawn_width, spawn_height, red_count, last_tick
     m = tutorial(screen, settings, font, getFps, exit)
     if m == "Quit" or m == "Game Menu":
         return None, None, m, None
@@ -287,8 +303,9 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
         "Red": settings["Game Secondary Colour"],
     }
     radius = int(settings["Width"] // (40 * difficulty**0.15))
+    spawn_width = settings["Width"] // 100 + radius * 2, (settings["Width"] * 99) // 100 - radius * 2,
+    spawn_height = settings["Height"] // 100 + text_height + radius * 2, (settings["Height"] * 99) // 100 - radius * 2,
     max_score = 30 / difficulty**0.65 * (difficulty * 0.1 + 0.9)
-    height = max(font.size(str(char))[1] for char in "0123456789")
     score = 0
     red_count = 0
     green_count = 0
@@ -297,22 +314,7 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
     start = current_frame = pygame.time.get_ticks()
     despawn_time = 9000 / (difficulty**0.15)
     spawn_gap = 800 / (difficulty**0.7)
-    coords = random.randint(
-        settings["Width"] // 100 + radius * 2,
-        (settings["Width"] * 99) // 100 - radius * 2,
-    ), random.randint(
-        settings["Height"] // 100 + height + radius * 2,
-        (settings["Height"] * 99) // 100 - radius * 2,
-    )
-    if not overlap(*coords):
-        colour = random.randint(0, 1)
-        if colour == 0:
-            colour = "Green"
-        else:
-            colour = "Red"
-            red_count += 1
-        circles.append(coords + (colour, current_frame))
-        last_tick = current_frame
+    spawnCircle()
     duration = 30000
     score_text = font.render(
         "Score: 0",
@@ -402,22 +404,7 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
             ),
         )
         if current_frame - last_tick > spawn_gap:
-            coords = random.randint(
-                settings["Width"] // 100 + radius * 2,
-                (settings["Width"] * 99) // 100 - radius * 2,
-            ), random.randint(
-                settings["Height"] // 100 + height + radius * 2,
-                (settings["Height"] * 99) // 100 - radius * 2,
-            )
-            if not overlap(*coords):
-                colour = random.randint(0, 1)
-                if colour == 0:
-                    colour = "Green"
-                else:
-                    colour = "Red"
-                    red_count += 1
-                circles.append(coords + (colour, current_frame))
-                last_tick = current_frame
+            spawnCircle()
         expired = True
         circle_number = 0
         while circle_number < len(circles):
