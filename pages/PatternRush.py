@@ -104,11 +104,10 @@ def drawRect(screen, rotation, colour, line_colour, big):
 def generateObjects(settings, difficulty):
     global objects, shape_size, buffer, square_size, num_shapes, shape_buffer, spawns
     sqrt2 = math.sqrt(2)
-    num_shapes = int((difficulty / 2) ** 2) + 1
-    trim = max(int(num_shapes // 1.2), 1)
+    num_shapes = max(int(6 - 5 / (difficulty ** 0.3)), 1)
+    trim = int(max(num_shapes ** 2 // 2, 1))
     if trim == 1:
         spawns = 5
-    print("num shapes", num_shapes)
     loc = [(x, y) for x in range(num_shapes) for y in range(num_shapes)]
     shape_size = (((settings["Width"] // 10) - 2) // num_shapes) - 2
     shape_buffer = shape_size // 25
@@ -242,15 +241,13 @@ def game3(settings, screen, font, getFps, exit, getID, updateLB):
     pairs = 0
     selected = []
     difficulty = settings["Adaptive Difficulty"][2]
-    rotation_multiplier = 0.01 * difficulty
+    rotation_multiplier = 0.012 * difficulty ** 0.6
     duration = 2000
     duration = 20000 / difficulty**0.2
     multiplier = difficulty * 0.1 + 0.9
     generateObjects(settings, difficulty)
     left = spawns // 2
-    print(spawns)
-    print(left)
-    time_left = 0
+    time_left = duration
     max_score = multiplier * 100
     lb = {
         "duration": duration,
@@ -259,7 +256,7 @@ def game3(settings, screen, font, getFps, exit, getID, updateLB):
         "username": username,
         "max": float(max_score),
     }
-    while time_left < duration and playing:
+    while time_left > 0 and playing:
         # print("frame")
         rects = []
         init_rotation = math.radians(time_left * rotation_multiplier)
@@ -309,16 +306,20 @@ def game3(settings, screen, font, getFps, exit, getID, updateLB):
                                         // 2,
                                         settings["Height"] * 0.01,
                                     )
-                                    selected = []
                                     pairs += left
                                     left -= 1
                                     if left == 0:
                                         playing = False
                                         score += (max(time_left, 0) / 100) * multiplier
                                     else:
-                                        for rect in rects:
-                                            if rect[1] in selected:
-                                                rects.remove(rect)
+                                        for i in range(0, len(objects) - 2, 2):
+                                            remove_rect = rects[i]
+                                            if remove_rect[1] in selected:
+                                                objects.pop(i)
+                                                objects.pop(i)
+                                                break
+
+                                    selected = []
                                 else:
                                     result = left * max_score / 2
                                     score -= result
@@ -341,7 +342,7 @@ def game3(settings, screen, font, getFps, exit, getID, updateLB):
                 if event.key == pygame.K_ESCAPE:
                     return None, None, "Game Menu", None
         time_text = font.render(
-            f"Time: {(time_left/1000):.1f}",
+            f"Time left: {(time_left/1000):.1f}",
             settings["Antialiasing Text"],
             settings["Background Font Colour"],
         )
@@ -355,8 +356,7 @@ def game3(settings, screen, font, getFps, exit, getID, updateLB):
         never = False
         pygame.display.flip()
         current = pygame.time.get_ticks()
-        time_left = current - start
-    print("time:", time_left)
+        time_left = duration - current + start
     lb["time"] = duration - max(time_left, 0)
     lb["pairs"] = pairs
     lb["score"] = score

@@ -1,6 +1,6 @@
 restart game required to fix audio (reenable audio)
 
-test game 3 - small objects dont spawn properly, no rotation, no movement (yet to be implemented) no retunr to game menu text, inner shapes being copied -> unchanged shapes
+test game 3 - show selected square. no return to game menu text
 game 3 tut
 
 confirm change within 15s for settings to prevent bad settings/wrong res etc
