@@ -1,6 +1,6 @@
 restart game required to fix audio (reenable audio)
 
-test game 3 - small objects dont spawn properly, no rotation, no movement (yet to be implemented) no retunr to game menu text
+test game 3 - small objects dont spawn properly, no rotation, no movement (yet to be implemented) no retunr to game menu text, inner shapes being copied -> unchanged shapes
 game 3 tut
 
 confirm change within 15s for settings to prevent bad settings/wrong res etc
@@ -11,3 +11,5 @@ make window shift down if windowed mode
 FPS limiter
 Functions and Classes files for main
 folders for each downloaded font instead of filtering each file
+
+right click for good guys?
