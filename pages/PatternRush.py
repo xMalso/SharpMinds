@@ -274,16 +274,6 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
                             if len(selected) == 2:
                                 if selected[0][1] == selected[1][1]:
                                     score += left * max_score
-                                    score_text = font.render(
-                                        f"Score: {score:,}",
-                                        settings["Antialiasing Text"],
-                                        settings["Background Font Colour"],
-                                    )
-                                    score_text_coords = (
-                                        (settings["Width"] - score_text.get_width())
-                                        // 2,
-                                        settings["Height"] * 0.01,
-                                    )
                                     pairs += left
                                     left -= 1
                                     if left == 0:
@@ -302,17 +292,17 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
                                     result = left * max_score / 2
                                     score -= result
                                     loss += result
-                                    score_text = font.render(
-                                        f"Score: {score:,}",
-                                        settings["Antialiasing Text"],
-                                        settings["Background Font Colour"],
-                                    )
-                                    score_text_coords = (
-                                        (settings["Width"] - score_text.get_width())
-                                        // 2,
-                                        settings["Height"] * 0.01,
-                                    )
                                     selected = []
+                                score_text = font.render(
+                                    f"Score: {int(score):,}",
+                                    settings["Antialiasing Text"],
+                                    settings["Background Font Colour"],
+                                )
+                                score_text_coords = (
+                                    (settings["Width"] - score_text.get_width())
+                                    // 2,
+                                    settings["Height"] * 0.01,
+                                )
             elif event.type == pygame.QUIT:
                 exitGame()
                 return None, None, "Quit", None
