@@ -251,11 +251,11 @@ def loadUpValues():
     text_surface = None
     settingsInit(settings, font, small_font)
     mainMenuInit(settings, font, title_font)
-    gameMenuInit(settings, small_font, font, title_font)
-    game1Init(settings, font)
-    game2Init(settings, font, title_font)
-    game3Init(settings, font)
-    gameOverInit(settings, font)
+    gameMenuInit(settings, small_font, font, title_font, splitText)
+    game1Init(settings, font, small_font, splitText)
+    game2Init(settings, font, title_font, splitText)
+    game3Init(settings, font, splitText)
+    gameOverInit(settings, font, splitText)
     leaderboardInit(settings, small_font, font, title_font)
 
 
@@ -319,15 +319,15 @@ def getID():
             if user_id:
                 return user_id, user_key, username
         logging.warning("id.txt found but empty, creating new ID and username.")
-        generateUsername(settings, font, getFps, exit)
+        generateUsername(settings, font, getFps, exitGame)
         return user_id, user_key, username
     except FileNotFoundError:
         logging.warning("id.txt not found, creating new ID and username.")
-        generateUsername(settings, font, getFps, exit)
+        generateUsername(settings, font, getFps, exitGame)
         return user_id, user_key, username
 
 
-def generateUsername(settings, font, getFps, exit):
+def generateUsername(settings, font, getFps, exitGame):
     global user_id, user_key, username
     username = ""
     never = True
@@ -370,7 +370,7 @@ def generateUsername(settings, font, getFps, exit):
         )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                exit()
+                exitGame()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
                     username = username[:-1]
@@ -450,10 +450,35 @@ def getFps(never):
             screen.blit(text_surface, (0, 0))
 
 
-def exit():
+def exitGame():
     pygame.quit()
     sys.exit()
 
+def splitText(font, max_width, antialiasing, colour, words="Press ESC to return to games menu"):
+    words = words.split()
+    lines = []
+    current_line = ""
+    return_text = []
+    for word in words:
+        test_line = current_line + " " + word if current_line else word
+        text_width = font.size(test_line)[0]
+
+        if text_width <= max_width:
+            current_line = test_line
+        else:
+            lines.append(current_line)
+            current_line = word
+
+    lines.append(current_line)
+    for text in lines:
+        return_text.append(
+            font.render(
+                text,
+                antialiasing,
+                colour,
+            )
+        )
+    return return_text
 
 def changeSettings(val):
     global choice, settings
@@ -529,35 +554,34 @@ try:
 
     while True:
         if meta == "Main Menu":
-            meta, choice = mainMenuDisplay(settings, screen, font, getFps, exit)
+            meta, choice = mainMenuDisplay(settings, screen, font, getFps, exitGame)
         elif meta == "Game Menu":
-            meta = gameMenuDisplay(settings, screen, getFps, exit)
+            meta = gameMenuDisplay(settings, screen, getFps, exitGame)
         elif meta == "Settings":
             scroll = 0
             choice, val = settingsDisplay(
-                settings, screen, font, title_font, small_font, choice, getFps, exit
+                settings, screen, font, title_font, small_font, choice, getFps, exitGame, splitText
             )
             meta = changeSettings(val)
         elif meta == "Quit":
-            pygame.quit()
-            sys.exit()
+            exitGame()
         elif meta == "Expose the Criminal":
             new_score, adjustment, meta, old_score = game1(
-                settings, screen, font, getFps, exit, getID, updateLB
+                settings, screen, font, getFps, exitGame, getID, updateLB
             )
             if new_score != None:
                 game = 1
                 adjustDifficulty(adjustment)
         elif meta == "Memory Experiment":
             new_score, adjustment, meta, old_score = game2(
-                settings, screen, font, getFps, exit, getID, updateLB
+                settings, screen, font, getFps, exitGame, getID, updateLB, splitText
             )
             if new_score != None:
                 game = 2
                 adjustDifficulty(adjustment)
         elif meta == "Pattern Rush":
             new_score, adjustment, meta, old_score = game3(
-                settings, screen, font, getFps, exit, getID, updateLB
+                settings, screen, font, getFps, exitGame, getID, updateLB
             )
             if new_score != None:
                 game = 3
@@ -574,7 +598,7 @@ try:
                 old_score,
                 adjustment,
                 getFps,
-                exit,
+                exitGame,
             )
         elif meta == "Leaderboards":
             meta == leaderboardsDisplay(
@@ -586,7 +610,7 @@ try:
                 game,
                 user_id,
                 getFps,
-                exit,
+                exitGame,
                 getLB,
             )
             meta = "Main Menu"
@@ -608,4 +632,4 @@ except SystemExit:
     pass
 except:
     logging.critical(traceback.format_exc())
-    exit()
+    exitGame()

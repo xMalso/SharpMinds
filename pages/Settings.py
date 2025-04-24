@@ -15,10 +15,10 @@ from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
 log_filename = f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt"
-handler = RotatingFileHandler(log_filename, maxBytes=5*1024**2, backupCount=10)
+handler = RotatingFileHandler(log_filename, maxBytes=5 * 1024**2, backupCount=10)
 logging.basicConfig(
     level=logging.WARNING,
-    handlers = [handler],
+    handlers=[handler],
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -40,25 +40,6 @@ def init(settings, font, small_font):
     makeOptions(settings, font)
     makeConfirmationButtons(settings, small_font)
     makeButtons(settings, small_font)
-
-
-def splitText(font, max_width, words):
-    words = words.split()
-    lines = []
-    current_line = ""
-
-    for word in words:
-        test_line = current_line + " " + word if current_line else word
-        text_width = font.size(test_line)[0]
-
-        if text_width <= max_width:
-            current_line = test_line
-        else:
-            lines.append(current_line)
-            current_line = word
-
-    lines.append(current_line)
-    return lines
 
 
 def makeColourPickerButtons(settings, font):
@@ -341,15 +322,15 @@ def pasteButton(button, settings, screen):
     screen.blit(
         button["Text"],
         (
-            button["Pygame Button"].centerx
-            - button["Text"].get_width() // 2,
-            button["Pygame Button"].centery
-            - button["Text"].get_height() // 2,
+            button["Pygame Button"].centerx - button["Text"].get_width() // 2,
+            button["Pygame Button"].centery - button["Text"].get_height() // 2,
         ),
     )
 
 
-def displayPage(settings, screen, font, title_font, small_font, choices, getFps, exit):
+def displayPage(
+    settings, screen, font, title_font, small_font, choices, getFps, exitGame, splitText
+):
     global current_dropdown, current_colour_picker, input_selected, choice, input_text, backspace_held
     never = True
     font_height = font.size("Save and Leave")[1]
@@ -501,9 +482,11 @@ def displayPage(settings, screen, font, title_font, small_font, choices, getFps,
             outputed_text = splitText(
                 font,
                 settings["Width"] // 3.1,
-                f"Are you sure you want to {confirmation_text[confirmation]}?",
+                settings["Antialiasing Text"],
+                settings["Font Quaternary Colour"],
+                words=f"Are you sure you want to {confirmation_text[confirmation]}?",
             )
-            small_text = small_font.size(outputed_text[0])[1]
+            small_text = outputed_text[0][0].get_height()
             buffer_height = small_text * (len(outputed_text) - 1)
             confirmation_surface = pygame.Surface(
                 (
@@ -518,18 +501,13 @@ def displayPage(settings, screen, font, title_font, small_font, choices, getFps,
                 confirmation_surface.get_rect(),
                 border_radius=settings["Width"] // 40,
             )
-            height = small_text * (len(outputed_text)) + settings["Height"] // 100
+            height = buffer_height + small_text + settings["Height"] // 100
             for line in outputed_text[::-1]:
-                text_surface = small_font.render(
-                    line,
-                    settings["Antialiasing Text"],
-                    settings["Font Quaternary Colour"],
-                )
-                height -= text_surface.get_height()
+                height -= line.get_height()
                 confirmation_surface.blit(
-                    text_surface,
+                    line,
                     (
-                        settings["Width"] // 6 - text_surface.get_width() // 2,
+                        settings["Width"] // 6 - line.get_width() // 2,
                         height,
                     ),
                 )
@@ -563,7 +541,7 @@ def displayPage(settings, screen, font, title_font, small_font, choices, getFps,
             )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                exit()
+                exitGame()
             elif event.type == pygame.MOUSEWHEEL:
                 scroll = max(
                     0,
@@ -598,7 +576,9 @@ def displayPage(settings, screen, font, title_font, small_font, choices, getFps,
                                     choice = settings.copy()
                                     del choice["Font Type"]
                                     del choice["Adaptive Difficulty"]
-                                    logging.info(f"Settings discarded. {datetime.now()}")
+                                    logging.info(
+                                        f"Settings discarded. {datetime.now()}"
+                                    )
                                 elif confirmation == "Main Menu":
                                     return None, "Main Menu"
                                 else:
@@ -609,7 +589,9 @@ def displayPage(settings, screen, font, title_font, small_font, choices, getFps,
                             elif button["Meta"] == "Decline":
                                 confirmation = None
                             else:
-                                logging.error(f"Error: Unknown confirmation button. {button}")
+                                logging.error(
+                                    f"Error: Unknown confirmation button. {button}"
+                                )
                 for button in buttons + last:  # Check for each button
                     if button["Pygame Button"].collidepoint(event.pos):
                         if any(

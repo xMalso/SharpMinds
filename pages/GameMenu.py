@@ -1,11 +1,12 @@
 import pygame
 
 
-def init(settings, small_font, font, title_font):
-    global title_text
+def init(settings, small_font, font, title_font, splitText):
+    global title_text, return_text
     title_text = title_font.render(
         "Games Menu", settings["Antialiasing Text"], settings["Font Primary Colour"]
     )
+    return_text = splitText(font, settings["Width"] // 4, settings["Antialiasing Text"], settings["Background Font Colour"], words="Press ESC to return to main menu")
     makeButtons(settings, font, small_font)
 
 
@@ -76,7 +77,7 @@ def makeButtons(settings, font, small_font):
     ]
 
 
-def displayPage(settings, screen, getFps, exit):
+def displayPage(settings, screen, getFps, exitGame):
     never = True
     while True:
         screen.fill(settings["Background Colour"])
@@ -87,6 +88,19 @@ def displayPage(settings, screen, getFps, exit):
                 (settings["Height"] * 2) // 16 - title_text.get_height() // 2,
             ),
         )
+        height = settings["Height"] // 200
+        for line in return_text:
+            screen.blit(
+                line,
+                (
+                    settings["Width"] * 7 // 8
+                    - line.get_width() // 2
+                    - settings["Width"] // 200,
+                    height,
+                ),
+            )
+            height += line.get_height()
+
         for button in buttons[:-1]:
             button_height, button_width = (
                 button["Pygame Button"].height,
@@ -143,7 +157,7 @@ def displayPage(settings, screen, getFps, exit):
         )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                exit()
+                exitGame()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for game in buttons:  # Check for each button
                     if game["Pygame Button"].collidepoint(event.pos):

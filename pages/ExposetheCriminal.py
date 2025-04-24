@@ -36,15 +36,16 @@ def loadSounds():
     attempting = False
 
 
-def init(settings, font):
-    global tutorial_text, text_height
+def init(settings, font, small_font, splitText):
+    global tutorial_text, text_height, return_text
     text_height = max(font.size(str(char))[1] for char in "0123456789")
-    makeButtons(settings, font)
+    makeButtons(settings, font, small_font)
     tutorial_text = makeTutText(
         font,
         int(settings["Width"] * 0.85),
         "Click these circles SECONDARY and avoid clicking these circles PRIMARY or the background, you gain more points when clicking these circles SECONDARY in a shorter space of time and you gain points when these circles PRIMARY despawn",
     )
+    return_text = splitText(font, settings["Width"] // 4, settings["Antialiasing Text"], settings["Background Font Colour"])
     #
     #
     #
@@ -85,9 +86,10 @@ def makeTutText(font, max_width, text):
     return lines
 
 
-def makeButtons(settings, font):
-    global tutorial_button, tut_text_size
+def makeButtons(settings, font, small_font):
+    global tutorial_button, tut_text_size, ready_button
     tut_text_size = font.size("Start")
+    text = small_font.size("Back to Game Menu")
     # tutorial_button = [{
     tutorial_button = {
         "Text": font.render(
@@ -100,6 +102,20 @@ def makeButtons(settings, font):
             tut_text_size[1] + settings["Height"] // 100,
         ),
         "Colour": settings["Button Primary Colour"],
+    }
+    ready_button = {
+        "Text": small_font.render(
+                "Back to Game Menu",
+                settings["Antialiasing Text"],
+                settings["Font Primary Colour"],
+            ),
+            "Pygame Button": pygame.Rect(
+                settings["Width"] // 94,
+                settings["Height"] // 16,
+                text[0] + settings["Width"] // 64,
+                text[1] + settings["Height"] // 90,
+            ),
+            "Colour": settings["Button Quinary Colour"],
     }
 
     # ]
@@ -154,28 +170,7 @@ def removeCircle(pos, current):
     wrong_sound.play()
     return (-max_score, pos)
 
-
-def splitText(font, max_width):
-    words = ["Press", "ESC", "to", "return", "to", "games", "menu"]
-    lines = []
-    current_line = ""
-
-    for word in words:
-        test_line = current_line + " " + word if current_line else word
-        text_width = font.size(test_line)[0]
-
-        if text_width <= max_width:
-            current_line = test_line
-        else:
-            lines.append(current_line)
-            current_line = word
-
-    lines.append(current_line)
-
-    return lines
-
-
-def tutorial(screen, settings, font, getFps, exit):
+def tutorial(screen, settings, font, getFps, exitGame):
     never = True
     while True:
         # if not sounds and not attempting:
@@ -254,7 +249,31 @@ def tutorial(screen, settings, font, getFps, exit):
                 else:
                     logging.warning(f"Unknown type: {type}, text: {text}")
             y += line_height
-
+            height = settings["Height"] // 200
+            for line in return_text:
+                screen.blit(
+                    line,
+                    (
+                        settings["Width"] * 7 // 8
+                        - line.get_width() // 2
+                        - settings["Width"] // 200,
+                        height,
+                    ),
+                )
+                height += line.get_height()
+        pygame.draw.rect(
+            screen,
+            ready_button["Colour"],
+            ready_button["Pygame Button"],
+            border_radius=settings["Width"] // 40,
+        )
+        screen.blit(
+            ready_button["Text"],
+            (
+                ready_button["Pygame Button"].centerx - ready_button["Text"].get_width() // 2,
+                ready_button["Pygame Button"].centery - ready_button["Text"].get_height() // 2,
+            ),
+        )
         pygame.draw.rect(
             screen,
             tutorial_button["Colour"],
@@ -274,8 +293,10 @@ def tutorial(screen, settings, font, getFps, exit):
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if tutorial_button["Pygame Button"].collidepoint(event.pos):
                     return "Ready"
+                if ready_button["Pygame Button"].collidepoint(event.pos):
+                    return "Game Menu"
             elif event.type == pygame.QUIT:
-                exit()
+                exitGame()
                 return "Quit"
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -285,9 +306,9 @@ def tutorial(screen, settings, font, getFps, exit):
         pygame.display.flip()
 
 
-def game1(settings, screen, font, getFps, exit, getID, updateLB):
+def game1(settings, screen, font, getFps, exitGame, getID, updateLB):
     global radius, circles, despawn_time, max_score, loss, red_score, current_frame, spawn_width, spawn_height, red_count, last_tick
-    m = tutorial(screen, settings, font, getFps, exit)
+    m = tutorial(screen, settings, font, getFps, exitGame)
     if m == "Quit" or m == "Game Menu":
         return None, None, m, None
     del m
@@ -297,7 +318,6 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
     user_id, user_key, username = getID()
     never = True
     difficulty = settings["Adaptive Difficulty"][0]
-    return_text = splitText(font, settings["Width"] // 4)
     circle_colour = {
         "Green": settings["Game Primary Colour"],
         "Red": settings["Game Secondary Colour"],
@@ -358,7 +378,7 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
                     settings["Height"] // 200,
                 )
             elif event.type == pygame.QUIT:
-                exit()
+                exitGame()
                 return None, None, "Quit", None
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -366,21 +386,16 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
         screen.fill(settings["Background Colour"])
         height = settings["Height"] // 200
         for line in return_text:
-            text = font.render(
-                line,
-                settings["Antialiasing Text"],
-                settings["Background Font Colour"],
-            )
             screen.blit(
-                text,
+                line,
                 (
                     settings["Width"] * 7 // 8
-                    - text.get_width() // 2
+                    - line.get_width() // 2
                     - settings["Width"] // 200,
                     height,
                 ),
             )
-            height += text.get_height()
+            height += line.get_height()
 
         remaining_time = (duration - (current_frame - start)) / 1000
         if remaining_time >= 10:
@@ -447,7 +462,7 @@ def game1(settings, screen, font, getFps, exit, getID, updateLB):
                     visual_text_score,
                     (
                         pos[0],
-                        pos[1] - text.get_height() // 2,
+                        pos[1] - visual_text_score.get_height() // 2,
                     ),
                 )
         getFps(never)

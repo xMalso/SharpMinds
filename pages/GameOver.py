@@ -4,7 +4,15 @@ import pygame
 rating = ["poorly...", "mediocre.", "good.", "great!", "excellent!!!"]
 
 
-def init(settings, font):
+def init(settings, font, splitText):
+    global return_text
+    return_text = splitText(
+        font,
+        settings["Width"] // 4,
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+        words="Press ESC to return to main menu",
+    )
     makeButtons(settings, font)
 
 
@@ -58,7 +66,7 @@ def displayPage(
     old_score,
     adjustment,
     getFps,
-    exit,
+    exitGame,
 ):
     game_over_text = small_title_font.render(
         f"{game}: Game Over", True, settings["Background Font Colour"]
@@ -146,10 +154,23 @@ def displayPage(
         never = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                exit()
+                exitGame()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return "Main Menu"
+        height = settings["Height"] // 200
+        for line in return_text:
+            screen.blit(
+                line,
+                (
+                    settings["Width"] * 7 // 8
+                    - line.get_width() // 2
+                    - settings["Width"] // 200,
+                    height,
+                ),
+            )
+            height += line.get_height()
+
         pygame.display.flip()
         current = pygame.time.get_ticks()
 
@@ -176,7 +197,7 @@ def displayPage(
         getFps(False)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                exit()
+                exitGame()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for button in buttons:
                     if button["Pygame Button"].collidepoint(event.pos):
@@ -184,4 +205,17 @@ def displayPage(
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return "Main Menu"
+        height = settings["Height"] // 200
+        for line in return_text:
+            screen.blit(
+                line,
+                (
+                    settings["Width"] * 7 // 8
+                    - line.get_width() // 2
+                    - settings["Width"] // 200,
+                    height,
+                ),
+            )
+            height += line.get_height()
+
         pygame.display.flip()

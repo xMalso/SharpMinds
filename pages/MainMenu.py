@@ -92,7 +92,7 @@ def makeButtons(settings, font):
     ]
 
 
-def displayPage(settings, screen, font, getFps, exit):
+def displayPage(settings, screen, font, getFps, exitGame):
     never = True
     while True:
         screen.fill(settings["Background Colour"])
@@ -120,7 +120,7 @@ def displayPage(settings, screen, font, getFps, exit):
             )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                exit()
+                exitGame()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for button in buttons:  # Check for each button
                     if button["Pygame Button"].collidepoint(event.pos):

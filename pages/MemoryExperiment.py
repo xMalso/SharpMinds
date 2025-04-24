@@ -13,7 +13,7 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("requests").setLevel(logging.WARNING)
 
 
-def init(settings, font, title_font):
+def init(settings, font, title_font, splitText):
     global return_text, pause_duration, answer_text, guess_text, curr_text
     curr_text = font.render(
         "Current Guess:",
@@ -31,16 +31,12 @@ def init(settings, font, title_font):
         settings["Background Font Colour"],
     )
     makeButtons(settings, font)
-    return_text = []
-    temp = splitText(font, settings["Width"] // 4, "Press ESC to return to games menu")
-    for text in temp:
-        return_text.append(
-            font.render(
-                text,
-                settings["Antialiasing Text"],
-                settings["Background Font Colour"],
-            )
-        )
+    return_text = splitText(
+        font,
+        settings["Width"] // 4,
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+    )
     pause_duration = 0
 
 
@@ -443,24 +439,6 @@ def drawPicker(screen, settings, font):
             )
 
 
-def splitText(font, max_width, words):
-    words = words.split()
-    lines = []
-    current_line = ""
-
-    for word in words:
-        test_line = current_line + " " + word if current_line else word
-        text_width = font.size(test_line)[0]
-
-        if text_width <= max_width:
-            current_line = test_line
-        else:
-            lines.append(current_line)
-            current_line = word
-
-    lines.append(current_line)
-
-    return lines
 
 
 def calculateScore(score):
@@ -485,7 +463,7 @@ def calculateScore(score):
     return score
 
 
-def game2(settings, screen, font, getFps, exit, getID, updateLB):
+def game2(settings, screen, font, getFps, exitGame, getID, updateLB, splitText):
     global buttons, rows, cols, button_side, radius, margin_width, margin_height, multiplier, pause_duration, avg, lb, remove_text, location
     user_id, user_key, username = getID()
     lb = {
@@ -526,16 +504,13 @@ def game2(settings, screen, font, getFps, exit, getID, updateLB):
         -(settings["Width"] // 4) + margin_width // 2,
         (settings["Width"] // 4) + margin_width // 2,
     ]
-    temp = splitText(font, margin_width * 3 // 2.6, "Click a box to remove guess")
-    remove_text = []
-    for text in temp:
-        remove_text.append(
-            font.render(
-                text,
-                settings["Antialiasing Text"],
-                settings["Background Font Colour"],
-            )
-        )
+    remove_text = splitText(
+        font,
+        margin_width * 3 // 2.6,
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+        words="Click a box to remove guess",
+    )
     makePickerButtons(settings, font)
     buttons = []
     y = margin_height + 2
@@ -554,7 +529,9 @@ def game2(settings, screen, font, getFps, exit, getID, updateLB):
     rounds_played = None
     round_score = 0
     for i in range(rounds):
-        round_score, meta = cycle(i, settings, getFps, screen, round_score, font, exit)
+        round_score, meta = cycle(
+            i, settings, getFps, screen, round_score, font, exitGame, splitText
+        )
         if round_score is None:
             return None, None, meta, None
         score += round_score
@@ -580,7 +557,7 @@ def game2(settings, screen, font, getFps, exit, getID, updateLB):
     return score, adjustment, meta, pb
 
 
-def cycle(round_number, settings, getFps, screen, score, font, exit):
+def cycle(round_number, settings, getFps, screen, score, font, exitGame, splitText):
     global answer, pattern, picker_shape, picker_colour, remove, guess, max_score, all_positions
     never = True
     round_text = font.render(
@@ -617,7 +594,7 @@ def cycle(round_number, settings, getFps, screen, score, font, exit):
         screen.fill(settings["Background Colour"])
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                exit()
+                exitGame()
                 return None, "Quit"
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -638,23 +615,24 @@ def cycle(round_number, settings, getFps, screen, score, font, exit):
                             )
                             + settings["Width"] // 33
                         )
-                        return_lines = splitText(
+                        help_lines = splitText(
                             font,
                             settings["Width"] - x - settings["Width"] // 64,
-                            "Memorise the grid and replicate it on the next page",
+                            settings["Antialiasing Text"],
+                            settings["Background Font Colour"],
+                            words="Memorise the grid and replicate it on the next page",
                         )
-                        help_lines = []
-                        for line in return_lines:
-                            help_lines.append(
-                                font.render(
-                                    line,
-                                    settings["Antialiasing Text"],
-                                    settings["Background Font Colour"],
-                                )
-                            )
                         help_line_height = help_lines[0].get_height()
-                        box_height = help_line_height * len(help_lines) + settings["Height"] // 50
-                        box_y = page1_buttons[1]["Pygame Button"].top + help_line_height - box_height + settings["Height"] // 100
+                        box_height = (
+                            help_line_height * len(help_lines)
+                            + settings["Height"] // 50
+                        )
+                        box_y = (
+                            page1_buttons[1]["Pygame Button"].top
+                            + help_line_height
+                            - box_height
+                            + settings["Height"] // 100
+                        )
                         box_width = settings["Width"] - x
                         box_x = x - settings["Width"] // 64
 
@@ -740,7 +718,7 @@ def cycle(round_number, settings, getFps, screen, score, font, exit):
         screen.fill(settings["Background Colour"])
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                exit()
+                exitGame()
                 return None, "Quit"
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -796,7 +774,7 @@ def cycle(round_number, settings, getFps, screen, score, font, exit):
     while not finished:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                exit()
+                exitGame()
                 return None, "Quit"
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -891,6 +869,18 @@ def cycle(round_number, settings, getFps, screen, score, font, exit):
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if next_button["Pygame Button"].collidepoint(event.pos):
                     return score, "Game Over"
+        # height = settings["Height"] // 200
+        # for line in return_text:
+        #     screen.blit(
+        #         line,
+        #         (
+        #             settings["Width"] * 7 // 8
+        #             - line.get_width() // 2
+        #             - settings["Width"] // 200,
+        #             height,
+        #         ),
+        #     )
+        #     height += line.get_height() # Collides with the GUESS: font
         drawGrid(
             screen,
             settings,

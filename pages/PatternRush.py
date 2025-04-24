@@ -14,41 +14,19 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("requests").setLevel(logging.WARNING)
 
 
-def init(settings, font):
+def init(settings, font, splitText):
     global return_lines, colours
     colours = [
         settings["Game Primary Colour"],
         settings["Game Secondary Colour"],
         settings["Game Tertiary Colour"],
     ]
-    lines = splitText(font, settings["Width"] // 4)
-    return_lines = []
-    for line in lines:
-        return_lines.append(
-            font.render(
-                line, settings["Antialiasing Text"], settings["Background Font Colour"]
-            )
-        )
-
-
-def splitText(font, max_width):
-    words = ["Press", "ESC", "to", "return", "to", "games", "menu"]
-    lines = []
-    current_line = ""
-
-    for word in words:
-        test_line = current_line + " " + word if current_line else word
-        text_width = font.size(test_line)[0]
-
-        if text_width <= max_width:
-            current_line = test_line
-        else:
-            lines.append(current_line)
-            current_line = word
-
-    lines.append(current_line)
-
-    return lines
+    return_lines = splitText(
+        font,
+        settings["Width"] // 4,
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+    )
 
 
 def generateInnerObjects(loc, trim):
@@ -220,7 +198,7 @@ def generateObjects(settings, difficulty):
     return
 
 
-def game3(settings, screen, font, getFps, exit, getID, updateLB):
+def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
     # logging.info(
     #     "Page 'Pattern Rush' is currently in development, sending back to main menu."
     # )
@@ -336,7 +314,7 @@ def game3(settings, screen, font, getFps, exit, getID, updateLB):
                                     )
                                     selected = []
             elif event.type == pygame.QUIT:
-                exit()
+                exitGame()
                 return None, None, "Quit", None
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:

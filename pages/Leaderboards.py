@@ -161,7 +161,7 @@ def loadLB(game, user_id, getLB, bold_font, settings):
 
 
 def displayPage(
-    settings, screen, font, bold_font, small_font, game, user_id, getFps, exit, getLB
+    settings, screen, font, bold_font, small_font, game, user_id, getFps, exitGame, getLB
 ):
     loadLB(game, user_id, getLB, bold_font, settings)
     never = True
@@ -246,7 +246,7 @@ def displayPage(
         never = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                exit()
+                exitGame()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 for button in buttons:
                     if button["Pygame Button"].collidepoint(event.pos):
