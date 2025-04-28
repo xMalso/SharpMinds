@@ -2,6 +2,7 @@ import pygame, sys, os, random, hashlib, requests, logging, traceback
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from pages import *
+
 global game
 game_names = ["Expose the Criminal", "Memory Experiment", "Pattern Rush"]
 lb = r"https://sharpminds-37b05-default-rtdb.europe-west1.firebasedatabase.app"
@@ -203,6 +204,8 @@ def loadUp():
         "Background Font Colour": (217, 217, 217),
         "Grid Background Colour": (63, 63, 63),
         "Grid Line Colour": (217, 217, 217),
+        "Grid Selected Colour": (193, 225, 193),
+        "Grid Selected Line Colour": (0, 0, 0),
         "Dropdown Background Colour": (63, 63, 63),
         "Dropdown Font Colour": (217, 217, 217),
         "Input Background Colour": (85, 85, 85),
@@ -235,7 +238,7 @@ def loadUp():
     }
     settingsClass = Settings()
     loadUpValues()
-    
+
     meta = "Main Menu"
     game = 1
     getID()
@@ -454,7 +457,10 @@ def exitGame():
     pygame.quit()
     sys.exit()
 
-def splitText(font, max_width, antialiasing, colour, words="Press ESC to return to games menu"):
+
+def splitText(
+    font, max_width, antialiasing, colour, words="Press ESC to return to games menu"
+):
     words = words.split()
     lines = []
     current_line = ""
@@ -479,6 +485,7 @@ def splitText(font, max_width, antialiasing, colour, words="Press ESC to return 
             )
         )
     return return_text
+
 
 def changeSettings(val):
     global choice, settings
@@ -560,7 +567,15 @@ try:
         elif meta == "Settings":
             scroll = 0
             choice, val = settingsDisplay(
-                settings, screen, font, title_font, small_font, choice, getFps, exitGame, splitText
+                settings,
+                screen,
+                font,
+                title_font,
+                small_font,
+                choice,
+                getFps,
+                exitGame,
+                splitText,
             )
             meta = changeSettings(val)
         elif meta == "Quit":

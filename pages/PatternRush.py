@@ -141,6 +141,8 @@ def generateObjects(settings, difficulty):
                 / 1000
                 * random.choice([-1, 1]),
                 "Identifier": [],
+                "Colour": settings["Grid Background Colour"],
+                "Line Colour": settings["Grid Line Colour"],
             }
         )
         # print("shuffloc", shuffloc)
@@ -247,8 +249,8 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
                     drawRect(
                         screen,
                         rotation,
-                        settings["Grid Background Colour"],
-                        settings["Grid Line Colour"],
+                        obj["Colour"],
+                        obj["Line Colour"],
                         centre,
                     ),
                     (obj["Number"], obj["Pair"]),
@@ -266,9 +268,24 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
                     # print("rect", rect)
                     if rect[0].collidepoint(event.pos):
                         if rect[1] in selected:
+                            for i in range(len(objects)):
+                                if rects[i][1] in selected:
+                                    objects[i]["Colour"] = settings["Grid Background Colour"]
+                                    objects[i]["Line Colour"] = settings["Grid Line Colour"]
+                                    break
+                                if i == len(objects) - 1:
+                                    logging.warning(f"Could not change colour of shape to original, rect[1]: {rects[i][1]}, i: {i}, selected: {selected} objects: {objects}")
                             selected.remove(rect[1])
                         else:
                             selected.append(rect[1])
+                            for i in range(len(objects)):
+                                if rects[i][1] in selected:
+                                    objects[i]["Colour"] = settings["Grid Selected Colour"]
+                                    objects[i]["Line Colour"] = settings["Grid Selected Line Colour"]
+                                    break
+                                if i == len(objects) - 1:
+                                    logging.warning(f"Could not change colour of shape to selected, rect[1]: {rects[i][1]}, i: {i}, selected: {selected} objects: {objects}")
+
                             while len(selected) > 2:
                                 selected.pop(0)
                             if len(selected) == 2:
@@ -281,18 +298,27 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
                                         score += (max(time_left, 0) / 100) * multiplier
                                     else:
                                         for i in range(0, len(objects) - 2, 2):
-                                            remove_rect = rects[i]
-                                            if remove_rect[1] in selected:
+                                            if rects[i][1] in selected:
                                                 objects.pop(i)
                                                 objects.pop(i)
                                                 break
-
-                                    selected = []
                                 else:
                                     result = left * max_score / 2
                                     score -= result
                                     loss += result
-                                    selected = []
+                                    count = 0
+                                    for i in range(len(objects)):
+                                        if rects[i][1] in selected:
+                                            objects[i]["Colour"] = settings["Grid Background Colour"]
+                                            objects[i]["Line Colour"] = settings["Grid Line Colour"]
+                                            count += 1
+                                            if count == 2:
+                                                break
+                                    if count != 2:
+                                        logging.error(
+                                            f"Only one shape was unselected, selected after: {selected}, objects: {objects}, rects: {rects}")
+
+                                selected = []
                                 score_text = font.render(
                                     f"Score: {int(score):,}",
                                     settings["Antialiasing Text"],
@@ -320,6 +346,18 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
         )
         screen.blit(score_text, score_text_coords)
         screen.blit(time_text, time_text_coords)
+        height = settings["Height"] // 200
+        for line in return_lines:
+            screen.blit(
+                line,
+                (
+                    settings["Width"] * 7 // 8
+                    - line.get_width() // 2
+                    - settings["Width"] // 200,
+                    height,
+                ),
+            )
+            height += line.get_height()
         getFps(never)
         never = False
         pygame.display.flip()
