@@ -1,6 +1,6 @@
 restart game required to fix audio (reenable audio)
 
-test game 3 - show selected square. adjust difficulty, leaderboards.
+test game 3 - adjust difficulty, leaderboards.
 game 3 tut
 
 confirm change within 15s for settings to prevent bad settings/wrong res etc

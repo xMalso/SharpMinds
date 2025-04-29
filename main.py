@@ -204,7 +204,7 @@ def loadUp():
         "Background Font Colour": (217, 217, 217),
         "Grid Background Colour": (63, 63, 63),
         "Grid Line Colour": (217, 217, 217),
-        "Grid Selected Colour": (193, 225, 193),
+        "Grid Selected Colour": (63, 94, 63),
         "Grid Selected Line Colour": (0, 0, 0),
         "Dropdown Background Colour": (63, 63, 63),
         "Dropdown Font Colour": (217, 217, 217),
