@@ -1,16 +1,14 @@
 global first_attempt, sounds
 from datetime import datetime
-from logging.handlers import RotatingFileHandler
 import pygame, math, random, logging, threading
 
 sounds = False
 first_attempt = True
 
-log_filename = f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt"
-handler = RotatingFileHandler(log_filename, maxBytes=5 * 1024**2, backupCount=10)
 logging.basicConfig(
     level=logging.WARNING,
-    handlers=[handler],
+    filename = "latestlog.txt",
+    filemode='w',
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -87,11 +85,11 @@ def makeTutText(font, max_width, text):
 
 
 def makeButtons(settings, font, small_font):
-    global tutorial_button, tut_text_size, ready_button
+    global ready_button, tut_text_size, return_button
     tut_text_size = font.size("Start")
     text = small_font.size("Back to Game Menu")
     # tutorial_button = [{
-    tutorial_button = {
+    ready_button = {
         "Text": font.render(
             "Start", settings["Antialiasing Text"], settings["Font Primary Colour"]
         ),
@@ -103,7 +101,7 @@ def makeButtons(settings, font, small_font):
         ),
         "Colour": settings["Button Primary Colour"],
     }
-    ready_button = {
+    return_button = {
         "Text": small_font.render(
                 "Back to Game Menu",
                 settings["Antialiasing Text"],
@@ -263,37 +261,37 @@ def tutorial(screen, settings, font, getFps, exitGame):
                 height += line.get_height()
         pygame.draw.rect(
             screen,
-            ready_button["Colour"],
-            ready_button["Pygame Button"],
+            return_button["Colour"],
+            return_button["Pygame Button"],
             border_radius=settings["Width"] // 40,
         )
         screen.blit(
-            ready_button["Text"],
+            return_button["Text"],
             (
-                ready_button["Pygame Button"].centerx - ready_button["Text"].get_width() // 2,
-                ready_button["Pygame Button"].centery - ready_button["Text"].get_height() // 2,
+                return_button["Pygame Button"].centerx - return_button["Text"].get_width() // 2,
+                return_button["Pygame Button"].centery - return_button["Text"].get_height() // 2,
             ),
         )
         pygame.draw.rect(
             screen,
-            tutorial_button["Colour"],
-            tutorial_button["Pygame Button"],
+            ready_button["Colour"],
+            ready_button["Pygame Button"],
             border_radius=settings["Width"] // 60,
         )
         screen.blit(
-            tutorial_button["Text"],
+            ready_button["Text"],
             (
-                tutorial_button["Pygame Button"].centerx
-                - tutorial_button["Text"].get_width() // 2,
-                tutorial_button["Pygame Button"].centery
-                - tutorial_button["Text"].get_height() // 2,
+                ready_button["Pygame Button"].centerx
+                - ready_button["Text"].get_width() // 2,
+                ready_button["Pygame Button"].centery
+                - ready_button["Text"].get_height() // 2,
             ),
         )
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if tutorial_button["Pygame Button"].collidepoint(event.pos):
-                    return "Ready"
                 if ready_button["Pygame Button"].collidepoint(event.pos):
+                    return "Ready"
+                if return_button["Pygame Button"].collidepoint(event.pos):
                     return "Game Menu"
             elif event.type == pygame.QUIT:
                 exitGame()

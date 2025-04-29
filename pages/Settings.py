@@ -12,13 +12,11 @@ from .ColourPicker import (
 global current_colour_picker, current_dropdown, options_buttons, backspace_held
 import os, pygame, logging
 from datetime import datetime
-from logging.handlers import RotatingFileHandler
 
-log_filename = f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt"
-handler = RotatingFileHandler(log_filename, maxBytes=5 * 1024**2, backupCount=10)
 logging.basicConfig(
     level=logging.WARNING,
-    handlers=[handler],
+    filename = "latestlog.txt",
+    filemode='w',
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
 logging.getLogger("urllib3").setLevel(logging.WARNING)

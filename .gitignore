@@ -1,7 +1,6 @@
 settings.txt
-.env
 id.txt
-/logs/
+latestlog.txt
 /pages/__pycache__/
 /__pycache__/
 /dist/

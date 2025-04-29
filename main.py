@@ -1,5 +1,4 @@
 import pygame, sys, os, random, hashlib, requests, logging, traceback
-from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from pages import *
 
@@ -7,11 +6,10 @@ global game
 game_names = ["Expose the Criminal", "Memory Experiment", "Pattern Rush"]
 lb = r"https://sharpminds-37b05-default-rtdb.europe-west1.firebasedatabase.app"
 
-log_filename = f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt"
-handler = RotatingFileHandler(log_filename, maxBytes=5 * 1024**2, backupCount=10)
 logging.basicConfig(
     level=logging.WARNING,
-    handlers=[handler],
+    filename = "latestlog.txt",
+    filemode='w',
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -257,7 +255,7 @@ def loadUpValues():
     gameMenuInit(settings, small_font, font, title_font, splitText)
     game1Init(settings, font, small_font, splitText)
     game2Init(settings, font, title_font, splitText)
-    game3Init(settings, font, splitText)
+    game3Init(settings, font, small_font, splitText)
     gameOverInit(settings, font, splitText)
     leaderboardInit(settings, small_font, font, title_font)
 
@@ -421,14 +419,16 @@ def generateUsername(settings, font, getFps, exitGame):
     updateLB(
         3,
         {
-            "duration": 20000,
-            "time": 20000,
+            "duration": float(20000),
+            "time": float(20000),
             "pairs": 0,
             "game": 3,
             "id": user_id,
             "username": username,
             "score": float(0),
             "max": float(300),
+            "loss": 0,
+            "difficulty": 1,
         },
     )
     return

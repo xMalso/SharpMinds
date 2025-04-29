@@ -1,21 +1,19 @@
 import math, pygame, random, logging
 from datetime import datetime
-from logging.handlers import RotatingFileHandler
 
 spawns = 7
-log_filename = f"logs/log{datetime.now().strftime('%d-%m_%Hh-%Mm-%Ss')}.txt"
-handler = RotatingFileHandler(log_filename, maxBytes=5 * 1024**2, backupCount=10)
 logging.basicConfig(
     level=logging.WARNING,
-    handlers=[handler],
+    filename = "latestlog.txt",
+    filemode='w',
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("requests").setLevel(logging.WARNING)
 
 
-def init(settings, font, splitText):
-    global return_lines, colours
+def init(settings, font, small_font, splitText):
+    global return_lines, colours, tutorial_text, gl_text
     colours = [
         settings["Game Primary Colour"],
         settings["Game Secondary Colour"],
@@ -27,6 +25,48 @@ def init(settings, font, splitText):
         settings["Antialiasing Text"],
         settings["Background Font Colour"],
     )
+    tutorial_text = splitText(
+        font,
+        (settings["Width"] * 3) // 4,
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+        "In this game you must match the rotating grids with another grid that is the exact same. But act swiftly while maintaining precision, you get more points the faster you are and lose points for incorrect pairs.",
+    )
+    gl_text = font.render("Good Luck!", settings["Antialiasing Text"], settings["Background Font Colour"])
+    makeButtons(settings, font, small_font)
+
+
+def makeButtons(settings, font, small_font):
+    global ready_button, tut_text_size, return_button
+    tut_text_size = font.size("Start")
+    text = small_font.size("Back to Game Menu")
+    # tutorial_button = [{
+    ready_button = {
+        "Text": font.render(
+            "Start", settings["Antialiasing Text"], settings["Font Primary Colour"]
+        ),
+        "Pygame Button": pygame.Rect(
+            (settings["Width"] - tut_text_size[0]) // 2,
+            (settings["Height"] * 95) // 100 - tut_text_size[1],
+            tut_text_size[0] + settings["Width"] // 100,
+            tut_text_size[1] + settings["Height"] // 100,
+        ),
+        "Colour": settings["Button Primary Colour"],
+    }
+    return_button = {
+        "Text": small_font.render(
+            "Back to Game Menu",
+            settings["Antialiasing Text"],
+            settings["Font Primary Colour"],
+        ),
+        "Pygame Button": pygame.Rect(
+            settings["Width"] // 94,
+            settings["Height"] // 16,
+            text[0] + settings["Width"] // 64,
+            text[1] + settings["Height"] // 90,
+        ),
+        "Colour": settings["Button Quinary Colour"],
+    }
 
 
 def generateInnerObjects(loc, trim):
@@ -62,18 +102,14 @@ def drawRect(screen, rotation, colour, line_colour, big):
         pygame.draw.line(
             screen,
             line_colour,
-            rotate_point(
-                x + offset, y - square_size / 2, x, y, rotation
-            ),
-            rotate_point(
-                x + offset, y + square_size / 2, x, y, rotation
-            ),
+            rotate_point(x + offset, y - square_size / 2, x, y, rotation),
+            rotate_point(x + offset, y + square_size / 2, x, y, rotation),
         )
         pygame.draw.line(
             screen,
             line_colour,
             rotate_point(x - square_size / 2, y + offset, x, y, rotation),
-            rotate_point(x + square_size / 2, y + offset, x, y, rotation)
+            rotate_point(x + square_size / 2, y + offset, x, y, rotation),
         )
     logging.debug(f"returned big rect: {rect}")
     return rect
@@ -82,8 +118,8 @@ def drawRect(screen, rotation, colour, line_colour, big):
 def generateObjects(settings, difficulty):
     global objects, shape_size, buffer, square_size, num_shapes, shape_buffer, spawns
     sqrt2 = math.sqrt(2)
-    num_shapes = max(int(6 - 5 / (difficulty ** 0.3)), 1)
-    trim = int(max(num_shapes ** 2 // 2, 1))
+    num_shapes = max(int(6 - 5 / (difficulty**0.3)), 1)
+    trim = int(max(num_shapes**2 // 2, 1))
     if trim == 1:
         spawns = 5
     loc = [(x, y) for x in range(num_shapes) for y in range(num_shapes)]
@@ -200,11 +236,94 @@ def generateObjects(settings, difficulty):
     return
 
 
+def tutorial(screen, settings, font, getFps, exitGame):
+    never = True
+    while True:
+        # if not sounds and not attempting:
+        # thread = threading.Thread(target=loadSounds, daemon=True)
+        # thread.start()
+        screen.fill(settings["Background Colour"])
+        line_height = tutorial_text[0].get_height()
+        y = (
+            settings["Height"] * 0.95
+            - tut_text_size[1]
+            - (line_height * len(tutorial_text))
+        ) // 2
+        for line in tutorial_text:
+            screen.blit(
+                line,
+                (
+                    (settings["Width"] - line.get_width()) // 2,
+                    y,
+                ),
+            )
+            y += line_height
+        height = settings["Height"] // 200
+        for line in return_lines:
+            screen.blit(
+                line,
+                (
+                    settings["Width"] * 7 // 8
+                    - line.get_width() // 2
+                    - settings["Width"] // 200,
+                    height,
+                ),
+            )
+            height += line.get_height()
+        y += line_height
+        screen.blit(gl_text, (settings["Width"] // 2 - gl_text.get_width() // 2, y))
+        pygame.draw.rect(
+            screen,
+            return_button["Colour"],
+            return_button["Pygame Button"],
+            border_radius=settings["Width"] // 40,
+        )
+        screen.blit(
+            return_button["Text"],
+            (
+                return_button["Pygame Button"].centerx
+                - return_button["Text"].get_width() // 2,
+                return_button["Pygame Button"].centery
+                - return_button["Text"].get_height() // 2,
+            ),
+        )
+        pygame.draw.rect(
+            screen,
+            ready_button["Colour"],
+            ready_button["Pygame Button"],
+            border_radius=settings["Width"] // 60,
+        )
+        screen.blit(
+            ready_button["Text"],
+            (
+                ready_button["Pygame Button"].centerx
+                - ready_button["Text"].get_width() // 2,
+                ready_button["Pygame Button"].centery
+                - ready_button["Text"].get_height() // 2,
+            ),
+        )
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if ready_button["Pygame Button"].collidepoint(event.pos):
+                    return "Ready"
+                if return_button["Pygame Button"].collidepoint(event.pos):
+                    return "Game Menu"
+            elif event.type == pygame.QUIT:
+                exitGame()
+                return "Quit"
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return "Game Menu"
+        getFps(never)
+        never = False
+        pygame.display.flip()
+
+
 def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
-    # logging.info(
-    #     "Page 'Pattern Rush' is currently in development, sending back to main menu."
-    # )
-    # return None, None, "Game Menu", None
+    m = tutorial(screen, settings, font, getFps, exitGame)
+    if m == "Quit" or m == "Game Menu":
+        return None, None, m, None
+    del m
     loss = 0
     user_id, user_key, username = getID()
     score_text = font.render(
@@ -221,9 +340,8 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
     pairs = 0
     selected = []
     difficulty = settings["Adaptive Difficulty"][2]
-    rotation_multiplier = 0.012 * difficulty ** 0.6
-    duration = 2000
-    duration = 20000 / difficulty**0.2
+    rotation_multiplier = 0.012 * difficulty**0.6
+    duration = 10000 / difficulty**0.2
     multiplier = difficulty * 0.1 + 0.9
     generateObjects(settings, difficulty)
     left = spawns // 2
@@ -235,8 +353,11 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
         "id": user_id,
         "username": username,
         "max": float(max_score),
+        "difficulty": difficulty,
     }
     while time_left > 0 and playing:
+        current = pygame.time.get_ticks()
+        time_left = duration - current + start
         # print("frame")
         rects = []
         init_rotation = math.radians(time_left * rotation_multiplier)
@@ -270,21 +391,33 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
                         if rect[1] in selected:
                             for i in range(len(objects)):
                                 if rects[i][1] in selected:
-                                    objects[i]["Colour"] = settings["Grid Background Colour"]
-                                    objects[i]["Line Colour"] = settings["Grid Line Colour"]
+                                    objects[i]["Colour"] = settings[
+                                        "Grid Background Colour"
+                                    ]
+                                    objects[i]["Line Colour"] = settings[
+                                        "Grid Line Colour"
+                                    ]
                                     break
                                 if i == len(objects) - 1:
-                                    logging.warning(f"Could not change colour of shape to original, rect[1]: {rects[i][1]}, i: {i}, selected: {selected} objects: {objects}")
+                                    logging.warning(
+                                        f"Could not change colour of shape to original, rect[1]: {rects[i][1]}, i: {i}, selected: {selected} objects: {objects}"
+                                    )
                             selected.remove(rect[1])
                         else:
                             selected.append(rect[1])
                             for i in range(len(objects)):
                                 if rects[i][1] in selected:
-                                    objects[i]["Colour"] = settings["Grid Selected Colour"]
-                                    objects[i]["Line Colour"] = settings["Grid Selected Line Colour"]
+                                    objects[i]["Colour"] = settings[
+                                        "Grid Selected Colour"
+                                    ]
+                                    objects[i]["Line Colour"] = settings[
+                                        "Grid Selected Line Colour"
+                                    ]
                                     break
                                 if i == len(objects) - 1:
-                                    logging.warning(f"Could not change colour of shape to selected, rect[1]: {rects[i][1]}, i: {i}, selected: {selected} objects: {objects}")
+                                    logging.warning(
+                                        f"Could not change colour of shape to selected, rect[1]: {rects[i][1]}, i: {i}, selected: {selected} objects: {objects}"
+                                    )
 
                             while len(selected) > 2:
                                 selected.pop(0)
@@ -309,14 +442,19 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
                                     count = 0
                                     for i in range(len(objects)):
                                         if rects[i][1] in selected:
-                                            objects[i]["Colour"] = settings["Grid Background Colour"]
-                                            objects[i]["Line Colour"] = settings["Grid Line Colour"]
+                                            objects[i]["Colour"] = settings[
+                                                "Grid Background Colour"
+                                            ]
+                                            objects[i]["Line Colour"] = settings[
+                                                "Grid Line Colour"
+                                            ]
                                             count += 1
                                             if count == 2:
                                                 break
                                     if count != 2:
                                         logging.error(
-                                            f"Only one shape was unselected, selected after: {selected}, objects: {objects}, rects: {rects}")
+                                            f"Only one shape was unselected, selected after: {selected}, objects: {objects}, rects: {rects}"
+                                        )
 
                                 selected = []
                                 score_text = font.render(
@@ -325,8 +463,7 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
                                     settings["Background Font Colour"],
                                 )
                                 score_text_coords = (
-                                    (settings["Width"] - score_text.get_width())
-                                    // 2,
+                                    (settings["Width"] - score_text.get_width()) // 2,
                                     settings["Height"] * 0.01,
                                 )
             elif event.type == pygame.QUIT:
@@ -361,12 +498,11 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
         getFps(never)
         never = False
         pygame.display.flip()
-        current = pygame.time.get_ticks()
-        time_left = duration - current + start
+    lb["loss"] = loss
     lb["time"] = duration - max(time_left, 0)
     lb["pairs"] = pairs
     lb["score"] = score
-    adjustment = (score - max_score * 6 + duration / 400) / 200
+    adjustment = (score - max_score * 6 - (duration / 200) * multiplier) / 200
     old_score = updateLB(3, lb)
     return score, adjustment, "Game Over", old_score
 
