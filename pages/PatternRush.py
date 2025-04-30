@@ -4,8 +4,8 @@ from datetime import datetime
 spawns = 7
 logging.basicConfig(
     level=logging.WARNING,
-    filename = "latestlog.txt",
-    filemode='w',
+    filename="latestlog.txt",
+    filemode="w",
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -32,7 +32,9 @@ def init(settings, font, small_font, splitText):
         settings["Background Font Colour"],
         "In this game you must match the rotating grids with another grid that is the exact same. But act swiftly while maintaining precision, you get more points the faster you are and lose points for incorrect pairs.",
     )
-    gl_text = font.render("Good Luck!", settings["Antialiasing Text"], settings["Background Font Colour"])
+    gl_text = font.render(
+        "Good Luck!", settings["Antialiasing Text"], settings["Background Font Colour"]
+    )
     makeButtons(settings, font, small_font)
 
 
@@ -351,7 +353,7 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
         "duration": duration,
         "game": 3,
         "id": user_id,
-        "username": username,
+        "username": str(username),
         "max": float(max_score),
         "difficulty": difficulty,
     }
@@ -428,7 +430,9 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
                                     left -= 1
                                     if left == 0:
                                         playing = False
-                                        score += (max(time_left, 0) / 100) * multiplier
+                                        score += float(
+                                            (max(time_left, 0) / 100) * multiplier
+                                        )
                                     else:
                                         for i in range(0, len(objects) - 2, 2):
                                             if rects[i][1] in selected:
@@ -499,7 +503,7 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
         never = False
         pygame.display.flip()
     lb["loss"] = loss
-    lb["time"] = duration - max(time_left, 0)
+    lb["time"] = duration - float(max(time_left, 0))
     lb["pairs"] = pairs
     lb["score"] = score
     adjustment = (score - max_score * 6 - (duration / 200) * multiplier) / 200

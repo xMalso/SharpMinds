@@ -15,8 +15,8 @@ from datetime import datetime
 
 logging.basicConfig(
     level=logging.WARNING,
-    filename = "latestlog.txt",
-    filemode='w',
+    filename="latestlog.txt",
+    filemode="w",
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
 logging.getLogger("urllib3").setLevel(logging.WARNING)

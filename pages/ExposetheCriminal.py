@@ -7,8 +7,8 @@ first_attempt = True
 
 logging.basicConfig(
     level=logging.WARNING,
-    filename = "latestlog.txt",
-    filemode='w',
+    filename="latestlog.txt",
+    filemode="w",
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -43,7 +43,12 @@ def init(settings, font, small_font, splitText):
         int(settings["Width"] * 0.85),
         "Click these circles SECONDARY and avoid clicking these circles PRIMARY or the background, you gain more points when clicking these circles SECONDARY in a shorter space of time and you gain points when these circles PRIMARY despawn",
     )
-    return_text = splitText(font, settings["Width"] // 4, settings["Antialiasing Text"], settings["Background Font Colour"])
+    return_text = splitText(
+        font,
+        settings["Width"] // 4,
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+    )
     #
     #
     #
@@ -103,17 +108,17 @@ def makeButtons(settings, font, small_font):
     }
     return_button = {
         "Text": small_font.render(
-                "Back to Game Menu",
-                settings["Antialiasing Text"],
-                settings["Font Primary Colour"],
-            ),
-            "Pygame Button": pygame.Rect(
-                settings["Width"] // 94,
-                settings["Height"] // 16,
-                text[0] + settings["Width"] // 64,
-                text[1] + settings["Height"] // 90,
-            ),
-            "Colour": settings["Button Quinary Colour"],
+            "Back to Game Menu",
+            settings["Antialiasing Text"],
+            settings["Font Primary Colour"],
+        ),
+        "Pygame Button": pygame.Rect(
+            settings["Width"] // 94,
+            settings["Height"] // 16,
+            text[0] + settings["Width"] // 64,
+            text[1] + settings["Height"] // 90,
+        ),
+        "Colour": settings["Button Quinary Colour"],
     }
 
     # ]
@@ -139,6 +144,7 @@ def spawnCircle():
         red_count += 1
     circles.append(coords + (colour, current_frame))
     last_tick = current_frame
+
 
 def removeCircle(pos, current):
     global circles, red_score, loss
@@ -167,6 +173,7 @@ def removeCircle(pos, current):
                 return (score, (x + radius, y - radius))
     wrong_sound.play()
     return (-max_score, pos)
+
 
 def tutorial(screen, settings, font, getFps, exitGame):
     never = True
@@ -268,8 +275,10 @@ def tutorial(screen, settings, font, getFps, exitGame):
         screen.blit(
             return_button["Text"],
             (
-                return_button["Pygame Button"].centerx - return_button["Text"].get_width() // 2,
-                return_button["Pygame Button"].centery - return_button["Text"].get_height() // 2,
+                return_button["Pygame Button"].centerx
+                - return_button["Text"].get_width() // 2,
+                return_button["Pygame Button"].centery
+                - return_button["Text"].get_height() // 2,
             ),
         )
         pygame.draw.rect(
@@ -321,8 +330,14 @@ def game1(settings, screen, font, getFps, exitGame, getID, updateLB):
         "Red": settings["Game Secondary Colour"],
     }
     radius = int(settings["Width"] // (40 * difficulty**0.15))
-    spawn_width = settings["Width"] // 100 + radius * 2, (settings["Width"] * 99) // 100 - radius * 2,
-    spawn_height = settings["Height"] // 100 + text_height + radius * 2, (settings["Height"] * 99) // 100 - radius * 2,
+    spawn_width = (
+        settings["Width"] // 100 + radius * 2,
+        (settings["Width"] * 99) // 100 - radius * 2,
+    )
+    spawn_height = (
+        settings["Height"] // 100 + text_height + radius * 2,
+        (settings["Height"] * 99) // 100 - radius * 2,
+    )
     max_score = 30 / difficulty**0.65 * (difficulty * 0.1 + 0.9)
     score = 0
     red_count = 0

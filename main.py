@@ -8,8 +8,8 @@ lb = r"https://sharpminds-37b05-default-rtdb.europe-west1.firebasedatabase.app"
 
 logging.basicConfig(
     level=logging.WARNING,
-    filename = "latestlog.txt",
-    filemode='w',
+    filename="latestlog.txt",
+    filemode="w",
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -309,23 +309,24 @@ def getID():
     global user_id, user_key, username
     try:
         try:
-            return user_id, user_key, username
+            return user_id, user_key, str(username)
         except NameError:
             logging.info("ID and username not loaded, loading ID and username.")
             user_id = None
             with open("id.txt", "r") as file:
                 for line in file:
                     user_id, user_key, username = line.split(", ")
+                    username = str(username)
                     break
             if user_id:
-                return user_id, user_key, username
+                return user_id, user_key, str(username)
         logging.warning("id.txt found but empty, creating new ID and username.")
         generateUsername(settings, font, getFps, exitGame)
-        return user_id, user_key, username
+        return user_id, user_key, str(username)
     except FileNotFoundError:
         logging.warning("id.txt not found, creating new ID and username.")
         generateUsername(settings, font, getFps, exitGame)
-        return user_id, user_key, username
+        return user_id, user_key, str(username)
 
 
 def generateUsername(settings, font, getFps, exitGame):
@@ -398,7 +399,7 @@ def generateUsername(settings, font, getFps, exitGame):
             "red": float(0),
             "game": 1,
             "id": user_id,
-            "username": username,
+            "username": str(username),
             "score": float(0),
             "max": float(1),
         },
@@ -411,7 +412,7 @@ def generateUsername(settings, font, getFps, exitGame):
             "kinda": 0,
             "game": 2,
             "id": user_id,
-            "username": username,
+            "username": str(username),
             "score": float(0),
             "max": float(0),
         },
@@ -424,7 +425,7 @@ def generateUsername(settings, font, getFps, exitGame):
             "pairs": 0,
             "game": 3,
             "id": user_id,
-            "username": username,
+            "username": str(username),
             "score": float(0),
             "max": float(300),
             "loss": 0,

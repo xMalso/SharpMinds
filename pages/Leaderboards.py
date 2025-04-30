@@ -4,8 +4,8 @@ from datetime import datetime
 
 logging.basicConfig(
     level=logging.WARNING,
-    filename = "latestlog.txt",
-    filemode='w',
+    filename="latestlog.txt",
+    filemode="w",
     format="%(filename)s:%(lineno)d | %(asctime)s - %(message)s",
 )
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -144,6 +144,7 @@ def makeButtons(settings, small_font):
         },
     ]
 
+
 def loadLB(game, user_id, getLB, bold_font, settings):
     global lb, player_score, x, game_text, played_score_x
     lb = list(getLB(game).values())
@@ -159,7 +160,16 @@ def loadLB(game, user_id, getLB, bold_font, settings):
 
 
 def displayPage(
-    settings, screen, font, bold_font, small_font, game, user_id, getFps, exitGame, getLB
+    settings,
+    screen,
+    font,
+    bold_font,
+    small_font,
+    game,
+    user_id,
+    getFps,
+    exitGame,
+    getLB,
 ):
     loadLB(game, user_id, getLB, bold_font, settings)
     never = True

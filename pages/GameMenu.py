@@ -6,7 +6,13 @@ def init(settings, small_font, font, title_font, splitText):
     title_text = title_font.render(
         "Games Menu", settings["Antialiasing Text"], settings["Font Primary Colour"]
     )
-    return_text = splitText(font, settings["Width"] // 4, settings["Antialiasing Text"], settings["Background Font Colour"], words="Press ESC to return to main menu")
+    return_text = splitText(
+        font,
+        settings["Width"] // 4,
+        settings["Antialiasing Text"],
+        settings["Background Font Colour"],
+        words="Press ESC to return to main menu",
+    )
     makeButtons(settings, font, small_font)
 
 
@@ -151,8 +157,10 @@ def displayPage(settings, screen, getFps, exitGame):
         screen.blit(
             buttons[-1]["Text"],
             (
-                buttons[-1]["Pygame Button"].centerx - buttons[-1]["Text"].get_width() // 2,
-                buttons[-1]["Pygame Button"].centery - buttons[-1]["Text"].get_height() // 2,
+                buttons[-1]["Pygame Button"].centerx
+                - buttons[-1]["Text"].get_width() // 2,
+                buttons[-1]["Pygame Button"].centery
+                - buttons[-1]["Text"].get_height() // 2,
             ),
         )
         for event in pygame.event.get():

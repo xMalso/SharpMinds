@@ -1,7 +1,5 @@
 restart game required to fix audio (reenable audio)
 
-game 3 tut
-
 confirm change within 15s for settings to prevent bad settings/wrong res etc
 screenshotting game 2 = shuffle
 
