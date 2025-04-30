@@ -171,6 +171,7 @@ def removeCircle(pos, current):
                 red_score += score
                 return (score, (x + radius, y - radius))
     wrong_sound.play()
+    loss += max_score
     return (-max_score, pos)
 
 
