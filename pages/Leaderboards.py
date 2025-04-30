@@ -1,6 +1,5 @@
 global pygame, logging
 import pygame, logging
-from datetime import datetime
 
 logging.basicConfig(
     level=logging.WARNING,

@@ -1,5 +1,4 @@
-import math, pygame, random, logging
-from datetime import datetime
+import math, pygame, random, logging, numpy as np
 
 spawns = 7
 logging.basicConfig(
@@ -106,12 +105,14 @@ def drawRect(screen, rotation, colour, line_colour, big):
             line_colour,
             rotate_point(x + offset, y - square_size / 2, x, y, rotation),
             rotate_point(x + offset, y + square_size / 2, x, y, rotation),
+            3,
         )
         pygame.draw.line(
             screen,
             line_colour,
             rotate_point(x - square_size / 2, y + offset, x, y, rotation),
             rotate_point(x + square_size / 2, y + offset, x, y, rotation),
+            3,
         )
     logging.debug(f"returned big rect: {rect}")
     return rect
@@ -120,7 +121,7 @@ def drawRect(screen, rotation, colour, line_colour, big):
 def generateObjects(settings, difficulty):
     global objects, shape_size, buffer, square_size, num_shapes, shape_buffer, spawns
     sqrt2 = math.sqrt(2)
-    num_shapes = max(int(6 - 5 / (difficulty**0.3)), 1)
+    num_shapes = max(int(difficulty / 2), 1)
     trim = int(max(num_shapes**2 // 2, 1))
     if trim == 1:
         spawns = 5
@@ -343,7 +344,7 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
     selected = []
     difficulty = settings["Adaptive Difficulty"][2]
     rotation_multiplier = 0.012 * difficulty**0.6
-    duration = 10000 / difficulty**0.2
+    duration = time_used = 12000 / difficulty**0.2
     multiplier = difficulty * 0.1 + 0.9
     generateObjects(settings, difficulty)
     left = spawns // 2
@@ -358,8 +359,6 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
         "difficulty": difficulty,
     }
     while time_left > 0 and playing:
-        current = pygame.time.get_ticks()
-        time_left = duration - current + start
         # print("frame")
         rects = []
         init_rotation = math.radians(time_left * rotation_multiplier)
@@ -433,6 +432,7 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
                                         score += float(
                                             (max(time_left, 0) / 100) * multiplier
                                         )
+                                        time_used = duration - time_left
                                     else:
                                         for i in range(0, len(objects) - 2, 2):
                                             if rects[i][1] in selected:
@@ -502,11 +502,29 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
         getFps(never)
         never = False
         pygame.display.flip()
+        current = pygame.time.get_ticks()
+        time_left = duration - current + start
     lb["loss"] = loss
-    lb["time"] = duration - float(max(time_left, 0))
+    lb["time"] = time_used
     lb["pairs"] = pairs
     lb["score"] = score
-    adjustment = (score - max_score * 6 - (duration / 200) * multiplier) / 200
+    max_pairs = 6
+    if spawns == 5:
+        max_pairs = 5
+    adjustment = (
+        (score - max_score * max_pairs - (duration / 300) * multiplier)
+        / (max_score * max_pairs)
+        * 5
+    )
+
+    adjustment = float(
+        np.piecewise(
+            adjustment,
+            [adjustment < 0, adjustment >= 0],
+            [lambda x: x / 10, lambda x: x * 2],
+        )
+    )
+
     old_score = updateLB(3, lb)
     return score, adjustment, "Game Over", old_score
 

@@ -1,5 +1,4 @@
 import random, pygame, math, logging, numpy as np
-from datetime import datetime
 
 logging.basicConfig(
     level=logging.WARNING,

@@ -1,5 +1,4 @@
 global first_attempt, sounds
-from datetime import datetime
 import pygame, math, random, logging, threading
 
 sounds = False
