@@ -1,6 +1,5 @@
 import math, pygame, random, logging, numpy as np
 
-spawns = 7
 logging.basicConfig(
     level=logging.WARNING,
     filename="latestlog.txt",
@@ -119,12 +118,10 @@ def drawRect(screen, rotation, colour, line_colour, big):
 
 
 def generateObjects(settings, difficulty):
-    global objects, shape_size, buffer, square_size, num_shapes, shape_buffer, spawns
+    global objects, shape_size, buffer, square_size, num_shapes, shape_buffer
     sqrt2 = math.sqrt(2)
-    num_shapes = max(int(difficulty / 2), 1)
+    num_shapes = max(int(difficulty / 1.5), 2)
     trim = int(max(num_shapes**2 // 2, 1))
-    if trim == 1:
-        spawns = 5
     loc = [(x, y) for x in range(num_shapes) for y in range(num_shapes)]
     shape_size = (((settings["Width"] // 10) - 2) // num_shapes) - 2
     shape_buffer = shape_size // 25
@@ -150,10 +147,10 @@ def generateObjects(settings, difficulty):
         ):
             spawn.append((x, y))
     random.shuffle(spawn)
-    spawn = spawn[:spawns]
+    spawn = spawn[:7]
     objects = []
     initial_spin_max = int(30 * difficulty**1.7)
-    for i in range(spawns):
+    for i in range(7):
         shuffloc = generateInnerObjects(loc, trim)
         duplicate = pair = i % 2 == 0
         while duplicate:
@@ -347,7 +344,7 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
     duration = time_used = 12000 / difficulty**0.2
     multiplier = difficulty * 0.1 + 0.9
     generateObjects(settings, difficulty)
-    left = spawns // 2
+    left = 3
     time_left = duration
     max_score = multiplier * 100
     lb = {
@@ -509,8 +506,6 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
     lb["pairs"] = pairs
     lb["score"] = score
     max_pairs = 6
-    if spawns == 5:
-        max_pairs = 5
     adjustment = (
         (score - max_score * max_pairs - (duration / 300) * multiplier)
         / (max_score * max_pairs)
