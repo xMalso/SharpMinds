@@ -9,6 +9,23 @@ logging.basicConfig(
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("requests").setLevel(logging.WARNING)
 
+def loadSounds():
+    global correct_sound, wrong_sound, sounds, attempting, first_attempt
+    attempting = True
+    try:
+        pygame.mixer.pre_init(frequency=22050, channels=1)
+        pygame.mixer.init()
+        correct_sound = pygame.mixer.Sound("assets/sounds/correct.wav")
+        wrong_sound = pygame.mixer.Sound("assets/sounds/wrong.wav")
+        sounds = True
+        correct_sound.set_volume(1.2)
+    except pygame.error as e:
+        if first_attempt:
+            logging.warning(
+                f"Sounds failed to load, most likely due to lack of audio output: {e}"
+            )
+            first_attempt = False
+    attempting = False
 
 def init(settings, font, small_font, splitText):
     global return_lines, colours, tutorial_text, gl_text
@@ -34,6 +51,7 @@ def init(settings, font, small_font, splitText):
         "Good Luck!", settings["Antialiasing Text"], settings["Background Font Colour"]
     )
     makeButtons(settings, font, small_font)
+    loadSounds()
 
 
 def makeButtons(settings, font, small_font):
@@ -117,7 +135,7 @@ def drawRect(screen, rotation, colour, line_colour, big):
     return rect
 
 
-def generateObjects(settings, difficulty):
+def generateObjects(settings, difficulty, score_height):
     global objects, shape_size, buffer, square_size, num_shapes, shape_buffer
     sqrt2 = math.sqrt(2)
     num_shapes = max(int(difficulty / 1.5), 2)
@@ -134,7 +152,7 @@ def generateObjects(settings, difficulty):
     )
     buffer = (
         settings["Width"] * 0.05,
-        settings["Height"] * 0.025 + len(return_lines) * return_lines[0].get_height(),
+        settings["Height"] * 0.025 + max(len(return_lines) * return_lines[0].get_height(), score_height*2) + score_height,
     )
     spawn = []
     for x in range(
@@ -236,7 +254,7 @@ def generateObjects(settings, difficulty):
     return
 
 
-def tutorial(screen, settings, font, getFps, exitGame):
+def tutorial(screen, settings, getFps, exitGame):
     never = True
     while True:
         # if not sounds and not attempting:
@@ -320,7 +338,7 @@ def tutorial(screen, settings, font, getFps, exitGame):
 
 
 def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
-    m = tutorial(screen, settings, font, getFps, exitGame)
+    m = tutorial(screen, settings, getFps, exitGame)
     if m == "Quit" or m == "Game Menu":
         return None, None, m, None
     del m
@@ -343,7 +361,7 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
     rotation_multiplier = 0.012 * difficulty**0.6
     duration = time_used = 12000 / difficulty**0.2
     multiplier = difficulty * 0.1 + 0.9
-    generateObjects(settings, difficulty)
+    generateObjects(settings, difficulty, score_text.get_height())
     left = 3
     time_left = duration
     max_score = multiplier * 100
@@ -355,6 +373,7 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
         "max": float(max_score),
         "difficulty": difficulty,
     }
+    visual_text =[]
     while time_left > 0 and playing:
         # print("frame")
         rects = []
@@ -403,6 +422,7 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
                             selected.remove(rect[1])
                         else:
                             selected.append(rect[1])
+                            clicked_coords = rect[0].midtop
                             for i in range(len(objects)):
                                 if rects[i][1] in selected:
                                     objects[i]["Colour"] = settings[
@@ -421,8 +441,22 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
                                 selected.pop(0)
                             if len(selected) == 2:
                                 if selected[0][1] == selected[1][1]:
-                                    score += left * max_score
+                                    if sounds:
+                                        correct_sound.play()
+                                    result = left * max_score
+                                    score += result
                                     pairs += left
+                                    visual_text.append(
+                                        (
+                                            font.render(
+                                                f"{result:+,.1f}",
+                                                settings["Antialiasing Text"],
+                                                settings["Background Font Colour"],
+                                            ),
+                                            clicked_coords,
+                                            current,
+                                        )
+                                    )
                                     left -= 1
                                     if left == 0:
                                         playing = False
@@ -437,9 +471,22 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
                                                 objects.pop(i)
                                                 break
                                 else:
+                                    if sounds:
+                                        wrong_sound.play()
                                     result = left * max_score / 2
                                     score -= result
                                     loss += result
+                                    visual_text.append(
+                                        (
+                                            font.render(
+                                                f"{-result:+,.1f}",
+                                                settings["Antialiasing Text"],
+                                                settings["Background Font Colour"],
+                                            ),
+                                            clicked_coords,
+                                            current,
+                                        )
+                                    )
                                     count = 0
                                     for i in range(len(objects)):
                                         if rects[i][1] in selected:
@@ -484,6 +531,17 @@ def game3(settings, screen, font, getFps, exitGame, getID, updateLB):
         )
         screen.blit(score_text, score_text_coords)
         screen.blit(time_text, time_text_coords)
+        for visual_text_score, pos, tick in visual_text:
+            if current - tick > 1000:
+                visual_text.pop(0)
+            else:
+                screen.blit(
+                    visual_text_score,
+                    (
+                        pos[0],
+                        pos[1] - visual_text_score.get_height() // 2,
+                    ),
+                )
         height = settings["Height"] // 200
         for line in return_lines:
             screen.blit(
