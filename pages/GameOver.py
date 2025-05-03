@@ -91,7 +91,7 @@ def displayPage(
     )
     adjustment = min(4, max(0, round(adjustment * 10) + 2))
     you_did = font.render(
-        f"You did {rating[adjustment]}, {"★" * (adjustment+1)}{"☆" * (4 - adjustment)}",
+        f"You did {rating[adjustment]} {"★" * (adjustment+1)}{"☆" * (4 - adjustment)}",
         settings["Antialiasing Text"],
         settings["Background Font Colour"],
     )

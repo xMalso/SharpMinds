@@ -216,7 +216,7 @@ def loadUp():
         "Font Tertiary Colour": (217, 217, 217),
         "Button Quaternary Colour": (90, 90, 90),
         "Font Quaternary Colour": (217, 217, 217),
-        "Button Quinary Colour": (255, 102, 68),
+        "Button Quinary Colour": (255, 85, 68),
         "Font Quinary Colour": (217, 217, 217),
         "Bold Contrasting Font Colour": (255, 215, 0),
         "Font": "OpenDyslexic-Regular.otf",

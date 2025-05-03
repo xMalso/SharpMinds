@@ -53,7 +53,7 @@ def makeButtons(settings, small_font):
                 "Expose the Criminal",
                 "Memory Experiment",
                 "Pattern Rush",
-                "Friends",
+                "Friends only",
                 "Main Menu",
             ],
             key=lambda x: small_font.size(x)[0],
@@ -113,7 +113,7 @@ def makeButtons(settings, small_font):
         },
         {
             "Text": small_font.render(
-                "Friends",
+                "Friends only",
                 settings["Antialiasing Text"],
                 settings["Font Primary Colour"],
             ),
