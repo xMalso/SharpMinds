@@ -9,7 +9,7 @@ def init(settings, font, title_font):
 def makeText(title_font, settings):
     global title_text
     title_text = title_font.render(
-        "Main Menu", settings["Antialiasing Text"], settings["Font Primary Colour"]
+        "Sharp Minds", settings["Antialiasing Text"], settings["Font Primary Colour"]
     )
 
 
