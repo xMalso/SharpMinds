@@ -484,7 +484,6 @@ def displayPage(
                 settings["Font Quaternary Colour"],
                 words=f"Are you sure you want to {confirmation_text[confirmation]}?",
             )
-            print(outputed_text)
             small_text = outputed_text[0].get_height()
             buffer_height = small_text * (len(outputed_text) - 1)
             confirmation_surface = pygame.Surface(

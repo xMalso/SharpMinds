@@ -139,7 +139,7 @@ def generateObjects(settings, difficulty, score_height):
     global objects, shape_size, buffer, square_size, num_shapes, shape_buffer
     sqrt2 = math.sqrt(2)
     num_shapes = max(int(difficulty / 1.5), 2)
-    trim = int(max((difficulty)**2, 1))
+    trim = min(int(max((difficulty / 1.5)**2 / 2, 1)), num_shapes**2)
     loc = [(x, y) for x in range(num_shapes) for y in range(num_shapes)]
     shape_size = (((settings["Width"] // 10) - 2) // num_shapes) - 2
     shape_buffer = shape_size // 25
