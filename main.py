@@ -1,10 +1,14 @@
 import pygame, sys, os, random, hashlib, requests, logging, traceback
 from datetime import datetime
 from pages import *
+import dotenv
+
+dotenv.load_dotenv()
+
+lb = os.getenv("LB_URL")
 
 global game
 game_names = ["Expose the Criminal", "Memory Experiment", "Pattern Rush"]
-lb = r"https://sharpminds-37b05-default-rtdb.europe-west1.firebasedatabase.app"
 
 logging.basicConfig(
     level=logging.WARNING,

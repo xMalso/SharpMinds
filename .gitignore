@@ -6,3 +6,4 @@ latestlog.txt
 /dist/
 /build/
 main.spec
+.env
