@@ -7,3 +7,15 @@ latestlog.txt
 /build/
 main.spec
 .env
+
+# --- Sensitive / local-only (added 2026-09-25 audit) ---
+.claude/
+.env
+.env.local
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.keystore
+secrets.json
