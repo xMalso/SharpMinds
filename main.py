@@ -6,6 +6,7 @@ import dotenv
 dotenv.load_dotenv()
 
 lb = os.getenv("LB_URL")
+lb_timeout = 5  # seconds to wait for the leaderboard before giving up
 
 global game
 game_names = ["Expose the Criminal", "Memory Experiment", "Pattern Rush"]
@@ -265,13 +266,28 @@ def loadUpValues():
 
 
 def updateLB(game, data):
+    if not lb:
+        logging.warning("No LB_URL set, score not uploaded.")
+        return 0
+    try:
+        return uploadScore(game, data)
+    except requests.RequestException:
+        logging.warning(
+            f"Could not reach leaderboard, score not uploaded. {traceback.format_exc()}"
+        )
+        return 0
+
+
+def uploadScore(game, data):
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     game_url = f"{lb}/game{game}/{user_id}.json"
-    response = requests.get(game_url, headers=headers)
+    response = requests.get(game_url, headers=headers, timeout=lb_timeout)
     try:
         old_score = float(response.json()["score"])
         if old_score < data["score"]:
-            response = requests.put(game_url, json=data, headers=headers)
+            response = requests.put(
+                game_url, json=data, headers=headers, timeout=lb_timeout
+            )
             if response.status_code == 200:
                 logging.info("Entry updated.")
             else:
@@ -282,7 +298,9 @@ def updateLB(game, data):
             logging.info("No new highscore.")
     except:
         logging.warning(f"No previous score found {traceback.format_exc()}")
-        response = requests.put(game_url, json=data, headers=headers)
+        response = requests.put(
+            game_url, json=data, headers=headers, timeout=lb_timeout
+        )
         if response.status_code == 200:  # Success
             logging.info("New entry created.")
         else:
@@ -299,14 +317,17 @@ def getLB(game, user_id=None):
         game_url = f"{lb}/game{game}.json"
     else:
         game_url = f"{lb}/game{game}/{user_id}.json"
-    response = requests.get(game_url, headers=headers)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        logging.critical(
-            f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}"
-        )
+    try:
+        response = requests.get(game_url, headers=headers, timeout=lb_timeout)
+        if response.status_code == 200:
+            return response.json()
+    except requests.RequestException:
+        logging.warning(f"Could not reach leaderboard. {traceback.format_exc()}")
         return None
+    logging.critical(
+        f"Error: {response.status_code}\n\n\n {response.text}\n\n\n url: {game_url}"
+    )
+    return None
 
 
 def getID():
@@ -620,6 +641,9 @@ try:
                 getFps,
                 exitGame,
             )
+        elif meta == "Leaderboards" and not lb:
+            logging.warning("No LB_URL set, leaderboards unavailable.")
+            meta = "Main Menu"
         elif meta == "Leaderboards":
             meta == leaderboardsDisplay(
                 settings,

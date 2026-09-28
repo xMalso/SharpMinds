@@ -146,9 +146,9 @@ def makeButtons(settings, small_font):
 
 def loadLB(game, user_id, getLB, bold_font, settings):
     global lb, player_score, x, game_text, played_score_x
-    lb = list(getLB(game).values())
+    lb = list((getLB(game) or {}).values())
     player_score = bold_font.render(
-        f"Your PB: {getLB(game, user_id)["score"]:,.2f}",
+        f"Your PB: {(getLB(game, user_id) or {}).get("score", 0):,.2f}",
         settings["Antialiasing Text"],
         settings["Bold Contrasting Font Colour"],
     )
